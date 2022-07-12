@@ -8,6 +8,7 @@ import matplotlib.animation as animation
 import subprocess
 import datetime
 from statistics import mean, StatisticsError
+import argparse
 
 # Use humanize if it's available. Install with
 # pip3 install humanize
@@ -18,35 +19,46 @@ except ModuleNotFoundError:
         # Use a tacky simple naturalsize
         def naturalsize(x): return f"{x:.1f} kB"
 
-# IMPORTANT: you must set tools_loc!!!
-# Location of the grpc-tools script dish_grpc_text.py
-tools_loc = '/home/brian/Develop/starlink/starlink-grpc-tools/dish_grpc_text.py'
-maxvals = 900 # 15 minutes
-# How many ticks to show on the x-axis
-num_ticks = 3
+parser = argparse.ArgumentParser(
+        description="Watch various Starlink status"
+        )
+parser.add_argument('-H', '--host',
+                    default='192.168.100.1',
+                    help='IP of the Starlink dish')
+parser.add_argument('-n', '--num-ticks',
+                    default=3,
+                    type=int,
+                    help='Number of ticks to show on the graph')
+parser.add_argument('-s', '--samples',
+                    default=900,
+                    type=int,
+                    help='How many seconds of history to keep')
+parser.add_argument('-l', '--tools-loc',
+                    required=True,
+                    help='Location of the grps-tools/dish_grpc_text.py script')
+parser.add_argument('-u', '--update-interval',
+                    default=900,
+                    type=int,
+                    help='How often to poll the dish for stats, in milliseconds')
+args = parser.parse_args()
 
 fig = plt.figure(label='Starlink')
 downchart = fig.add_subplot(3,1,1)
 upchart = fig.add_subplot(3,1,2)
 latencychart = fig.add_subplot(3,1,3)
 
-
-
-
-
-
 def get_data(data_type='status', vals=1, headers_only=False):
         """
         This really should directly use the grpc-tools module instead of just running the script!
         Uses decode('utf-8') because subprocess returns a binary instead of a string
         """
-        args = ['python', tools_loc]
+        pargs = ['python', args.tools_loc]
         if headers_only:
-                args += ['-H']
+                pargs += ['-H']
         else:
-                args += ['-s', f'{vals}'] # Need to convert to strings as arg can't be an int
-        args += [data_type]
-        result = subprocess.check_output(args).decode('utf-8')
+                pargs += ['-s', f'{vals}'] # Need to convert to strings as arg can't be an int
+        pargs += [data_type]
+        result = subprocess.check_output(pargs).decode('utf-8')
         lines = result.split('\n')
         vals = []
         fixed_result = []
@@ -115,7 +127,7 @@ def animate(i):
                 return
 
         # Only keep maxvals (seconds) of samples
-        while (xar[-1] - xar[0]).seconds > maxvals:
+        while (xar[-1] - xar[0]).seconds > args.samples:
                 xar.pop(0)
                 download.pop(0)
                 upload.pop(0)
@@ -169,9 +181,9 @@ def animate(i):
         downchart.xaxis.set_ticks([]) 
         upchart.xaxis.set_ticks([])
         # Set the tick interval
-        tick_count = int(len(xar) / (num_ticks - 1))
+        tick_count = int(len(xar) / (args.num_ticks - 1))
         tick_vals = xar[::tick_count]
-        if len(tick_vals) < num_ticks:
+        if len(tick_vals) < args.num_ticks:
                 tick_vals.append(xar[-1])
         tick_labels = [f'{v.astimezone().strftime("%I:%M%p")}' for v in tick_vals]
         latencychart.xaxis.set_ticks(tick_vals, labels=tick_labels)
@@ -198,7 +210,7 @@ def animate(i):
                                 labels=[f'Min: {latmin:.0f}', f'Ave: {latave:.0f}', f'Max: {max(latency):.0f}'])
 
 # On startup, grab the data right away so the graph can be populated.
-z = get_data(data_type='bulk_history', vals=maxvals)
+z = get_data(data_type='bulk_history', vals=args.samples)
 
 xar = []
 download = []
@@ -225,5 +237,5 @@ fig.suptitle(f'Dishy: {z[3]}')
 animate(1)
 
 # Start filling out the graph every 900ms.
-ani = animation.FuncAnimation(fig, animate, interval=900)
+ani = animation.FuncAnimation(fig, animate, interval=args.update_interval)
 plt.show()
