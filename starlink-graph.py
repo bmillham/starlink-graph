@@ -49,7 +49,7 @@ try:
 except:
         print("Unable to import starlink_grpc.!")
         print(f"Is it really available in {args.tools_loc}?")
-        #exit()
+        exit()
 
 fig = plt.figure(label='Starlink')
 availchart = fig.add_subplot(4,1,1)
@@ -69,22 +69,10 @@ def animate(i):
         upload.append(data[0]['uplink_throughput_bps'])
         if data[0]['state'] != 'CONNECTED':
                 print(f'Not connected: {data[0]["state"]}')
-        #        new_avail = avail[-1] - 10
-        #        if new_avail < 0:
-        #                new_avail = 0
-        #        avail.append(new_avail)
-        #else:
-        #        new_avail = avail[-1] + 10
-        #        if new_avail > 100:
-        #                new_avail = 100
-        #        avail.append(new_avail)
-        #if data[0]['pop_ping_drop_rate'] != 0:
-        #        print(f'Ping rate {data[0]["pop_ping_drop_rate"]}')
         avail.append(100 - (data[0]['pop_ping_drop_rate'] * 100))
         xar.append(data[0]['datetimestamp_utc'])
         # Only keep maxvals (seconds) of samples
         while (xar[-1] - xar[0]).seconds > args.samples:
-                #print(f'Popping sample {len(xar)} {(xar[-1] - xar[0]).seconds}')
                 xar.pop(0)
                 download.pop(0)
                 upload.pop(0)
@@ -198,12 +186,6 @@ for i in range(0, args.samples-1):
                         latency.append(l['pop_ping_latency_ms'])
                 download.append(l['downlink_throughput_bps'])
                 upload.append(l['uplink_throughput_bps'])
-                #if l['pop_ping_latency_ms'] is None:
-                #        avail.append(0)
-                #else:
-                #        avail.append(100)
-                #if l['pop_ping_drop_rate'] != 0:
-                #        print(f"ppdr {l['pop_ping_drop_rate'] * 100}")
                 avail.append(100 - (l['pop_ping_drop_rate'] * 100))
         except:
                 latency.append(0)
