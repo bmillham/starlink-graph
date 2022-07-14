@@ -9,6 +9,7 @@ import subprocess
 import datetime
 from statistics import mean, StatisticsError
 import argparse
+import sys
 
 # Use humanize if it's available. Install with
 # pip3 install humanize
@@ -37,101 +38,58 @@ parser.add_argument('-l', '--tools-loc',
                     required=True,
                     help='Location of the grps-tools/dish_grpc_text.py script')
 parser.add_argument('-u', '--update-interval',
-                    default=900,
+                    default=1000,
                     type=int,
                     help='How often to poll the dish for stats, in milliseconds')
 args = parser.parse_args()
 
-fig = plt.figure(label='Starlink')
-downchart = fig.add_subplot(3,1,1)
-upchart = fig.add_subplot(3,1,2)
-latencychart = fig.add_subplot(3,1,3)
+sys.path.insert(0, args.tools_loc)
+try:
+        import starlink_grpc
+except:
+        print("Unable to import starlink_grpc.!")
+        print(f"Is it really available in {args.tools_loc}?")
+        #exit()
 
-def get_data(data_type='status', vals=1, headers_only=False):
-        """
-        This really should directly use the grpc-tools module instead of just running the script!
-        Uses decode('utf-8') because subprocess returns a binary instead of a string
-        """
-        pargs = ['python', args.tools_loc]
-        if headers_only:
-                pargs += ['-H']
-        else:
-                pargs += ['-s', f'{vals}'] # Need to convert to strings as arg can't be an int
-        pargs += [data_type]
-        result = subprocess.check_output(pargs).decode('utf-8')
-        lines = result.split('\n')
-        vals = []
-        fixed_result = []
-        for line in lines:
-                if line == '':
-                        continue
-                fields = line.split(',')
-                if not headers_only:
-                        fields[0] = f"{fields[0]}+00:00" # Convert to UTC
-                if data_type == 'bulk_history':
-                        newf = [None] * 20 # Create empty array
-                        newf[0] = fields[0]
-                        newf[8] = fields[1]
-                        newf[9] = fields[3]
-                        newf[10] = fields[4]
-                        newf[11] = fields[2]
-                        vals.append(newf)
-                else:
-                        vals.append(fields)
-        if len(vals) > 1:
-                return vals
-        else:
-                return vals[0]
+fig = plt.figure(label='Starlink')
+availchart = fig.add_subplot(4,1,1)
+downchart = fig.add_subplot(4,1,2)
+upchart = fig.add_subplot(4,1,3)
+latencychart = fig.add_subplot(4,1,4)
+
+def get_data(vals=0):
+        z = starlink_grpc.status_data()
+        z[0]['datetimestamp_utc'] = datetime.datetime.now().astimezone()
+        return z
 
 def animate(i):
-        '''Returned fields:
-           datetimestamp_utc,0
-	   id,1
-           hardware_version,2
-           software_version,3
-           state,4
-           uptime,5
-           snr,6
-           seconds_to_first_nonempty_slot,7
-           pop_ping_drop_rate,8
-           downlink_throughput_bps,9
-           uplink_throughput_bps,10
-           pop_ping_latency_ms,11
-           alerts,12
-           fraction_obstructed,13
-           currently_obstructed,14
-           seconds_obstructed,15
-           obstruction_duration,16
-           obstruction_interval,17
-           direction_azimuth,18
-           direction_elevation,19'''
-
-        z = get_data(vals=1) # Grab the latest data
-
-        if len(z) != 20:
-                print(f'Got an unexpected result: {z}')
-                # Convert to expected results.
-                z = [z[0], '0', '0', '0', z[4], '0', '', '0', '0',
-                     '0', '0', '0', '0', '0', '0', '0', '0', '0',
-                     '0', '0']
-        if z[6] != '':
-                print('Got SNR:', z[6])
-        try:
-                download.append(float(z[9])) # Convert the string to float
-                latency.append(float(z[11]))
-                upload.append(float(z[10]))
-                xar.append(datetime.datetime.fromisoformat(z[0]))
-        except:
-                print(f'Unable to convert {z[9]} to float')
-                print(z)
-                return
-
+        data = get_data(vals=1) # Grab the latest data
+        download.append(data[0]['downlink_throughput_bps']) # Convert the string to float
+        latency.append(data[0]['pop_ping_latency_ms'])
+        upload.append(data[0]['uplink_throughput_bps'])
+        if data[0]['state'] != 'CONNECTED':
+                print(f'Not connected: {data[0]["state"]}')
+        #        new_avail = avail[-1] - 10
+        #        if new_avail < 0:
+        #                new_avail = 0
+        #        avail.append(new_avail)
+        #else:
+        #        new_avail = avail[-1] + 10
+        #        if new_avail > 100:
+        #                new_avail = 100
+        #        avail.append(new_avail)
+        #if data[0]['pop_ping_drop_rate'] != 0:
+        #        print(f'Ping rate {data[0]["pop_ping_drop_rate"]}')
+        avail.append(100 - (data[0]['pop_ping_drop_rate'] * 100))
+        xar.append(data[0]['datetimestamp_utc'])
         # Only keep maxvals (seconds) of samples
         while (xar[-1] - xar[0]).seconds > args.samples:
+                #print(f'Popping sample {len(xar)} {(xar[-1] - xar[0]).seconds}')
                 xar.pop(0)
                 download.pop(0)
                 upload.pop(0)
                 latency.pop(0)
+                avail.pop(0)
         hdl = download[-1]
         hul = upload[-1]
         hmdl = max(download)
@@ -161,6 +119,8 @@ def animate(i):
         dlave = naturalsize(dlave)
         upave = naturalsize(upave)
 
+        availchart.clear()
+        availchart.plot(xar, avail, linewidth=1, color='green')
         downchart.clear()
         downchart.plot(xar, download, linewidth=1)
         downchart.plot(xar, daveline, linewidth=1, linestyle='dashed', color='black')
@@ -172,8 +132,9 @@ def animate(i):
         latencychart.clear()
         latencychart.plot(xar, latency, linewidth=1, color='green')
         latencychart.plot(xar, lataveline, linewidth=1, color='black', linestyle='dashed')
-        if z[4] != 'CONNECTED':
-                latencychart.legend([z[4]], loc='upper left')
+        if data[0]['state'] != 'CONNECTED':
+                latencychart.legend([data[0]['state']], loc='upper left')
+                print('complete stats', data)
         else:
                 latencychart.legend([f'Last: {latency[-1]:.0f} ms'], loc='upper left')
 
@@ -189,12 +150,16 @@ def animate(i):
         latencychart.xaxis.set_ticks(tick_vals, labels=tick_labels)
         # Rotate the tick text
         latencychart.xaxis.set_tick_params(rotation=30)
-        latencychart.yaxis.set_label_text('Latency (ms)')
+        latencychart.yaxis.set_label_text('Latency\n(ms)')
         latencychart.yaxis.set_label_position('right')
         upchart.yaxis.set_label_text('Upload')
         upchart.yaxis.set_label_position('right')
         downchart.yaxis.set_label_text('Download')
         downchart.yaxis.set_label_position('right')
+        availchart.yaxis.set_label_text('Uptime')
+        availchart.yaxis.set_label_position('right')
+        availchart.xaxis.set_ticks([])
+        availchart.set_yticks([100, 0], labels=['100%', '0%'])
         upmin = min(upload)
         upmax = max(upload)
         dmin = min(download)
@@ -210,28 +175,45 @@ def animate(i):
                                 labels=[f'Min: {latmin:.0f}', f'Ave: {latave:.0f}', f'Max: {max(latency):.0f}'])
 
 # On startup, grab the data right away so the graph can be populated.
-z = get_data(data_type='bulk_history', vals=args.samples)
+#z = get_data(data_type='bulk_history', vals=args.samples)
+z = starlink_grpc.history_bulk_data(args.samples)[1]
 
 xar = []
 download = []
 upload = []
 latency = []
-
-headers = get_data('status', headers_only=True) # Nothing is done with this yet.
+avail = []
 
 # Fill out the graph with the history
-for i in z:
-        xar.append(datetime.datetime.fromisoformat(i[0]))
-        download.append(float(i[9]))
-        upload.append(float(i[10]))
+dtstart = datetime.datetime.now().astimezone() - datetime.timedelta(seconds=args.samples)
+
+for i in range(0, args.samples-1):
+        l = {k: z[k][i] for k in z.keys()}
+        xar.append(dtstart)
+        dtstart += datetime.timedelta(seconds=1)
         try:
-                latency.append(float(i[11]))
+                if l['pop_ping_latency_ms'] is None:
+                        latency.append(0)
+                else:
+                        latency.append(l['pop_ping_latency_ms'])
+                download.append(l['downlink_throughput_bps'])
+                upload.append(l['uplink_throughput_bps'])
+                #if l['pop_ping_latency_ms'] is None:
+                #        avail.append(0)
+                #else:
+                #        avail.append(100)
+                #if l['pop_ping_drop_rate'] != 0:
+                #        print(f"ppdr {l['pop_ping_drop_rate'] * 100}")
+                avail.append(100 - (l['pop_ping_drop_rate'] * 100))
         except:
-                latency.append(latency[-1])
+                latency.append(0)
+                download.append(0)
+                upload.append(0)
+                avail.append(0)
 
 # Show the dish firmware release
-z = get_data()
-fig.suptitle(f'Dishy: {z[3]}')
+z = get_data()[0]
+fig.suptitle(f'Dishy: {z["software_version"]}')
 
 # Force an update right away.
 animate(1)
