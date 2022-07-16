@@ -36,7 +36,7 @@ parser.add_argument('-s', '--samples',
                     type=int,
                     help='How many seconds of history to keep')
 parser.add_argument('-l', '--tools-loc',
-                    required=True,
+                    required=False,
                     help='Location of the grps-tools/dish_grpc_text.py script')
 parser.add_argument('-u', '--update-interval',
                     default=1000,
@@ -44,12 +44,14 @@ parser.add_argument('-u', '--update-interval',
                     help='How often to poll the dish for stats, in milliseconds')
 args = parser.parse_args()
 
-sys.path.insert(0, args.tools_loc)
+if args.tools_loc:
+        sys.path.insert(0, args.tools_loc)
+
 try:
         import starlink_grpc
 except:
         print("Unable to import starlink_grpc.!")
-        print(f"Is it really available in {args.tools_loc}?")
+        print("Check your PYTHONPATH or use the -l/--tools-loc option")
         exit()
 
 fig = plt.figure(label='Starlink')
