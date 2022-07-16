@@ -10,6 +10,7 @@ import datetime
 from statistics import mean, StatisticsError
 import argparse
 import sys
+import leapseconds
 
 # Use humanize if it's available. Install with
 # pip3 install humanize
@@ -53,12 +54,27 @@ except:
 
 fig = plt.figure(label='Starlink')
 availchart = fig.add_subplot(4,1,1)
-downchart = fig.add_subplot(4,1,2)
-upchart = fig.add_subplot(4,1,3)
-latencychart = fig.add_subplot(4,1,4)
+latencychart = fig.add_subplot(4,1,2)
+downchart = fig.add_subplot(4,1,3)
+upchart = fig.add_subplot(4,1,4)
+
+def ns_time_to_sec(stamp):
+        # Convert GPS time to GMT.
+        tzoff = datetime.datetime.now().astimezone().utcoffset().total_seconds()
+        t = leapseconds.gps_to_utc(datetime.datetime(1980,1,6) +
+                                   datetime.timedelta(seconds=(stamp/1000000000)+tzoff))
+        return t
 
 def get_data(vals=0):
-        z = starlink_grpc.status_data()
+        try:
+                z = starlink_grpc.status_data()
+        except starlink_grpc.GrpcError:
+                print('No stats returned!')
+                z = []
+                z.append({'downlink_throughput_bps': 0,
+                          'pop_ping_latency_ms': 0,
+                          'uplink_throughput_bps': 0,
+                          'state': 'UNKNOWN'})
         z[0]['datetimestamp_utc'] = datetime.datetime.now().astimezone()
         return z
 
@@ -68,7 +84,7 @@ def animate(i):
         latency.append(data[0]['pop_ping_latency_ms'])
         upload.append(data[0]['uplink_throughput_bps'])
         if data[0]['state'] != 'CONNECTED':
-                print(f'Not connected: {data[0]["state"]}')
+                print(f'Not connected: {data[0]["state"]}@{data[0]["datetimestamp_utc"]}')
         avail.append(100 - (data[0]['pop_ping_drop_rate'] * 100))
         xar.append(data[0]['datetimestamp_utc'])
         # Only keep maxvals (seconds) of samples
@@ -120,24 +136,21 @@ def animate(i):
         latencychart.clear()
         latencychart.plot(xar, latency, linewidth=1, color='green')
         latencychart.plot(xar, lataveline, linewidth=1, color='black', linestyle='dashed')
-        if data[0]['state'] != 'CONNECTED':
-                latencychart.legend([data[0]['state']], loc='upper left')
-                print('complete stats', data)
-        else:
-                latencychart.legend([f'Last: {latency[-1]:.0f} ms'], loc='upper left')
+        availchart.legend([data[0]['state']], loc='upper left')
+        latencychart.legend([f'Last: {latency[-1]:.0f} ms'], loc='upper left')
 
         # Turn off the ticks for up/down charts
         downchart.xaxis.set_ticks([]) 
-        upchart.xaxis.set_ticks([])
+        latencychart.xaxis.set_ticks([])
         # Set the tick interval
         tick_count = int(len(xar) / (args.num_ticks - 1))
         tick_vals = xar[::tick_count]
         if len(tick_vals) < args.num_ticks:
                 tick_vals.append(xar[-1])
         tick_labels = [f'{v.astimezone().strftime("%I:%M%p")}' for v in tick_vals]
-        latencychart.xaxis.set_ticks(tick_vals, labels=tick_labels)
+        upchart.xaxis.set_ticks(tick_vals, labels=tick_labels)
         # Rotate the tick text
-        latencychart.xaxis.set_tick_params(rotation=30)
+        upchart.xaxis.set_tick_params(rotation=30)
         latencychart.yaxis.set_label_text('Latency\n(ms)')
         latencychart.yaxis.set_label_position('right')
         upchart.yaxis.set_label_text('Upload')
@@ -154,8 +167,7 @@ def animate(i):
         dmax = max(download)
         upchart.set_yticks([upmin, saveupave, upmax], labels=['', f'Ave:\n{upave}', hmul])
         downchart.set_yticks([dmin, savedlave, dmax], labels=['', f'Ave:\n{dlave}', hmdl])
-        try:
-                latmin = min([x for x in latency if x != 0.0])
+        try:                latmin = min([x for x in latency if x != 0.0])
         except:
                 latmin = 0
         
@@ -163,14 +175,15 @@ def animate(i):
                                 labels=[f'Min: {latmin:.0f}', f'Ave: {latave:.0f}', f'Max: {max(latency):.0f}'])
 
 # On startup, grab the data right away so the graph can be populated.
-#z = get_data(data_type='bulk_history', vals=args.samples)
-z = starlink_grpc.history_bulk_data(args.samples)[1]
+z1 = starlink_grpc.history_bulk_data(args.samples)
+z = z1[1]
 
 xar = []
 download = []
 upload = []
 latency = []
 avail = []
+outages = []
 
 # Fill out the graph with the history
 dtstart = datetime.datetime.now().astimezone() - datetime.timedelta(seconds=args.samples)
@@ -178,7 +191,6 @@ dtstart = datetime.datetime.now().astimezone() - datetime.timedelta(seconds=args
 for i in range(0, args.samples-1):
         l = {k: z[k][i] for k in z.keys()}
         xar.append(dtstart)
-        dtstart += datetime.timedelta(seconds=1)
         try:
                 if l['pop_ping_latency_ms'] is None:
                         latency.append(0)
@@ -188,11 +200,23 @@ for i in range(0, args.samples-1):
                 upload.append(l['uplink_throughput_bps'])
                 avail.append(100 - (l['pop_ping_drop_rate'] * 100))
         except:
+                print('something went wrong:', l, dtstart)
                 latency.append(0)
                 download.append(0)
                 upload.append(0)
                 avail.append(0)
 
+        dtstart += datetime.timedelta(seconds=1)
+# Try and get the outage history
+history = starlink_grpc.get_history()
+
+for o in history.outages:
+        print('before fix', o.start_timestamp_ns)
+        fix = ns_time_to_sec(o.start_timestamp_ns)
+        print(fix, fix.hour)
+        #stamp = datetime.datetime.fromtimestamp(fix)
+        #print('stamp', stamp)
+        
 # Show the dish firmware release
 z = get_data()[0]
 fig.suptitle(f'Dishy: {z["software_version"]}')
@@ -203,3 +227,5 @@ animate(1)
 # Start filling out the graph every 900ms.
 ani = animation.FuncAnimation(fig, animate, interval=args.update_interval)
 plt.show()
+
+### 3652 conversion days!!!!!
