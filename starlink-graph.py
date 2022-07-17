@@ -43,6 +43,10 @@ parser.add_argument('-u', '--update-interval',
                     default=1000,
                     type=int,
                     help='How often to poll the dish for stats, in milliseconds')
+parser.add_argument('-o', '--minimum-outage',
+                    default=2.0,
+                    type=float,
+                    help='Minimum outage time to report')
 args = parser.parse_args()
 
 if args.tools_loc:
@@ -82,7 +86,7 @@ def get_data(vals=0):
         z[0]['datetimestamp_utc'] = datetime.datetime.now().astimezone()
         return z
 
-def get_outages():
+def get_outages(min_duration=2.0):
         history = starlink_grpc.get_history()
         # Clear old data
         outages.clear()
@@ -92,7 +96,7 @@ def get_outages():
                 cause = o.Cause.Name(o.cause)
                 duration =  o.duration_ns/1000000000
                 # The starlink page ignores outages less than 2 seconds. So do the same.
-                if duration < 2.0:
+                if duration < min_duration:
                         continue
                 outages.append({'time': fix,
                                 'cause': cause,
@@ -110,7 +114,7 @@ def animate(i):
         if data[0]['state'] != 'CONNECTED':
                 print(f'Not connected: {data[0]["state"]}@{data[0]["datetimestamp_utc"]}')
                 #print(data[0])
-                get_outages()
+                get_outages(args.minimum_outage)
         avail.append(100 - (data[0]['pop_ping_drop_rate'] * 100))
         xar.append(data[0]['datetimestamp_utc'])
         # Only keep maxvals (seconds) of samples
@@ -244,7 +248,7 @@ for i in range(0, args.samples-1):
         dtstart += datetime.timedelta(seconds=1)
 # Try and get the outage history
 
-get_outages()
+get_outages(args.minimum_outage)
 
 # Show the dish firmware release
 z = get_data()[0]
