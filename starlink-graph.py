@@ -108,13 +108,14 @@ def get_outages(min_duration=2.0):
 
 def animate(i):
         data = get_data(vals=1) # Grab the latest data
+        get_outages(args.minimum_outage) # Also get outage history as the current data is not always accurate
         download.append(data[0]['downlink_throughput_bps']) # Convert the string to float
         latency.append(data[0]['pop_ping_latency_ms'])
         upload.append(data[0]['uplink_throughput_bps'])
         if data[0]['state'] != 'CONNECTED':
                 print(f'Not connected: {data[0]["state"]}@{data[0]["datetimestamp_utc"]}')
                 #print(data[0])
-                get_outages(args.minimum_outage)
+
         avail.append(100 - (data[0]['pop_ping_drop_rate'] * 100))
         xar.append(data[0]['datetimestamp_utc'])
         # Only keep maxvals (seconds) of samples
