@@ -75,6 +75,7 @@ def get_data(vals=0):
                 z = []
                 z.append({'downlink_throughput_bps': 0,
                           'pop_ping_latency_ms': 0,
+                          'pop_ping_drop_rate': 0,
                           'uplink_throughput_bps': 0,
                           'state': 'UNKNOWN'})
         z[0]['datetimestamp_utc'] = datetime.datetime.now().astimezone()
@@ -138,7 +139,6 @@ def animate(i):
         latencychart.clear()
         latencychart.plot(xar, latency, linewidth=1, color='green')
         latencychart.plot(xar, lataveline, linewidth=1, color='black', linestyle='dashed')
-        #availchart.legend([data[0]['state']], loc='upper left')
 
         latencychart.legend([f'Last: {latency[-1]:.0f} ms'], loc='upper left')
 
@@ -164,9 +164,13 @@ def animate(i):
         availchart.yaxis.set_label_position('right')
         availchart.xaxis.set_ticks([])
         availchart.set_yticks([100, 0], labels=['100%', '0%'])
-        
-        availchart.text(xar[0], 10, "\n".join([f'{k}: {v:.1f}s' for k, v in outages_by_cause.items()]), bbox={
-        'facecolor': 'green', 'alpha': 0.5, 'pad': 1})
+        if len(outages_by_cause) == 0:
+                availchart.text(xar[0], 10, "No outages in the last 12 hours", bbox={'facecolor': 'green',
+                                                                                     'alpha': 0.5,
+                                                                                     'pad': 1})
+        else:
+                availchart.text(xar[0], 10, "\n".join([f'{k}: {v:.0f}s' for k, v in outages_by_cause.items()]), bbox={
+                        'facecolor': 'green', 'alpha': 0.5, 'pad': 1})
         upmin = min(upload)
         upmax = max(upload)
         dmin = min(download)
@@ -221,6 +225,9 @@ for o in history.outages:
         fix = ns_time_to_sec(o.start_timestamp_ns)
         cause = o.Cause.Name(o.cause)
         duration =  o.duration_ns/1000000000
+        # The starlink page ignores outages less than 2 seconds. So do the same.
+        if duration < 2.0:
+                continue
         outages.append({'time': fix,
                         'cause': cause,
                         'duration': duration})
