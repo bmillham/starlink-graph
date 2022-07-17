@@ -5,6 +5,7 @@
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from matplotlib.widgets import Button
 import subprocess
 import datetime
 from statistics import mean, StatisticsError
@@ -81,6 +82,26 @@ def get_data(vals=0):
         z[0]['datetimestamp_utc'] = datetime.datetime.now().astimezone()
         return z
 
+def get_outages():
+        history = starlink_grpc.get_history()
+        # Clear old data
+        outages.clear()
+        outages_by_cause.clear()
+        for o in history.outages:
+                fix = ns_time_to_sec(o.start_timestamp_ns)
+                cause = o.Cause.Name(o.cause)
+                duration =  o.duration_ns/1000000000
+                # The starlink page ignores outages less than 2 seconds. So do the same.
+                if duration < 2.0:
+                        continue
+                outages.append({'time': fix,
+                                'cause': cause,
+                                'duration': duration})
+                if cause not in outages_by_cause:
+                        outages_by_cause[cause] = duration
+                else:
+                        outages_by_cause[cause] += duration
+
 def animate(i):
         data = get_data(vals=1) # Grab the latest data
         download.append(data[0]['downlink_throughput_bps']) # Convert the string to float
@@ -88,6 +109,8 @@ def animate(i):
         upload.append(data[0]['uplink_throughput_bps'])
         if data[0]['state'] != 'CONNECTED':
                 print(f'Not connected: {data[0]["state"]}@{data[0]["datetimestamp_utc"]}')
+                #print(data[0])
+                get_outages()
         avail.append(100 - (data[0]['pop_ping_drop_rate'] * 100))
         xar.append(data[0]['datetimestamp_utc'])
         # Only keep maxvals (seconds) of samples
@@ -164,6 +187,7 @@ def animate(i):
         availchart.yaxis.set_label_position('right')
         availchart.xaxis.set_ticks([])
         availchart.set_yticks([100, 0], labels=['100%', '0%'])
+        #outbutton = Button(availchart.xaxis, 'Outages')
         if len(outages_by_cause) == 0:
                 availchart.text(xar[0], 10, "No outages in the last 12 hours", bbox={'facecolor': 'green',
                                                                                      'alpha': 0.5,
@@ -219,22 +243,8 @@ for i in range(0, args.samples-1):
 
         dtstart += datetime.timedelta(seconds=1)
 # Try and get the outage history
-history = starlink_grpc.get_history()
 
-for o in history.outages:
-        fix = ns_time_to_sec(o.start_timestamp_ns)
-        cause = o.Cause.Name(o.cause)
-        duration =  o.duration_ns/1000000000
-        # The starlink page ignores outages less than 2 seconds. So do the same.
-        if duration < 2.0:
-                continue
-        outages.append({'time': fix,
-                        'cause': cause,
-                        'duration': duration})
-        if cause not in outages_by_cause:
-                outages_by_cause[cause] = duration
-        else:
-                outages_by_cause[cause] += duration
+get_outages()
 
 # Show the dish firmware release
 z = get_data()[0]
