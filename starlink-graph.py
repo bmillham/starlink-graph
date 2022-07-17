@@ -138,7 +138,8 @@ def animate(i):
         latencychart.clear()
         latencychart.plot(xar, latency, linewidth=1, color='green')
         latencychart.plot(xar, lataveline, linewidth=1, color='black', linestyle='dashed')
-        availchart.legend([data[0]['state']], loc='upper left')
+        #availchart.legend([data[0]['state']], loc='upper left')
+
         latencychart.legend([f'Last: {latency[-1]:.0f} ms'], loc='upper left')
 
         # Turn off the ticks for up/down charts
@@ -163,6 +164,9 @@ def animate(i):
         availchart.yaxis.set_label_position('right')
         availchart.xaxis.set_ticks([])
         availchart.set_yticks([100, 0], labels=['100%', '0%'])
+        
+        availchart.text(xar[0], 10, "\n".join([f'{k}: {v:.1f}s' for k, v in outages_by_cause.items()]), bbox={
+        'facecolor': 'green', 'alpha': 0.5, 'pad': 1})
         upmin = min(upload)
         upmax = max(upload)
         dmin = min(download)
@@ -186,6 +190,7 @@ upload = []
 latency = []
 avail = []
 outages = []
+outages_by_cause = {}
 
 # Fill out the graph with the history
 dtstart = datetime.datetime.now().astimezone() - datetime.timedelta(seconds=args.samples)
@@ -213,12 +218,17 @@ for i in range(0, args.samples-1):
 history = starlink_grpc.get_history()
 
 for o in history.outages:
-        print('before fix', o.start_timestamp_ns)
         fix = ns_time_to_sec(o.start_timestamp_ns)
-        print(fix, fix.hour)
-        #stamp = datetime.datetime.fromtimestamp(fix)
-        #print('stamp', stamp)
-        
+        cause = o.Cause.Name(o.cause)
+        duration =  o.duration_ns/1000000000
+        outages.append({'time': fix,
+                        'cause': cause,
+                        'duration': duration})
+        if cause not in outages_by_cause:
+                outages_by_cause[cause] = duration
+        else:
+                outages_by_cause[cause] += duration
+
 # Show the dish firmware release
 z = get_data()[0]
 fig.suptitle(f'Dishy: {z["software_version"]}')
