@@ -75,7 +75,7 @@ def ns_time_to_sec(stamp):
 def get_data(vals=0):
         try:
                 z = starlink_grpc.status_data()
-        except starlink_grpc.GrpcError:
+        except:
                 print('No stats returned!')
                 z = []
                 z.append({'downlink_throughput_bps': 0,
@@ -87,10 +87,14 @@ def get_data(vals=0):
         return z
 
 def get_outages(min_duration=2.0):
-        history = starlink_grpc.get_history()
         # Clear old data
         outages.clear()
         outages_by_cause.clear()
+        try:
+                history = starlink_grpc.get_history()
+        except:
+                print('No history returned')
+                return
         for o in history.outages:
                 fix = ns_time_to_sec(o.start_timestamp_ns)
                 cause = o.Cause.Name(o.cause)
