@@ -30,6 +30,17 @@ except ModuleNotFoundError:
 class Window1Signals:
     def on_window1_destroy(self, widget):
         Gtk.main_quit()
+    def on_about_dialog_click(self, widget):
+        aboutdialog.show()
+    def on_about_close_button(self, widget):
+        aboutdialog.hide()
+    def on_outage_clicked(self, widget):
+        for out in outages:
+                outagestore.append([out['time'].strftime("%I:%M%p"), out['cause'], str(out['duration'])])
+        outagewindow.show()
+
+def onAboutDialog():
+    aboutdialog.show()
 
 parser = argparse.ArgumentParser(
         description="Watch various Starlink status"
@@ -73,6 +84,23 @@ availchart = fig.add_subplot(4,1,1)
 latencychart = fig.add_subplot(4,1,2)
 downchart = fig.add_subplot(4,1,3)
 upchart = fig.add_subplot(4,1,4)
+builder = Gtk.Builder()
+builder.add_from_file("starlink-graph.glade")
+
+builder.connect_signals(Window1Signals())
+window = builder.get_object("window1")
+sw = builder.get_object("scrolledwindow1")
+aboutdialog = builder.get_object('aboutdialog')
+outagewindow = builder.get_object('outagewindow')
+outagelist = builder.get_object('outagelist')
+outagebox = builder.get_object('outagebox')
+outagestore = builder.get_object('outagestore')
+#obs = builder.get_objects()
+#for o in obs:
+#        print(o.widget().get_name())
+
+#figure = Figure(figsize=(8,6), dpi=71)
+#axis = figure.add_subplot()
 
 def ns_time_to_sec(stamp):
     # Convert GPS time to GMT.
@@ -121,12 +149,16 @@ def get_outages(min_duration=2.0):
 
 def animate(i):
     data = get_data(vals=1) # Grab the latest data
-    get_outages(args.minimum_outage) # Also get outage history as the current data is not always accurate
     download.append(data[0]['downlink_throughput_bps']) # Convert the string to float
     latency.append(data[0]['pop_ping_latency_ms'])
     upload.append(data[0]['uplink_throughput_bps'])
     if data[0]['state'] != 'CONNECTED':
         print(f'Not connected: {data[0]["state"]}@{data[0]["datetimestamp_utc"]}')
+        get_outages(args.minimum_outage)
+    else:
+        # Things are working normally, so only check outages every 5 seconds
+        if xar[-1].second % 5 == 0:
+            get_outages(args.minimum_outage) # Also get outage history as the current data is not always accurate                
         
     avail.append(100 - (data[0]['pop_ping_drop_rate'] * 100))
     xar.append(data[0]['datetimestamp_utc'])
@@ -267,13 +299,21 @@ get_outages(args.minimum_outage)
 
 # Show the dish firmware release
 z = get_data()[0]
-fig.suptitle(f'Dishy: {z["software_version"]}')
+aboutdialog.set_comments(f'Dishy: {z["software_version"]}')
 
 # Force an update right away.
 animate(1)
 
-# Start filling out the graph every 900ms.
-ani = animation.FuncAnimation(fig, animate, interval=args.update_interval)
-plt.show()
+#axis.plot(xar, latency)
+canvas = FigureCanvas(fig)
+#canvas.set_size_request(800, 699)
+sw.add(canvas)
+#window.add(canvas)
+window.show_all()
 
-### 3652 conversion days!!!!!
+ani = animation.FuncAnimation(fig, animate, interval=args.update_interval)
+Gtk.main()
+
+# Start filling out the graph every 900ms.
+
+#plt.show()
