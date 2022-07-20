@@ -12,7 +12,11 @@
     <property name="authors">Brian Millham &lt;bmillham@gmail.com&gt;</property>
     <property name="logo">starlink.png</property>
     <property name="license-type">gpl-2-0</property>
+	<property name="use-header-bar">0</property>
     <signal name="close" handler="on_about_close_button" swapped="no"/>
+    <signal name="delete-event" handler="on_about_close_button" swapped="no"/>
+    <signal name="destroy" handler="on_about_close_button" swapped="no"/>
+    <signal name="destroy-event" handler="on_about_close_button" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox">
         <property name="can-focus">False</property>
@@ -220,6 +224,7 @@
     <property name="title" translatable="yes">Starlnk Outages</property>
     <property name="destroy-with-parent">True</property>
     <property name="transient-for">window1</property>
+    <signal name="delete-event" handler="outage_close" swapped="no"/>
     <child>
       <object class="GtkTreeView">
         <property name="visible">True</property>

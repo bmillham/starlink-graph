@@ -5,12 +5,12 @@
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtk3agg import (FigureCanvasGTK3Agg as FigureCanvas)
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from matplotlib.widgets import Button
+#from matplotlib.widgets import Button
 import subprocess
 import datetime
 from statistics import mean, StatisticsError
@@ -33,11 +33,19 @@ class Window1Signals:
     def on_about_dialog_click(self, widget):
         aboutdialog.show()
     def on_about_close_button(self, widget):
+        print('about close clicked')
         aboutdialog.hide()
+        return True
     def on_outage_clicked(self, widget):
+        outagestore.clear()
         for out in outages:
                 outagestore.append([out['time'].strftime("%I:%M%p"), out['cause'], str(out['duration'])])
         outagewindow.show()
+    def outage_close(self, *args, **kwargs):
+        print('hide window')
+        outagewindow.hide()
+        return True
+            
 
 def onAboutDialog():
     aboutdialog.show()
@@ -79,7 +87,7 @@ except:
     print("Check your PYTHONPATH or use the -l/--tools-loc option")
     exit()
 
-fig = plt.figure(label='Starlink')
+fig = Figure()
 availchart = fig.add_subplot(4,1,1)
 latencychart = fig.add_subplot(4,1,2)
 downchart = fig.add_subplot(4,1,3)
@@ -95,12 +103,6 @@ outagewindow = builder.get_object('outagewindow')
 outagelist = builder.get_object('outagelist')
 outagebox = builder.get_object('outagebox')
 outagestore = builder.get_object('outagestore')
-#obs = builder.get_objects()
-#for o in obs:
-#        print(o.widget().get_name())
-
-#figure = Figure(figsize=(8,6), dpi=71)
-#axis = figure.add_subplot()
 
 def ns_time_to_sec(stamp):
     # Convert GPS time to GMT.
@@ -148,6 +150,7 @@ def get_outages(min_duration=2.0):
             outages_by_cause[cause] += duration
 
 def animate(i):
+    print('Running animation')
     data = get_data(vals=1) # Grab the latest data
     download.append(data[0]['downlink_throughput_bps']) # Convert the string to float
     latency.append(data[0]['pop_ping_latency_ms'])
@@ -258,6 +261,7 @@ def animate(i):
                             labels=[f'Min: {latmin:.0f}',
                                     f'Ave: {latave:.0f}',
                                     f'Max: {max(latency):.0f}'])
+    return True
 
 # On startup, grab the data right away so the graph can be populated.
 z1 = starlink_grpc.history_bulk_data(args.samples)
@@ -304,14 +308,12 @@ aboutdialog.set_comments(f'Dishy: {z["software_version"]}')
 # Force an update right away.
 animate(1)
 
-#axis.plot(xar, latency)
 canvas = FigureCanvas(fig)
-#canvas.set_size_request(800, 699)
 sw.add(canvas)
-#window.add(canvas)
 window.show_all()
 
 ani = animation.FuncAnimation(fig, animate, interval=args.update_interval)
+#GLib.timeout_add_seconds(1, animate)
 Gtk.main()
 
 # Start filling out the graph every 900ms.
