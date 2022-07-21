@@ -9,7 +9,6 @@ from gi.repository import Gtk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtk3agg import (FigureCanvasGTK3Agg as FigureCanvas)
 import matplotlib.animation as animation
-import subprocess
 import datetime
 from statistics import mean, StatisticsError
 import argparse
