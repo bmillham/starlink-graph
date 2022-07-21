@@ -5,12 +5,10 @@
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtk3agg import (FigureCanvasGTK3Agg as FigureCanvas)
-#import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-#from matplotlib.widgets import Button
 import subprocess
 import datetime
 from statistics import mean, StatisticsError
@@ -22,18 +20,22 @@ import leapseconds
 # pip3 install humanize
 try:
     from humanize import naturalsize
+    from humanize.time import naturaldelta
 except ModuleNotFoundError:
     print('Humazine module not installed. Install with pip3')
     # Use a tacky simple naturalsize
     def naturalsize(x): return f"{x:.1f} kB"
+    def naturaldelta(x): return x
 
 class Window1Signals:
     def on_window1_destroy(self, widget):
         Gtk.main_quit()
     def on_about_dialog_click(self, widget):
+        # Show current dish info
+        z = get_data()[0]
+        aboutdialog.set_comments(f'Dishy: {z["software_version"]}\nUptime: {naturaldelta(z["uptime"])}')
         aboutdialog.show()
     def on_about_close_button(self, widget):
-        print('about close clicked')
         aboutdialog.hide()
         return True
     def on_outage_clicked(self, widget):
@@ -42,13 +44,8 @@ class Window1Signals:
                 outagestore.append([out['time'].strftime("%I:%M%p"), out['cause'], str(out['duration'])])
         outagewindow.show()
     def outage_close(self, *args, **kwargs):
-        print('hide window')
         outagewindow.hide()
         return True
-            
-
-def onAboutDialog():
-    aboutdialog.show()
 
 parser = argparse.ArgumentParser(
         description="Watch various Starlink status"
@@ -150,7 +147,6 @@ def get_outages(min_duration=2.0):
             outages_by_cause[cause] += duration
 
 def animate(i):
-    print('Running animation')
     data = get_data(vals=1) # Grab the latest data
     download.append(data[0]['downlink_throughput_bps']) # Convert the string to float
     latency.append(data[0]['pop_ping_latency_ms'])
@@ -301,21 +297,14 @@ for i in range(0, args.samples-1):
 
 get_outages(args.minimum_outage)
 
-# Show the dish firmware release
-z = get_data()[0]
-aboutdialog.set_comments(f'Dishy: {z["software_version"]}')
-
 # Force an update right away.
 animate(1)
 
+# Create the canvas for matplotlib
 canvas = FigureCanvas(fig)
 sw.add(canvas)
+
 window.show_all()
 
 ani = animation.FuncAnimation(fig, animate, interval=args.update_interval)
-#GLib.timeout_add_seconds(1, animate)
 Gtk.main()
-
-# Start filling out the graph every 900ms.
-
-#plt.show()
