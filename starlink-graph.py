@@ -228,7 +228,7 @@ def animate(i):
     tick_labels = [f'{v.astimezone().strftime("%I:%M%p")}' for v in tick_vals]
     upchart.xaxis.set_ticks(tick_vals, labels=tick_labels)
     # Rotate the tick text
-    upchart.xaxis.set_tick_params(rotation=30)
+    # upchart.xaxis.set_tick_params(rotation=30)
     latencychart.yaxis.set_label_text('Latency\n(ms)')
     latencychart.yaxis.set_label_position('right')
     upchart.yaxis.set_label_text('Upload')
