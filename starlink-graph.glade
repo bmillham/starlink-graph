@@ -233,6 +233,21 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
           </packing>
         </child>
         <child>
+          <object class="GtkCheckButton" id="outagecheckbox">
+            <property name="label" translatable="yes">Show all outages (Default is outages longer than 2s)</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="draw-indicator">True</property>
+            <signal name="toggled" handler="outage_toggled" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkTreeView">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
@@ -241,9 +256,11 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
             <property name="search-column">0</property>
             <property name="show-expanders">False</property>
             <property name="level-indentation">1</property>
+            <child internal-child="selection">
+              <object class="GtkTreeSelection"/>
+            </child>
             <child>
               <object class="GtkTreeViewColumn">
-                <property name="resizable">True</property>
                 <property name="spacing">2</property>
                 <property name="sizing">autosize</property>
                 <property name="title" translatable="yes">Time</property>
@@ -258,7 +275,6 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
             </child>
             <child>
               <object class="GtkTreeViewColumn">
-                <property name="resizable">True</property>
                 <property name="spacing">2</property>
                 <property name="sizing">autosize</property>
                 <property name="title" translatable="yes">Reason</property>
@@ -273,7 +289,6 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
             </child>
             <child>
               <object class="GtkTreeViewColumn">
-                <property name="resizable">True</property>
                 <property name="spacing">2</property>
                 <property name="sizing">autosize</property>
                 <property name="title" translatable="yes">Duration</property>
@@ -290,7 +305,7 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>

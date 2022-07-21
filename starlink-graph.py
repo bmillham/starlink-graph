@@ -38,18 +38,26 @@ class Window1Signals:
         aboutdialog.hide()
         return True
     def on_outage_clicked(self, widget):
+        self._show_outages()
+    def _show_outages(self, all=False):
         outagestore.clear()
-        get_outages() # Re-read outage info
+        if all:
+            get_outages(min_duration=0.0)
+        else:
+            get_outages() # Re-read outage info
         if len(outages) == 0:
             outagelabel.set_text('There have been no outages in the last 12 hours over 2 seconds!')
         else:
-            outagelabel.set_text(f'There have been {len(outages)} outages over 2 seconds in the last 12 hours')
+            outagelabel.set_text(f'There have been {len(outages)} outages {"over 2 seconds" if not all else ""} in the last 12 hours')
+                
         for out in outages:
                 outagestore.append([out['time'].strftime("%I:%M%p"), out['cause'], str(out['duration'])])
         outagewindow.show()
     def outage_close(self, *args, **kwargs):
         outagewindow.hide()
         return True
+    def outage_toggled(self, widget):
+        self._show_outages(all=widget.get_active())
 
 parser = argparse.ArgumentParser(
         description="Watch various Starlink status"
