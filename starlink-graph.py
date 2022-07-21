@@ -39,6 +39,11 @@ class Window1Signals:
         return True
     def on_outage_clicked(self, widget):
         outagestore.clear()
+        get_outages() # Re-read outage info
+        if len(outages) == 0:
+            outagelabel.set_text('There have been no outages in the last 12 hours over 2 seconds!')
+        else:
+            outagelabel.set_text(f'There have been {len(outages)} outages over 2 seconds in the last 12 hours')
         for out in outages:
                 outagestore.append([out['time'].strftime("%I:%M%p"), out['cause'], str(out['duration'])])
         outagewindow.show()
@@ -99,6 +104,7 @@ outagewindow = builder.get_object('outagewindow')
 outagelist = builder.get_object('outagelist')
 outagebox = builder.get_object('outagebox')
 outagestore = builder.get_object('outagestore')
+outagelabel = builder.get_object('outagelabel')
 
 def ns_time_to_sec(stamp):
     # Convert GPS time to GMT.
