@@ -63,9 +63,9 @@ class Window1Signals:
         else:
             get_outages(min_duration=float(config['options']['duration'])) # Re-read outage info
         if len(outages) == 0:
-            outagelabel.set_text('There have been no outages in the last 12 hours over 2 seconds!')
+            outagelabel.set_text(f'There have been no outages in the last 12 hours over {config["options"]["duration"]} seconds!')
         else:
-            outagelabel.set_text(f'There have been {len(outages)} outages {"over 2 seconds" if not all else ""} in the last 12 hours')
+            outagelabel.set_text(f'There have been {len(outages)} outages {"over " + str(config["options"]["duration"]) + " seconds" if not all else ""} in the last 12 hours')
                 
         for out in outages:
                 outagestore.append([out['time'].strftime("%I:%M%p"), out['cause'], str(out['duration'])])
