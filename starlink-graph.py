@@ -44,15 +44,13 @@ class Window1Signals:
         configwindow.hide()
         return True
     def on_configsavebutton_clicked(self, widget):
-        print('save', toolslocation.get_filename())
-        print(updateentry.get_value())
         config['tools'] = {}
         config['tools']['grpctools'] = toolslocation.get_filename()
         config['options'] = {'updateinterval': str(int(updateentry.get_value())),
                              'duration': str(int(durationentry.get_value())),
                              'history': str(int(historyentry.get_value())),
                              'ticks': str(int(ticksentry.get_value()))}
-        config
+        args.num_ticks = ticksentry.get_value()
         with open(configfile, 'w') as f:
             config.write(f)
         configwindow.hide()
@@ -109,7 +107,6 @@ config = configparser.ConfigParser()
 configfile = 'starlinkgraph.ini'
 config.read(configfile)
 if 'grpctools' in config['tools']:
-    print(config['tools']['grpctools'])
     args.tools_loc = config['tools']['grpctools']
 
 if args.tools_loc:
