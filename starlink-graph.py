@@ -11,7 +11,6 @@ from matplotlib.backends.backend_gtk3agg import (FigureCanvasGTK3Agg as FigureCa
 import matplotlib.animation as animation
 import datetime
 from statistics import mean, StatisticsError
-import argparse
 import sys
 import leapseconds
 import configparser
@@ -50,10 +49,11 @@ class Window1Signals:
                              'duration': str(int(durationentry.get_value())),
                              'history': str(int(historyentry.get_value())),
                              'ticks': str(int(ticksentry.get_value()))}
-        args.num_ticks = ticksentry.get_value()
         with open(configfile, 'w') as f:
             config.write(f)
         configwindow.hide()
+        get_outages(min_duration=float(config['options']['duration']))
+        animate(1) # Force an update.
     def on_settings_clicked(self, widget):
         configwindow.show()
     def _show_outages(self, all=False):
@@ -61,7 +61,7 @@ class Window1Signals:
         if all:
             get_outages(min_duration=0.0)
         else:
-            get_outages() # Re-read outage info
+            get_outages(min_duration=float(config['options']['duration'])) # Re-read outage info
         if len(outages) == 0:
             outagelabel.set_text('There have been no outages in the last 12 hours over 2 seconds!')
         else:
@@ -76,41 +76,13 @@ class Window1Signals:
     def outage_toggled(self, widget):
         self._show_outages(all=widget.get_active())
 
-parser = argparse.ArgumentParser(
-        description="Watch various Starlink status"
-        )
-parser.add_argument('-H', '--host',
-                    default='192.168.100.1',
-                    help='IP of the Starlink dish')
-parser.add_argument('-n', '--num-ticks',
-                    default=3,
-                    type=int,
-                    help='Number of ticks to show on the graph')
-parser.add_argument('-s', '--samples',
-                    default=900,
-                    type=int,
-                    help='How many seconds of history to keep')
-parser.add_argument('-l', '--tools-loc',
-                    required=False,
-                    help='Location of the grps-tools/dish_grpc_text.py script')
-parser.add_argument('-u', '--update-interval',
-                    default=1000,
-                    type=int,
-                    help='How often to poll the dish for stats, in milliseconds')
-parser.add_argument('-o', '--minimum-outage',
-                    default=2.0,
-                    type=float,
-                    help='Minimum outage time to report')
-args = parser.parse_args()
 
 config = configparser.ConfigParser()
 configfile = 'starlinkgraph.ini'
 config.read(configfile)
-if 'grpctools' in config['tools']:
-    args.tools_loc = config['tools']['grpctools']
 
-if args.tools_loc:
-        sys.path.insert(0, args.tools_loc)
+if 'grpctools' in config['tools']:
+    sys.path.insert(0, config['tools']['grpctools'])
 
 try:
     import starlink_grpc
@@ -179,7 +151,9 @@ def get_data(vals=0):
     z[0]['datetimestamp_utc'] = datetime.datetime.now().astimezone()
     return z
 
-def get_outages(min_duration=2.0):
+def get_outages(min_duration=None):
+    if min_duration is None:
+        min_duration = float(config['options']['duration'])
     # Clear old data
     outages.clear()
     outages_by_cause.clear()
@@ -210,16 +184,16 @@ def animate(i):
     upload.append(data[0]['uplink_throughput_bps'])
     if data[0]['state'] != 'CONNECTED':
         print(f'Not connected: {data[0]["state"]}@{data[0]["datetimestamp_utc"]}')
-        get_outages(args.minimum_outage)
+        get_outages(min_duration=float(config['options']['duration']))
     else:
         # Things are working normally, so only check outages every 5 seconds
         if xar[-1].second % 5 == 0:
-            get_outages(args.minimum_outage) # Also get outage history as the current data is not always accurate                
+            get_outages(min_duration=float(config['options']['duration'])) # Also get outage history as the current data is not always accurate
         
     avail.append(100 - (data[0]['pop_ping_drop_rate'] * 100))
     xar.append(data[0]['datetimestamp_utc'])
     # Only keep maxvals (seconds) of samples
-    while (xar[-1] - xar[0]).seconds > args.samples:
+    while (xar[-1] - xar[0]).seconds > float(config['options']['history']):
         xar.pop(0)
         download.pop(0)
         upload.pop(0)
@@ -273,9 +247,9 @@ def animate(i):
     downchart.xaxis.set_ticks([]) 
     latencychart.xaxis.set_ticks([])
     # Set the tick interval
-    tick_count = int(len(xar) / (args.num_ticks - 1))
+    tick_count = int(len(xar) / (int(config['options']['ticks']) - 1))
     tick_vals = xar[::tick_count]
-    if len(tick_vals) < args.num_ticks:
+    if len(tick_vals) < int(config['options']['ticks']):
         tick_vals.append(xar[-1])
     tick_labels = [f'{v.astimezone().strftime("%I:%M%p")}' for v in tick_vals]
     upchart.xaxis.set_ticks(tick_vals, labels=tick_labels)
@@ -317,7 +291,7 @@ def animate(i):
     return True
 
 # On startup, grab the data right away so the graph can be populated.
-z1 = starlink_grpc.history_bulk_data(args.samples)
+z1 = starlink_grpc.history_bulk_data(int(config['options']['history']))
 z = z1[1]
 
 xar = []
@@ -329,9 +303,9 @@ outages = []
 outages_by_cause = {}
 
 # Fill out the graph with the history
-dtstart = datetime.datetime.now().astimezone() - datetime.timedelta(seconds=args.samples)
+dtstart = datetime.datetime.now().astimezone() - datetime.timedelta(seconds=int(config['options']['history']))
 
-for i in range(0, args.samples-1):
+for i in range(0, int(config['options']['history'])-1):
     l = {k: z[k][i] for k in z.keys()}
     xar.append(dtstart)
     try:
@@ -352,7 +326,7 @@ for i in range(0, args.samples-1):
     dtstart += datetime.timedelta(seconds=1)
 # Try and get the outage history
 
-get_outages(args.minimum_outage)
+get_outages(min_duration=float(config['options']['duration']))
 
 # Force an update right away.
 animate(1)
@@ -363,5 +337,6 @@ sw.add(canvas)
 
 window.show_all()
 
-ani = animation.FuncAnimation(fig, animate, interval=args.update_interval)
+ani = animation.FuncAnimation(fig, animate, interval=int(config['options']['updateinterval']))
+
 Gtk.main()
