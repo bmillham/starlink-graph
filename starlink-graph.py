@@ -14,6 +14,7 @@ from statistics import mean, StatisticsError
 import argparse
 import sys
 import leapseconds
+import configparser
 
 # Use humanize if it's available. Install with
 # pip3 install humanize
@@ -39,6 +40,24 @@ class Window1Signals:
         return True
     def on_outage_clicked(self, widget):
         self._show_outages()
+    def on_configcancelbutton_clicked(self, *args):
+        configwindow.hide()
+        return True
+    def on_configsavebutton_clicked(self, widget):
+        print('save', toolslocation.get_filename())
+        print(updateentry.get_value())
+        config['tools'] = {}
+        config['tools']['grpctools'] = toolslocation.get_filename()
+        config['options'] = {'updateinterval': str(int(updateentry.get_value())),
+                             'duration': str(int(durationentry.get_value())),
+                             'history': str(int(historyentry.get_value())),
+                             'ticks': str(int(ticksentry.get_value()))}
+        config
+        with open(configfile, 'w') as f:
+            config.write(f)
+        configwindow.hide()
+    def on_settings_clicked(self, widget):
+        configwindow.show()
     def _show_outages(self, all=False):
         outagestore.clear()
         if all:
@@ -86,6 +105,13 @@ parser.add_argument('-o', '--minimum-outage',
                     help='Minimum outage time to report')
 args = parser.parse_args()
 
+config = configparser.ConfigParser()
+configfile = 'starlinkgraph.ini'
+config.read(configfile)
+if 'grpctools' in config['tools']:
+    print(config['tools']['grpctools'])
+    args.tools_loc = config['tools']['grpctools']
+
 if args.tools_loc:
         sys.path.insert(0, args.tools_loc)
 
@@ -95,6 +121,7 @@ except:
     print("Unable to import starlink_grpc.!")
     print("Check your PYTHONPATH or use the -l/--tools-loc option")
     exit()
+
 
 fig = Figure()
 availchart = fig.add_subplot(4,1,1)
@@ -113,6 +140,26 @@ outagelist = builder.get_object('outagelist')
 outagebox = builder.get_object('outagebox')
 outagestore = builder.get_object('outagestore')
 outagelabel = builder.get_object('outagelabel')
+configwindow = builder.get_object('configwindow')
+configsavebutton = builder.get_object('configsavebutton')
+configcancelbutton = builder.get_object('configcancelbutton')
+toolslocation = builder.get_object('toolslocation')
+updateentry = builder.get_object('updateentry')
+intervaladjustment = builder.get_object('intervaladjustment')
+durationentry = builder.get_object('durationentry')
+outagedurationadjustment = builder.get_object('outagedurationadjustment')
+durationentry.configure(outagedurationadjustment, 1, 0)
+updateentry.configure(intervaladjustment, 1, 0)
+historyentry = builder.get_object('historyentry')
+historyentry.configure(builder.get_object('historyadjustment'), 1, 0)
+ticksentry = builder.get_object('ticksentry')
+ticksentry.configure(builder.get_object('ticksadjustment'), 1, 0)
+
+toolslocation.set_filename(config['tools']['grpctools'])
+updateentry.set_value(int(config['options']['updateinterval']))
+durationentry.set_value(int(config['options']['duration']))
+historyentry.set_value(int(config['options']['history']))
+ticksentry.set_value(int(config['options']['ticks']))
 
 def ns_time_to_sec(stamp):
     # Convert GPS time to GMT.
