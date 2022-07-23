@@ -43,16 +43,21 @@ class Window1Signals:
         configwindow.hide()
         return True
     def on_configsavebutton_clicked(self, widget):
-        config['tools'] = {}
-        config['tools']['grpctools'] = toolslocation.get_filename()
         config['options'] = {'updateinterval': str(int(updateentry.get_value())),
                              'duration': str(int(durationentry.get_value())),
                              'history': str(int(historyentry.get_value())),
-                             'ticks': str(int(ticksentry.get_value()))}
+                             'ticks': str(int(ticksentry.get_value())),
+                             'grpctools': toolslocation.get_filename()}
         with open(configfile, 'w') as f:
             config.write(f)
         configwindow.hide()
         get_outages(min_duration=float(config['options']['duration']))
+        xar.clear()
+        download.clear()
+        upload.clear()
+        latency.clear()
+        avail.clear()
+        get_history()
         animate(1) # Force an update.
     def on_settings_clicked(self, widget):
         configwindow.show()
@@ -80,9 +85,10 @@ class Window1Signals:
 config = configparser.ConfigParser()
 configfile = 'starlinkgraph.ini'
 config.read(configfile)
+opts = config['options']
 
-if 'grpctools' in config['tools']:
-    sys.path.insert(0, config['tools']['grpctools'])
+if opts.get('grpctools') != '':
+    sys.path.insert(0, opts.get('grpctools'))
 
 try:
     import starlink_grpc
@@ -100,7 +106,7 @@ upchart = fig.add_subplot(4,1,4)
 builder = Gtk.Builder()
 builder.add_from_file("starlink-graph.glade")
 
-builder.connect_signals(Window1Signals())
+
 window = builder.get_object("window1")
 sw = builder.get_object("scrolledwindow1")
 aboutdialog = builder.get_object('aboutdialog')
@@ -123,8 +129,9 @@ historyentry = builder.get_object('historyentry')
 historyentry.configure(builder.get_object('historyadjustment'), 1, 0)
 ticksentry = builder.get_object('ticksentry')
 ticksentry.configure(builder.get_object('ticksadjustment'), 1, 0)
+builder.connect_signals(Window1Signals())
 
-toolslocation.set_filename(config['tools']['grpctools'])
+toolslocation.set_filename(config['options']['grpctools'])
 updateentry.set_value(int(config['options']['updateinterval']))
 durationentry.set_value(int(config['options']['duration']))
 historyentry.set_value(int(config['options']['history']))
@@ -150,6 +157,29 @@ def get_data(vals=0):
                   'state': 'UNKNOWN'})
     z[0]['datetimestamp_utc'] = datetime.datetime.now().astimezone()
     return z
+
+def get_history():
+    seconds = opts.getint('history')
+    dtstart = datetime.datetime.now().astimezone() - datetime.timedelta(seconds=seconds)
+
+    for i in range(0, seconds-1):
+        l = {k: z[k][i] for k in z.keys()}
+        xar.append(dtstart)
+        try:
+            if l['pop_ping_latency_ms'] is None:
+                latency.append(0)
+            else:
+                latency.append(l['pop_ping_latency_ms'])
+            download.append(l['downlink_throughput_bps'])
+            upload.append(l['uplink_throughput_bps'])
+            avail.append(100 - (l['pop_ping_drop_rate'] * 100))
+        except:
+            print('something went wrong:', l, dtstart)
+            latency.append(0)
+            download.append(0)
+            upload.append(0)
+            avail.append(0)
+        dtstart += datetime.timedelta(seconds=1)
 
 def get_outages(min_duration=None):
     if min_duration is None:
@@ -303,27 +333,8 @@ outages = []
 outages_by_cause = {}
 
 # Fill out the graph with the history
-dtstart = datetime.datetime.now().astimezone() - datetime.timedelta(seconds=int(config['options']['history']))
+get_history()
 
-for i in range(0, int(config['options']['history'])-1):
-    l = {k: z[k][i] for k in z.keys()}
-    xar.append(dtstart)
-    try:
-        if l['pop_ping_latency_ms'] is None:
-            latency.append(0)
-        else:
-            latency.append(l['pop_ping_latency_ms'])
-        download.append(l['downlink_throughput_bps'])
-        upload.append(l['uplink_throughput_bps'])
-        avail.append(100 - (l['pop_ping_drop_rate'] * 100))
-    except:
-        print('something went wrong:', l, dtstart)
-        latency.append(0)
-        download.append(0)
-        upload.append(0)
-        avail.append(0)
-
-    dtstart += datetime.timedelta(seconds=1)
 # Try and get the outage history
 
 get_outages(min_duration=float(config['options']['duration']))
