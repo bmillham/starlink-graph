@@ -14,6 +14,9 @@ from statistics import mean, StatisticsError
 import sys
 import leapseconds
 import configparser
+import os
+import shutil
+import importlib
 
 # Use humanize if it's available. Install with
 # pip3 install humanize
@@ -43,15 +46,15 @@ class Window1Signals:
         configwindow.hide()
         return True
     def on_configsavebutton_clicked(self, widget):
-        config['options'] = {'updateinterval': str(int(updateentry.get_value())),
+        config['options'] = {'updateinterval': f'{updateentry.get_value():.0f}',
                              'duration': str(int(durationentry.get_value())),
                              'history': str(int(historyentry.get_value())),
                              'ticks': str(int(ticksentry.get_value())),
-                             'grpctools': toolslocation.get_filename()}
+                             'grpctools': '' if toolslocation.get_filename() is None else toolslocation.get_filename()}
         with open(configfile, 'w') as f:
             config.write(f)
         configwindow.hide()
-        get_outages(min_duration=float(config['options']['duration']))
+        get_outages(min_duration=opts.getfloat('duration'))
         xar.clear()
         download.clear()
         upload.clear()
@@ -66,11 +69,11 @@ class Window1Signals:
         if all:
             get_outages(min_duration=0.0)
         else:
-            get_outages(min_duration=float(config['options']['duration'])) # Re-read outage info
+            get_outages(min_duration=opts.getfloat('duration')) # Re-read outage info
         if len(outages) == 0:
-            outagelabel.set_text(f'There have been no outages in the last 12 hours over {config["options"]["duration"]} seconds!')
+            outagelabel.set_text(f'There have been no outages in the last 12 hours over {opts.getint("duration")} seconds!')
         else:
-            outagelabel.set_text(f'There have been {len(outages)} outages {"over " + str(config["options"]["duration"]) + " seconds" if not all else ""} in the last 12 hours')
+            outagelabel.set_text(f'There have been {len(outages)} outages {"over " + opts.get("duration") + " seconds" if not all else ""} in the last 12 hours')
                 
         for out in outages:
                 outagestore.append([out['time'].strftime("%I:%M%p"), out['cause'], str(out['duration'])])
@@ -83,19 +86,17 @@ class Window1Signals:
 
 
 config = configparser.ConfigParser()
-configfile = 'starlinkgraph.ini'
+configfile = 'starlink-graph.ini'
+defaultconfigfile = 'starlink-graph-default.ini'
+if not os.path.exists(configfile):
+    shutil.copyfile(defaultconfigfile, configfile)
 config.read(configfile)
 opts = config['options']
 
-if opts.get('grpctools') != '':
+if config.get('options', 'grpctools') != '':
     sys.path.insert(0, opts.get('grpctools'))
 
-try:
-    import starlink_grpc
-except:
-    print("Unable to import starlink_grpc.!")
-    print("Check your PYTHONPATH or use the -l/--tools-loc option")
-    exit()
+
 
 
 fig = Figure()
@@ -131,11 +132,23 @@ ticksentry = builder.get_object('ticksentry')
 ticksentry.configure(builder.get_object('ticksadjustment'), 1, 0)
 builder.connect_signals(Window1Signals())
 
-toolslocation.set_filename(config['options']['grpctools'])
-updateentry.set_value(int(config['options']['updateinterval']))
-durationentry.set_value(int(config['options']['duration']))
-historyentry.set_value(int(config['options']['history']))
-ticksentry.set_value(int(config['options']['ticks']))
+
+# Get the options from the ini file
+toolslocation.set_filename(opts.get('grpctools'))
+updateentry.set_value(opts.getint('updateinterval'))
+durationentry.set_value(opts.getint('duration'))
+historyentry.set_value(opts.getint('history'))
+ticksentry.set_value(opts.getint('ticks'))
+
+if importlib.util.find_spec('starlink_grpc') is None:
+    configwindow.show()
+
+try:
+    import starlink_grpc
+except:
+    print("Unable to import starlink_grpc.!")
+    print("Check your PYTHONPATH or use the -l/--tools-loc option")
+    exit()
 
 def ns_time_to_sec(stamp):
     # Convert GPS time to GMT.
@@ -183,7 +196,7 @@ def get_history():
 
 def get_outages(min_duration=None):
     if min_duration is None:
-        min_duration = float(config['options']['duration'])
+        min_duration = opts.getfloat('duration')
     # Clear old data
     outages.clear()
     outages_by_cause.clear()
@@ -214,16 +227,16 @@ def animate(i):
     upload.append(data[0]['uplink_throughput_bps'])
     if data[0]['state'] != 'CONNECTED':
         print(f'Not connected: {data[0]["state"]}@{data[0]["datetimestamp_utc"]}')
-        get_outages(min_duration=float(config['options']['duration']))
+        get_outages(min_duration=opts.getfloat('duration'))
     else:
         # Things are working normally, so only check outages every 5 seconds
         if xar[-1].second % 5 == 0:
-            get_outages(min_duration=float(config['options']['duration'])) # Also get outage history as the current data is not always accurate
+            get_outages(min_duration=opts.getfloat('duration')) # Also get outage history as the current data is not always accurate
         
     avail.append(100 - (data[0]['pop_ping_drop_rate'] * 100))
     xar.append(data[0]['datetimestamp_utc'])
     # Only keep maxvals (seconds) of samples
-    while (xar[-1] - xar[0]).seconds > float(config['options']['history']):
+    while (xar[-1] - xar[0]).seconds > opts.getfloat('history'):
         xar.pop(0)
         download.pop(0)
         upload.pop(0)
@@ -277,9 +290,9 @@ def animate(i):
     downchart.xaxis.set_ticks([]) 
     latencychart.xaxis.set_ticks([])
     # Set the tick interval
-    tick_count = int(len(xar) / (int(config['options']['ticks']) - 1))
+    tick_count = int(len(xar) / (opts.getint('ticks') - 1))
     tick_vals = xar[::tick_count]
-    if len(tick_vals) < int(config['options']['ticks']):
+    if len(tick_vals) < opts.getint('ticks'):
         tick_vals.append(xar[-1])
     tick_labels = [f'{v.astimezone().strftime("%I:%M%p")}' for v in tick_vals]
     upchart.xaxis.set_ticks(tick_vals, labels=tick_labels)
@@ -321,7 +334,7 @@ def animate(i):
     return True
 
 # On startup, grab the data right away so the graph can be populated.
-z1 = starlink_grpc.history_bulk_data(int(config['options']['history']))
+z1 = starlink_grpc.history_bulk_data(opts.getint('history'))
 z = z1[1]
 
 xar = []
@@ -337,7 +350,7 @@ get_history()
 
 # Try and get the outage history
 
-get_outages(min_duration=float(config['options']['duration']))
+get_outages(min_duration=opts.getint('duration'))
 
 # Force an update right away.
 animate(1)
@@ -347,7 +360,6 @@ canvas = FigureCanvas(fig)
 sw.add(canvas)
 
 window.show_all()
-
-ani = animation.FuncAnimation(fig, animate, interval=int(config['options']['updateinterval']))
+ani = animation.FuncAnimation(fig, animate, interval=opts.getint('updateinterval'))
 
 Gtk.main()
