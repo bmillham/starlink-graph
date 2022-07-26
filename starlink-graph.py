@@ -175,15 +175,18 @@ def animate(i):
         dlave = mean([z for z in sd._download if z > 0])
         upave = mean([z for z in sd._upload if z > 0])
         latave = mean([z for z in sd._latency if z > 0])
+        availave = mean([z for z in sd._avail])
     except StatisticsError:
         dlave = 0
         upave = 0
         latave = 0
+        availave = 0
         print('No data received')
 
     daveline = [dlave] * len(sd._xaxis)
     uaveline = [upave] * len(sd._xaxis)
     lataveline = [latave] * len(sd._xaxis)
+    availave = [availave] * len(sd._xaxis)
     savedlave = dlave
     saveupave = upave
     hdl = naturalsize(hdl)
@@ -196,6 +199,7 @@ def animate(i):
 
     availchart.clear()
     availchart.plot(sd._xaxis, sd._avail, linewidth=1, color='green')
+    availchart.plot(sd._xaxis, availave, linewidth=1, linestyle='dotted', color='black')
     downchart.clear()
     downchart.plot(sd._xaxis, sd._download, linewidth=1)
     downchart.plot(sd._xaxis, daveline, linewidth=1, linestyle='dashed', color='black')
@@ -231,7 +235,8 @@ def animate(i):
     availchart.yaxis.set_label_text('Uptime')
     availchart.yaxis.set_label_position('right')
     availchart.xaxis.set_ticks([])
-    availchart.set_yticks([100, 0], labels=['100%', '0%'])
+    availchart.set_yticks([100, availave[0], 0], labels=[f'{"" if availave[0]>95.0 else "100%"}',
+                                                         f'Ave: {availave[0]/100:.2%}', '0%'])
     if len(sd._outages_by_cause) == 0:
         availchart.text(sd._xaxis[0], 10, "No outages in the last 12 hours",
                         bbox={'facecolor': 'green',
@@ -246,6 +251,7 @@ def animate(i):
     dmax = max(sd._download)
     upchart.set_yticks([upmin, saveupave, upmax], labels=['', f'Ave:\n{upave}', hmul])
     downchart.set_yticks([dmin, savedlave, dmax], labels=['', f'Ave:\n{dlave}', hmdl])
+
     try:
         latmin = min([x for x in sd._latency if x != 0.0])
     except:
