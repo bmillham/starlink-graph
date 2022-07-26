@@ -12,11 +12,12 @@ import matplotlib.animation as animation
 import datetime
 from statistics import mean, StatisticsError
 import sys
-import leapseconds
+#import leapseconds
 import configparser
 import os
 import shutil
 import importlib
+
 
 # Use humanize if it's available. Install with
 # pip3 install humanize
@@ -30,12 +31,14 @@ except ModuleNotFoundError:
     def naturaldelta(x): return x
 
 class Window1Signals:
+    def on_nogrpc_ok_button_clicked(self, widget):
+        pass
     def on_window1_destroy(self, widget):
         Gtk.main_quit()
     def on_about_dialog_click(self, widget):
         # Show current dish info
-        z = get_data()[0]
-        aboutdialog.set_comments(f'Dishy: {z["software_version"]}\nUptime: {naturaldelta(z["uptime"])}')
+        sd.current_data()
+        aboutdialog.set_comments(f'Dishy: {sd._last_data["software_version"]}\nUptime: {naturaldelta(sd._last_data["uptime"])}')
         aboutdialog.show()
     def on_about_close_button(self, widget):
         aboutdialog.hide()
@@ -54,28 +57,28 @@ class Window1Signals:
         with open(configfile, 'w') as f:
             config.write(f)
         configwindow.hide()
-        get_outages(min_duration=opts.getfloat('duration'))
-        xar.clear()
-        download.clear()
-        upload.clear()
-        latency.clear()
-        avail.clear()
-        get_history()
+        sd.outages(min_duration=opts.getfloat('duration'))
+        #xar.clear()
+        #download.clear()
+        #upload.clear()
+        #latency.clear()
+        #avail.clear()
+        sd.history()
         animate(1) # Force an update.
     def on_settings_clicked(self, widget):
         configwindow.show()
     def _show_outages(self, all=False):
-        outagestore.clear()
+        #outagestore.clear()
         if all:
-            get_outages(min_duration=0.0)
+            sd.outages(min_duration=0.0)
         else:
-            get_outages(min_duration=opts.getfloat('duration')) # Re-read outage info
-        if len(outages) == 0:
+            sd.outages(min_duration=opts.getfloat('duration')) # Re-read outage info
+        if len(sd._outages) == 0:
             outagelabel.set_text(f'There have been no outages in the last 12 hours over {opts.getint("duration")} seconds!')
         else:
-            outagelabel.set_text(f'There have been {len(outages)} outages {"over " + opts.get("duration") + " seconds" if not all else ""} in the last 12 hours')
+            outagelabel.set_text(f'There have been {len(sd._outages)} outages {"over " + opts.get("duration") + " seconds" if not all else ""} in the last 12 hours')
                 
-        for out in outages:
+        for out in sd._outages:
                 outagestore.append([out['time'].strftime("%I:%M%p"), out['cause'], str(out['duration'])])
         outagewindow.show()
     def outage_close(self, *args, **kwargs):
@@ -95,8 +98,6 @@ opts = config['options']
 
 if config.get('options', 'grpctools') != '':
     sys.path.insert(0, opts.get('grpctools'))
-
-
 
 
 fig = Figure()
@@ -130,6 +131,7 @@ historyentry = builder.get_object('historyentry')
 historyentry.configure(builder.get_object('historyadjustment'), 1, 0)
 ticksentry = builder.get_object('ticksentry')
 ticksentry.configure(builder.get_object('ticksadjustment'), 1, 0)
+nogrpcwindow = builder.get_object('nogrpcwindow')
 builder.connect_signals(Window1Signals())
 
 
@@ -140,160 +142,82 @@ durationentry.set_value(opts.getint('duration'))
 historyentry.set_value(opts.getint('history'))
 ticksentry.set_value(opts.getint('ticks'))
 
-if importlib.util.find_spec('starlink_grpc') is None:
-    configwindow.show()
+#if importlib.util.find_spec('starlink_grpc') is None:
+#    configwindow.show()
 
 try:
     import starlink_grpc
 except:
-    print("Unable to import starlink_grpc.!")
-    print("Check your PYTHONPATH or use the -l/--tools-loc option")
-    exit()
+    starlink_grpc = None
 
-def ns_time_to_sec(stamp):
-    # Convert GPS time to GMT.
-    tzoff = datetime.datetime.now().astimezone().utcoffset().total_seconds()
-    t = leapseconds.gps_to_utc(datetime.datetime(1980,1,6) +
-                               datetime.timedelta(seconds=(stamp/1000000000)+tzoff))
-    return t
+from starlinkdata import StarlinkData
 
-def get_data(vals=0):
-    try:
-        z = starlink_grpc.status_data()
-    except:
-        print('No stats returned!')
-        z = []
-        z.append({'downlink_throughput_bps': 0,
-                  'pop_ping_latency_ms': 0,
-                  'pop_ping_drop_rate': 0,
-                  'uplink_throughput_bps': 0,
-                  'state': 'UNKNOWN'})
-    z[0]['datetimestamp_utc'] = datetime.datetime.now().astimezone()
-    return z
+sd = StarlinkData(opts=opts)
 
-def get_history():
-    seconds = opts.getint('history')
-    dtstart = datetime.datetime.now().astimezone() - datetime.timedelta(seconds=seconds)
 
-    for i in range(0, seconds-1):
-        l = {k: z[k][i] for k in z.keys()}
-        xar.append(dtstart)
-        try:
-            if l['pop_ping_latency_ms'] is None:
-                latency.append(0)
-            else:
-                latency.append(l['pop_ping_latency_ms'])
-            download.append(l['downlink_throughput_bps'])
-            upload.append(l['uplink_throughput_bps'])
-            avail.append(100 - (l['pop_ping_drop_rate'] * 100))
-        except:
-            print('something went wrong:', l, dtstart)
-            latency.append(0)
-            download.append(0)
-            upload.append(0)
-            avail.append(0)
-        dtstart += datetime.timedelta(seconds=1)
-
-def get_outages(min_duration=None):
-    if min_duration is None:
-        min_duration = opts.getfloat('duration')
-    # Clear old data
-    outages.clear()
-    outages_by_cause.clear()
-    try:
-        history = starlink_grpc.get_history()
-    except:
-        print('No history returned')
-        return
-    for o in history.outages:
-        fix = ns_time_to_sec(o.start_timestamp_ns)
-        cause = o.Cause.Name(o.cause)
-        duration =  o.duration_ns/1000000000
-        # The starlink page ignores outages less than 2 seconds. So do the same.
-        if duration < min_duration:
-            continue
-        outages.append({'time': fix,
-                        'cause': cause,
-                        'duration': duration})
-        if cause not in outages_by_cause:
-            outages_by_cause[cause] = duration
-        else:
-            outages_by_cause[cause] += duration
 
 def animate(i):
-    data = get_data(vals=1) # Grab the latest data
-    download.append(data[0]['downlink_throughput_bps']) # Convert the string to float
-    latency.append(data[0]['pop_ping_latency_ms'])
-    upload.append(data[0]['uplink_throughput_bps'])
-    if data[0]['state'] != 'CONNECTED':
-        print(f'Not connected: {data[0]["state"]}@{data[0]["datetimestamp_utc"]}')
-        get_outages(min_duration=opts.getfloat('duration'))
+    sd.current_data()
+    if sd._last_data['state'] != 'CONNECTED':
+        print(f'Not connected: {sd._last_data["state"]}@{sd._last_data["datetimestamp_utc"]}')
+        sd.get_outages()
     else:
         # Things are working normally, so only check outages every 5 seconds
-        if xar[-1].second % 5 == 0:
-            get_outages(min_duration=opts.getfloat('duration')) # Also get outage history as the current data is not always accurate
+        if sd._xaxis[-1].second % 5 == 0:
+            sd.outages(min_duration=opts.getfloat('duration'))
         
-    avail.append(100 - (data[0]['pop_ping_drop_rate'] * 100))
-    xar.append(data[0]['datetimestamp_utc'])
-    # Only keep maxvals (seconds) of samples
-    while (xar[-1] - xar[0]).seconds > opts.getfloat('history'):
-        xar.pop(0)
-        download.pop(0)
-        upload.pop(0)
-        latency.pop(0)
-        avail.pop(0)
-    hdl = download[-1]
-    hul = upload[-1]
-    hmdl = max(download)
-    hmul = max(upload)
+    hdl = sd._download[-1]
+    hul = sd._upload[-1]
+    hmdl = max(sd._download)
+    hmul = max(sd._upload)
     # Get averages, excluding an 0 values
     try:
-        dlave = mean([z for z in download if z > 0])
-        upave = mean([z for z in upload if z > 0])
-        latave = mean([z for z in latency if z > 0])
+        dlave = mean([z for z in sd._download if z > 0])
+        upave = mean([z for z in sd._upload if z > 0])
+        latave = mean([z for z in sd._latency if z > 0])
     except StatisticsError:
         dlave = 0
         upave = 0
         latave = 0
         print('No data received')
 
-    daveline = [dlave] * len(xar)
-    uaveline = [upave] * len(xar)
-    lataveline = [latave] * len(xar)
+    daveline = [dlave] * len(sd._xaxis)
+    uaveline = [upave] * len(sd._xaxis)
+    lataveline = [latave] * len(sd._xaxis)
     savedlave = dlave
     saveupave = upave
     hdl = naturalsize(hdl)
-    hmdl = naturalsize(max(download))
+    hmdl = naturalsize(max(sd._download))
     hul = naturalsize(hul)
-    umin = naturalsize(min(upload))
-    hmul = naturalsize(max(upload))
+    umin = naturalsize(min(sd._upload))
+    hmul = naturalsize(max(sd._upload))
     dlave = naturalsize(dlave)
     upave = naturalsize(upave)
 
     availchart.clear()
-    availchart.plot(xar, avail, linewidth=1, color='green')
+    availchart.plot(sd._xaxis, sd._avail, linewidth=1, color='green')
     downchart.clear()
-    downchart.plot(xar, download, linewidth=1)
-    downchart.plot(xar, daveline, linewidth=1, linestyle='dashed', color='black')
+    downchart.plot(sd._xaxis, sd._download, linewidth=1)
+    downchart.plot(sd._xaxis, daveline, linewidth=1, linestyle='dashed', color='black')
     downchart.legend([f'Last: {hdl}'], loc='upper left')
     upchart.clear()
-    upchart.plot(xar, upload, linewidth=1, color='red')
-    upchart.plot(xar, uaveline, linewidth=1, color='black', linestyle='dashed')
+    upchart.plot(sd._xaxis, sd._upload, linewidth=1, color='red')
+    upchart.plot(sd._xaxis, uaveline, linewidth=1, color='black', linestyle='dashed')
     upchart.legend([f'Last: {hul}'], loc='upper left')
     latencychart.clear()
-    latencychart.plot(xar, latency, linewidth=1, color='green')
-    latencychart.plot(xar, lataveline, linewidth=1, color='black', linestyle='dashed')
+    latencychart.plot(sd._xaxis, sd._latency, linewidth=1, color='green')
+    latencychart.plot(sd._xaxis, lataveline, linewidth=1, color='black', linestyle='dashed')
 
-    latencychart.legend([f'Last: {latency[-1]:.0f} ms'], loc='upper left')
+    latencychart.legend([f'Last: {sd._latency[-1]:.0f} ms'], loc='upper left')
 
     # Turn off the ticks for up/down charts
     downchart.xaxis.set_ticks([]) 
     latencychart.xaxis.set_ticks([])
     # Set the tick interval
-    tick_count = int(len(xar) / (opts.getint('ticks') - 1))
-    tick_vals = xar[::tick_count]
+    tick_count = int(len(sd._xaxis) / (opts.getint('ticks') - 1))
+    tick_vals = sd._xaxis[::tick_count]
     if len(tick_vals) < opts.getint('ticks'):
-        tick_vals.append(xar[-1])
+        tick_vals.append(sd._xaxis[-1])
     tick_labels = [f'{v.astimezone().strftime("%I:%M%p")}' for v in tick_vals]
     upchart.xaxis.set_ticks(tick_vals, labels=tick_labels)
     # Rotate the tick text
@@ -308,58 +232,47 @@ def animate(i):
     availchart.yaxis.set_label_position('right')
     availchart.xaxis.set_ticks([])
     availchart.set_yticks([100, 0], labels=['100%', '0%'])
-    if len(outages_by_cause) == 0:
-        availchart.text(xar[0], 10, "No outages in the last 12 hours",
+    if len(sd._outages_by_cause) == 0:
+        availchart.text(sd._xaxis[0], 10, "No outages in the last 12 hours",
                         bbox={'facecolor': 'green',
                               'alpha': 0.5,
                               'pad': 1})
     else:
-        availchart.text(xar[0], 10, "\n".join([f'{k}: {v:.0f}s' for k, v in outages_by_cause.items()]), bbox={
+        availchart.text(sd._xaxis[0], 10, "\n".join([f'{k}: {v:.0f}s' for k, v in sd._outages_by_cause.items()]), bbox={
                 'facecolor': 'green', 'alpha': 0.5, 'pad': 1})
-    upmin = min(upload)
-    upmax = max(upload)
-    dmin = min(download)
-    dmax = max(download)
+    upmin = min(sd._upload)
+    upmax = max(sd._upload)
+    dmin = min(sd._download)
+    dmax = max(sd._download)
     upchart.set_yticks([upmin, saveupave, upmax], labels=['', f'Ave:\n{upave}', hmul])
     downchart.set_yticks([dmin, savedlave, dmax], labels=['', f'Ave:\n{dlave}', hmdl])
     try:
-        latmin = min([x for x in latency if x != 0.0])
+        latmin = min([x for x in sd._latency if x != 0.0])
     except:
         latmin = 0
         
-    latencychart.set_yticks([latmin, latave, max(latency)],
+    latencychart.set_yticks([latmin, latave, max(sd._latency)],
                             labels=[f'Min: {latmin:.0f}',
                                     f'Ave: {latave:.0f}',
-                                    f'Max: {max(latency):.0f}'])
+                                    f'Max: {max(sd._latency):.0f}'])
     return True
 
-# On startup, grab the data right away so the graph can be populated.
-z1 = starlink_grpc.history_bulk_data(opts.getint('history'))
-z = z1[1]
 
-xar = []
-download = []
-upload = []
-latency = []
-avail = []
-outages = []
-outages_by_cause = {}
+def startup():
+    # On startup, grab the data right away so the graph can be populated.
+    canvas = FigureCanvas(fig)
+    sw.add(canvas)
+    sd.history()
+    sd.outages()
+    # Force an update right away.
+    animate(1)
+    return animation.FuncAnimation(fig, animate, interval=opts.getint('updateinterval'))
 
-# Fill out the graph with the history
-get_history()
-
-# Try and get the outage history
-
-get_outages(min_duration=opts.getint('duration'))
-
-# Force an update right away.
-animate(1)
-
-# Create the canvas for matplotlib
-canvas = FigureCanvas(fig)
-sw.add(canvas)
+if starlink_grpc is None:
+    nogrpcwindow.show()
+else:
+    ani = startup()
 
 window.show_all()
-ani = animation.FuncAnimation(fig, animate, interval=opts.getint('updateinterval'))
 
 Gtk.main()
