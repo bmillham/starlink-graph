@@ -68,7 +68,7 @@ class Window1Signals:
         nogrpcwindow.hide()
         configwindow.show()
     def _show_outages(self, all=False):
-        #outagestore.clear()
+        outagestore.clear()
         if all:
             sd.outages(min_duration=0.0)
         else:
