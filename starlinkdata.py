@@ -24,10 +24,10 @@ class StarlinkData:
                                'pop_ping_latency_ms': 0,
                                'pop_ping_drop_rate': 0,
                                'uplink_throughput_bps': 0,
-                               'state': 'UNKNOWN',
-                               'datetimestamp_utc': datetime.datetime.now().astimezone()}
+                               'state': 'UNKNOWN'}
+        self._last_data['datetimestamp_utc'] = datetime.datetime.now().astimezone()
 
-        self._xaxis.append(datetime.datetime.now().astimezone())
+        self._xaxis.append(self._last_data['datetimestamp_utc'])
         self._latency.append(self._last_data['pop_ping_latency_ms'])
         self._upload.append(self._last_data['uplink_throughput_bps'])
         self._download.append(self._last_data['downlink_throughput_bps'])
