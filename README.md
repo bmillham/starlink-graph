@@ -9,6 +9,6 @@ The humanize module is used if installed. Install it with pip3 install humanize
 Just clone the git and run the script: python starlink-graph.py
 If you have the environment variable PYTHONPATH set to include the location of starlink-grpc-tools then
 the script should run. If you don't have it set you will prompted to select the location of starlink-grpc-tools
-#Release Notes
+# Release Notes
 Removed command line options in favor of having a GUI setting window.
 
