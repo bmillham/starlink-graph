@@ -49,6 +49,8 @@ class Window1Signals:
         configwindow.hide()
         return True
     def on_configsavebutton_clicked(self, widget):
+        savetools = opts.get('grpctools')
+        saveinterval = opts.getint('updateinterval')
         config['options'] = {'updateinterval': f'{updateentry.get_value():.0f}',
                              'duration': str(int(durationentry.get_value())),
                              'history': str(int(historyentry.get_value())),
@@ -57,15 +59,13 @@ class Window1Signals:
         with open(configfile, 'w') as f:
             config.write(f)
         configwindow.hide()
+        if savetools != opts.get('grpctools') or saveinterval != opts.getint('updateinterval'):
+            os.execv(__file__, sys.argv) # Restart the script
         sd.outages(min_duration=opts.getfloat('duration'))
-        #xar.clear()
-        #download.clear()
-        #upload.clear()
-        #latency.clear()
-        #avail.clear()
         sd.history()
         animate(1) # Force an update.
     def on_settings_clicked(self, widget):
+        nogrpcwindow.hide()
         configwindow.show()
     def _show_outages(self, all=False):
         #outagestore.clear()
@@ -142,25 +142,11 @@ durationentry.set_value(opts.getint('duration'))
 historyentry.set_value(opts.getint('history'))
 ticksentry.set_value(opts.getint('ticks'))
 
-#if importlib.util.find_spec('starlink_grpc') is None:
-#    configwindow.show()
-
-try:
-    import starlink_grpc
-except:
-    starlink_grpc = None
-
-from starlinkdata import StarlinkData
-
-sd = StarlinkData(opts=opts)
-
-
-
 def animate(i):
     sd.current_data()
     if sd._last_data['state'] != 'CONNECTED':
         print(f'Not connected: {sd._last_data["state"]}@{sd._last_data["datetimestamp_utc"]}')
-        sd.get_outages()
+        sd.outages()
     else:
         # Things are working normally, so only check outages every 5 seconds
         if sd._xaxis[-1].second % 5 == 0:
@@ -274,11 +260,17 @@ def startup():
     animate(1)
     return animation.FuncAnimation(fig, animate, interval=opts.getint('updateinterval'))
 
-if starlink_grpc is None:
+try:
+    from starlinkdata import StarlinkData
+except:
+    StarlinkData = None
+
+
+if StarlinkData is None:
     nogrpcwindow.show()
 else:
+    sd = StarlinkData(opts=opts)
     ani = startup()
-
-window.show_all()
+    window.show_all()
 
 Gtk.main()

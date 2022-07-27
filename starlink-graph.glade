@@ -109,6 +109,7 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
               <object class="GtkFileChooserButton" id="toolslocation">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="tooltip-text" translatable="yes">Starlink-graph will automatically restart if this value is changed.</property>
                 <property name="action">select-folder</property>
                 <property name="title" translatable="yes">Location of the starlink-grpc-tools directory</property>
               </object>
@@ -134,6 +135,7 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
               <object class="GtkSpinButton" id="updateentry">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
+                <property name="tooltip-text" translatable="yes">Starlink-graph will automatically restart if this value is changed.</property>
                 <property name="input-purpose">number</property>
               </object>
               <packing>
@@ -298,7 +300,7 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">WARNING</property>
+            <property name="label" translatable="yes">ERROR</property>
             <attributes>
               <attribute name="weight" value="bold"/>
               <attribute name="scale" value="2"/>
@@ -337,17 +339,44 @@ Select the correct directory in the following dialog.</property>
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="nogrpc_ok_button">
-            <property name="label" translatable="yes">Open the settings dialog</property>
+          <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <signal name="clicked" handler="on_nogrpc_ok_button_clicked" swapped="no"/>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkButton" id="nogrpc_ok_button">
+                <property name="label" translatable="yes">Open the settings dialog</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <signal name="clicked" handler="on_settings_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">Quit</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <signal name="clicked" handler="on_window1_destroy" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack-type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">3</property>
+            <property name="pack-type">end</property>
+            <property name="position">4</property>
           </packing>
         </child>
       </object>
