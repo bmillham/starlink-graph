@@ -5,7 +5,7 @@
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, GdkPixbuf
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtk3agg import (FigureCanvasGTK3Agg as FigureCanvas)
 import matplotlib.animation as animation
@@ -17,7 +17,6 @@ import configparser
 import os
 import shutil
 import importlib
-
 
 # Use humanize if it's available. Install with
 # pip3 install humanize
@@ -45,6 +44,18 @@ class Window1Signals:
         return True
     def on_outage_clicked(self, widget):
         self._show_outages()
+    def on_obstructions_clicked(self, widget):
+        map = sd.obstruction_map() # Get the latest obstruction map in a temp file
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(map,
+                                                        width=400,
+                                                        height=400)
+                                        
+        obstructionimage.set_from_pixbuf(pixbuf)
+        obstructionwindow.show()
+        os.unlink(map) # Remove the temp file
+    def on_obstructionwindow_delete_event(self, *args):
+        obstructionwindow.hide()
+        return True
     def on_configcancelbutton_clicked(self, *args):
         configwindow.hide()
         return True
@@ -132,6 +143,8 @@ historyentry.configure(builder.get_object('historyadjustment'), 1, 0)
 ticksentry = builder.get_object('ticksentry')
 ticksentry.configure(builder.get_object('ticksadjustment'), 1, 0)
 nogrpcwindow = builder.get_object('nogrpcwindow')
+obstructionwindow = builder.get_object('obstructionwindow')
+obstructionimage = builder.get_object('obstructionimage')
 builder.connect_signals(Window1Signals())
 
 
@@ -221,7 +234,7 @@ def animate(i):
     availchart.yaxis.set_label_text('Uptime')
     availchart.yaxis.set_label_position('right')
     availchart.xaxis.set_ticks([])
-    availchart.set_yticks([100, availave[0], 0], labels=[f'{"" if availave[0]>95.0 else "100%"}',
+    availchart.set_yticks([100, availave[0], 0], labels=[f'{"" if availave[0]>85.0 else "100%"}',
                                                          f'Ave: {availave[0]/100:.2%}', '0%'])
     if len(sd._outages_by_cause) == 0:
         availchart.text(sd._xaxis[0], 10, "No outages in the last 12 hours",

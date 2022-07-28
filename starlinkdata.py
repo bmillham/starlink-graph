@@ -1,6 +1,9 @@
 import starlink_grpc
 import leapseconds
 import datetime
+import png
+import tempfile
+import os
 
 class StarlinkData:
     def __init__(self, opts=None):
@@ -15,6 +18,13 @@ class StarlinkData:
         self._last_obstructions = None
         self._last_alerts = None
         self._opts = opts
+        self._obstructed_color_a, self._obstructed_color_r, self._obstructed_color_g, self._obstructed_color_b  = self._color_conv("FFFF0000")
+        self._unobstructed_color_a, self._unobstructed_color_r, self._unobstructed_color_g, self._unobstructed_color_b  = self._color_conv("FF5B82A3")
+        self._no_data_color_a, self._no_data_color_r, self._no_data_color_g, self._no_data_color_b = self._color_conv("00000000")
+
+    def _color_conv(self, colorstr):
+        color = int(colorstr, 16)
+        return (color >> 24) & 255, (color >> 16) & 255, (color >> 8) & 255, color & 255
 
     def current_data(self):
         try:
@@ -104,3 +114,41 @@ class StarlinkData:
                 self._outages_by_cause[cause] = duration
             else:
                 self._outages_by_cause[cause] += duration
+
+    def obstruction_map(self):
+        try:
+            snr_data = starlink_grpc.obstruction_map()
+        except:
+            print('Error getting obstructions')
+            return False
+
+        # Code lifted from starlink_grpc_tools/dish_obstruction_map.py
+        def pixel_bytes(row):
+            for point in row:
+                if point > 1.0:
+                    # shouldn't happen, but just in case...
+                    point = 1.0
+
+                if point >= 0.0:
+                    yield round(point * self._unobstructed_color_r +
+                            (1.0-point) * self._obstructed_color_r)
+                    yield round(point * self._unobstructed_color_g +
+                                (1.0-point) * self._obstructed_color_g)
+                    yield round(point * self._unobstructed_color_b +
+                                (1.0-point) * self._obstructed_color_b)
+                    yield round(point * self._unobstructed_color_a +
+                                (1.0-point) * self._obstructed_color_a)
+                else:
+                    yield self._no_data_color_r
+                    yield self._no_data_color_g
+                    yield self._no_data_color_b
+                    yield self._no_data_color_a
+
+        writer = png.Writer(len(snr_data[0]),
+                            len(snr_data),
+                            alpha=True,
+                            greyscale=False)
+        thandle, tfname = tempfile.mkstemp()
+        with os.fdopen(thandle, "wb") as f:
+            writer.write(f, (bytes(pixel_bytes(row)) for row in snr_data))
+        return tfname
