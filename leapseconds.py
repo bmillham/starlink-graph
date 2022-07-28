@@ -106,8 +106,12 @@ def leapseconds(tzfiles=['/usr/share/zoneinfo/right/UTC',
             warn('Unsupported version %r in tzfile: %s' % (
                 version, file.name), RuntimeWarning)
         if leapcnt == 0:
-            raise ValueError("No leap seconds in tzfile: %s" % (
-                file.name))
+            if not use_fallback:
+                raise ValueError("No leap seconds in tzfile: %s" % (
+                    file.name))
+            else:
+                warn(f'No leap seconds i tzfile {file.name}')
+                return _fallback()
 
         """# from tzfile.h[2] (the file is in public domain)
 
