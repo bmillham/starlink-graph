@@ -1,5 +1,5 @@
 # starlink-graph
-Show Starlink stats in a nice graph in an app instead of using a web browser.
+Show Starlink stats in a nice graph in an app instead of using a web browser. It has been tested on linux and MacOS. 
 # Prerequisites
 You will need starlink-grps-tools from https://github.com/sparky8512/starlink-grpc-tools
 Some distributions (Manjaro) do not have matplotlib installed by default. Install it with pip install matplotlib
