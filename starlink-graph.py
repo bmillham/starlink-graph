@@ -15,7 +15,6 @@ import sys
 #import leapseconds
 import configparser
 import os
-import shutil
 import importlib
 
 # Use humanize if it's available. Install with
@@ -102,9 +101,14 @@ class Window1Signals:
 config = configparser.ConfigParser()
 configfile = 'starlink-graph.ini'
 defaultconfigfile = 'starlink-graph-default.ini'
-if not os.path.exists(configfile):
-    shutil.copyfile(defaultconfigfile, configfile)
-config.read(configfile)
+try:
+    config.read_file(open(configfile))
+except FileNotFoundError:
+    config.read_file(open(defaultconfigfile))
+except:
+    print('No config files found!')
+    exit()
+
 opts = config['options']
 
 if config.get('options', 'grpctools') != '':
