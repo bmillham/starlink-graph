@@ -75,9 +75,12 @@ LeapSecond = namedtuple('LeapSecond', 'utc dTAI_UTC')  # tai = utc + dTAI_UTC
 sentinel = LeapSecond(utc=datetime.max, dTAI_UTC=timedelta(0))
 
 
+# Changed use_fallback to default to true and added zoneinfo/UTC for macs
+
 def leapseconds(tzfiles=['/usr/share/zoneinfo/right/UTC',
-                         '/usr/lib/zoneinfo/right/UTC'],
-                use_fallback=False):
+                         '/usr/lib/zoneinfo/right/UTC',
+                         '/usr/share/zoneinfo/UTC'],
+                use_fallback=True):
     """Extract leap seconds from *tzfiles*."""
     for filename in tzfiles:
         try:
