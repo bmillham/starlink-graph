@@ -4,6 +4,7 @@
 # (C) 2022: Brian Millham
 
 import gi
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf
 from matplotlib.figure import Figure
@@ -12,7 +13,7 @@ import matplotlib.animation as animation
 import datetime
 from statistics import mean, StatisticsError
 import sys
-#import leapseconds
+# import leapseconds
 import configparser
 import os
 import importlib
@@ -24,40 +25,56 @@ try:
     from humanize.time import naturaldelta
 except ModuleNotFoundError:
     print('Humazine module not installed. Install with pip3')
+
+
     # Use a tacky simple naturalsize
-    def naturalsize(x): return f"{x:.1f} kB"
-    def naturaldelta(x): return x
+    def naturalsize(x):
+        return f"{x:.1f} kB"
+
+
+    def naturaldelta(x):
+        return x
+
 
 class Window1Signals:
     def on_nogrpc_ok_button_clicked(self, widget):
         pass
+
     def on_window1_destroy(self, widget):
         Gtk.main_quit()
+
     def on_about_dialog_click(self, widget):
         # Show current dish info
         sd.current_data()
-        aboutdialog.set_comments(f'Dishy: {sd._last_data["software_version"]}\nUptime: {naturaldelta(sd._last_data["uptime"])}')
+        aboutdialog.set_comments(
+            f'Dishy: {sd._last_data["software_version"]}\nUptime: {naturaldelta(sd._last_data["uptime"])}')
         aboutdialog.show()
+
     def on_about_close_button(self, widget):
         aboutdialog.hide()
         return True
+
     def on_outage_clicked(self, widget):
         self._show_outages()
+
     def on_obstructions_clicked(self, widget):
-        map = sd.obstruction_map() # Get the latest obstruction map in a temp file
+        map = sd.obstruction_map()  # Get the latest obstruction map in a temp file
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(map,
                                                         width=400,
                                                         height=400)
-                                        
+
         obstructionimage.set_from_pixbuf(pixbuf)
         obstructionwindow.show()
-        os.unlink(map) # Remove the temp file
+        os.unlink(map)  # Remove the temp file
+
     def on_obstructionwindow_delete_event(self, *args):
         obstructionwindow.hide()
         return True
+
     def on_configcancelbutton_clicked(self, *args):
         configwindow.hide()
         return True
+
     def on_configsavebutton_clicked(self, widget):
         savetools = opts.get('grpctools')
         saveinterval = opts.getint('updateinterval')
@@ -70,30 +87,36 @@ class Window1Signals:
             config.write(f)
         configwindow.hide()
         if savetools != opts.get('grpctools') or saveinterval != opts.getint('updateinterval'):
-            os.execv(__file__, sys.argv) # Restart the script
+            os.execv(__file__, sys.argv)  # Restart the script
         sd.outages(min_duration=opts.getfloat('duration'))
         sd.history()
-        animate(1) # Force an update.
+        animate(1)  # Force an update.
+
     def on_settings_clicked(self, widget):
         nogrpcwindow.hide()
         configwindow.show()
+
     def _show_outages(self, all=False):
         outagestore.clear()
         if all:
             sd.outages(min_duration=0.0)
         else:
-            sd.outages(min_duration=opts.getfloat('duration')) # Re-read outage info
+            sd.outages(min_duration=opts.getfloat('duration'))  # Re-read outage info
         if len(sd._outages) == 0:
-            outagelabel.set_text(f'There have been no outages in the last 12 hours over {opts.getint("duration")} seconds!')
+            outagelabel.set_text(
+                f'There have been no outages in the last 12 hours over {opts.getint("duration")} seconds!')
         else:
-            outagelabel.set_text(f'There have been {len(sd._outages)} outages {"over " + opts.get("duration") + " seconds" if not all else ""} in the last 12 hours')
-                
+            outagelabel.set_text(
+                f'There have been {len(sd._outages)} outages {"over " + opts.get("duration") + " seconds" if not all else ""} in the last 12 hours')
+
         for out in sd._outages:
-                outagestore.append([out['time'].strftime("%I:%M%p"), out['cause'], str(out['duration'])])
+            outagestore.append([out['time'].strftime("%I:%M%p"), out['cause'], str(out['duration'])])
         outagewindow.show()
+
     def outage_close(self, *args, **kwargs):
         outagewindow.hide()
         return True
+
     def outage_toggled(self, widget):
         self._show_outages(all=widget.get_active())
 
@@ -101,10 +124,9 @@ class Window1Signals:
 config = configparser.ConfigParser()
 configfile = 'starlink-graph.ini'
 defaultconfigfile = 'starlink-graph-default.ini'
+
 try:
-    config.read_file(open(configfile))
-except FileNotFoundError:
-    config.read_file(open(defaultconfigfile))
+    config.read([defaultconfigfile, configfile])
 except:
     print('No config files found!')
     exit()
@@ -114,15 +136,13 @@ opts = config['options']
 if config.get('options', 'grpctools') != '':
     sys.path.insert(0, opts.get('grpctools'))
 
-
 fig = Figure()
-availchart = fig.add_subplot(4,1,1)
-latencychart = fig.add_subplot(4,1,2)
-downchart = fig.add_subplot(4,1,3)
-upchart = fig.add_subplot(4,1,4)
+availchart = fig.add_subplot(4, 1, 1)
+latencychart = fig.add_subplot(4, 1, 2)
+downchart = fig.add_subplot(4, 1, 3)
+upchart = fig.add_subplot(4, 1, 4)
 builder = Gtk.Builder()
 builder.add_from_file("starlink-graph.glade")
-
 
 window = builder.get_object("window1")
 sw = builder.get_object("scrolledwindow1")
@@ -151,13 +171,13 @@ obstructionwindow = builder.get_object('obstructionwindow')
 obstructionimage = builder.get_object('obstructionimage')
 builder.connect_signals(Window1Signals())
 
-
 # Get the options from the ini file
 toolslocation.set_filename(opts.get('grpctools'))
 updateentry.set_value(opts.getint('updateinterval'))
 durationentry.set_value(opts.getint('duration'))
 historyentry.set_value(opts.getint('history'))
 ticksentry.set_value(opts.getint('ticks'))
+
 
 def animate(i):
     sd.current_data()
@@ -168,7 +188,7 @@ def animate(i):
         # Things are working normally, so only check outages every 5 seconds
         if sd._xaxis[-1].second % 5 == 0:
             sd.outages(min_duration=opts.getfloat('duration'))
-        
+
     hdl = sd._download[-1]
     hul = sd._upload[-1]
     hmdl = max(sd._download)
@@ -218,7 +238,7 @@ def animate(i):
     latencychart.legend([f'Last: {sd._latency[-1]:.0f} ms'], loc='upper left')
 
     # Turn off the ticks for up/down charts
-    downchart.xaxis.set_ticks([]) 
+    downchart.xaxis.set_ticks([])
     latencychart.xaxis.set_ticks([])
     # Set the tick interval
     tick_count = int(len(sd._xaxis) / (opts.getint('ticks') - 1))
@@ -238,8 +258,8 @@ def animate(i):
     availchart.yaxis.set_label_text('Uptime')
     availchart.yaxis.set_label_position('right')
     availchart.xaxis.set_ticks([])
-    availchart.set_yticks([100, availave[0], 0], labels=[f'{"" if availave[0]>85.0 else "100%"}',
-                                                         f'Ave: {availave[0]/100:.2%}', '0%'])
+    availchart.set_yticks([100, availave[0], 0], labels=[f'{"" if availave[0] > 85.0 else "100%"}',
+                                                         f'Ave: {availave[0] / 100:.2%}', '0%'])
     if len(sd._outages_by_cause) == 0:
         availchart.text(sd._xaxis[0], 10, "No outages in the last 12 hours",
                         bbox={'facecolor': 'green',
@@ -247,7 +267,7 @@ def animate(i):
                               'pad': 1})
     else:
         availchart.text(sd._xaxis[0], 10, "\n".join([f'{k}: {v:.0f}s' for k, v in sd._outages_by_cause.items()]), bbox={
-                'facecolor': 'green', 'alpha': 0.5, 'pad': 1})
+            'facecolor': 'green', 'alpha': 0.5, 'pad': 1})
     upmin = min(sd._upload)
     upmax = max(sd._upload)
     dmin = min(sd._download)
@@ -259,7 +279,7 @@ def animate(i):
         latmin = min([x for x in sd._latency if x != 0.0])
     except:
         latmin = 0
-        
+
     latencychart.set_yticks([latmin, latave, max(sd._latency)],
                             labels=[f'Min: {latmin:.0f}',
                                     f'Ave: {latave:.0f}',
@@ -277,17 +297,19 @@ def startup():
     animate(1)
     return animation.FuncAnimation(fig, animate, interval=opts.getint('updateinterval'))
 
+
 try:
     from starlinkdata import StarlinkData
 except:
     StarlinkData = None
 
-
 if StarlinkData is None:
+    window.show_all()
     nogrpcwindow.show()
 else:
     sd = StarlinkData(opts=opts)
     ani = startup()
-    window.show_all()
+
+window.show_all()
 
 Gtk.main()

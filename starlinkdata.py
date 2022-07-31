@@ -18,9 +18,10 @@ class StarlinkData:
         self._last_obstructions = None
         self._last_alerts = None
         self._opts = opts
-        self._obstructed_color_a, self._obstructed_color_r, self._obstructed_color_g, self._obstructed_color_b  = self._color_conv("FFFF0000")
-        self._unobstructed_color_a, self._unobstructed_color_r, self._unobstructed_color_g, self._unobstructed_color_b  = self._color_conv("FF5B82A3")
-        self._no_data_color_a, self._no_data_color_r, self._no_data_color_g, self._no_data_color_b = self._color_conv("00000000")
+        self._obstructed_color_a, self._obstructed_color_r, self._obstructed_color_g, self._obstructed_color_b = self._color_conv(self._opts.get('obstructed_color'))
+        self._unobstructed_color_a, self._unobstructed_color_r, self._unobstructed_color_g, self._unobstructed_color_b = self._color_conv(self._opts.get('unobstructed_color'))
+        self._no_data_color_a, self._no_data_color_r, self._no_data_color_g, self._no_data_color_b = self._color_conv(self._opts.get('no_data_color'))
+
 
     def _color_conv(self, colorstr):
         color = int(colorstr, 16)
