@@ -2,6 +2,50 @@
 <!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.10"/>
+  <object class="GtkAdjustment" id="historyadjustment">
+    <property name="lower">60</property>
+    <property name="upper">900</property>
+    <property name="value">900</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">1</property>
+  </object>
+  <object class="GtkAdjustment" id="intervaladjustment">
+    <property name="lower">500</property>
+    <property name="upper">1500</property>
+    <property name="value">1000</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="obstructionadjustment">
+    <property name="lower">10</property>
+    <property name="upper">900</property>
+    <property name="value">10</property>
+    <property name="step-increment">10</property>
+    <property name="page-increment">1</property>
+  </object>
+  <object class="GtkAdjustment" id="outagedurationadjustment">
+    <property name="upper">5</property>
+    <property name="value">2</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">1</property>
+  </object>
+  <object class="GtkListStore" id="outagestore">
+    <columns>
+      <!-- column-name Time -->
+      <column type="gchararray"/>
+      <!-- column-name Reason -->
+      <column type="gchararray"/>
+      <!-- column-name Duration -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkAdjustment" id="ticksadjustment">
+    <property name="lower">2</property>
+    <property name="upper">4</property>
+    <property name="value">3</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">1</property>
+  </object>
   <object class="GtkWindow" id="configwindow">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Starlink-graph Configuration</property>
@@ -26,7 +70,7 @@
           </packing>
         </child>
         <child>
-          <!-- n-columns=2 n-rows=8 -->
+          <!-- n-columns=2 n-rows=9 -->
           <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
@@ -75,6 +119,7 @@
                 <property name="can-focus">True</property>
                 <property name="tooltip-text" translatable="yes">Starlink-graph will automatically restart if this value is changed.</property>
                 <property name="input-purpose">number</property>
+                <property name="adjustment">intervaladjustment</property>
               </object>
               <packing>
                 <property name="left-attach">1</property>
@@ -99,6 +144,7 @@
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="input-purpose">number</property>
+                <property name="adjustment">outagedurationadjustment</property>
                 <property name="digits">2</property>
               </object>
               <packing>
@@ -124,6 +170,7 @@
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="input-purpose">number</property>
+                <property name="adjustment">historyadjustment</property>
               </object>
               <packing>
                 <property name="left-attach">1</property>
@@ -148,6 +195,7 @@
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="input-purpose">number</property>
+                <property name="adjustment">ticksadjustment</property>
               </object>
               <packing>
                 <property name="left-attach">1</property>
@@ -160,37 +208,11 @@
                 <property name="can-focus">False</property>
                 <property name="halign">end</property>
                 <property name="margin-right">3</property>
-                <property name="label" translatable="yes">Obstructed Color:</property>
-              </object>
-              <packing>
-                <property name="left-attach">0</property>
-                <property name="top-attach">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="halign">end</property>
-                <property name="margin-right">3</property>
-                <property name="label" translatable="yes">Unobstructed Color:</property>
-              </object>
-              <packing>
-                <property name="left-attach">0</property>
-                <property name="top-attach">6</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="halign">end</property>
-                <property name="margin-right">3</property>
                 <property name="label" translatable="yes">No Data Color</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
-                <property name="top-attach">7</property>
+                <property name="top-attach">8</property>
               </packing>
             </child>
             <child>
@@ -203,20 +225,7 @@
               </object>
               <packing>
                 <property name="left-attach">1</property>
-                <property name="top-attach">7</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkColorButton" id="obstructed_color_button">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="use-alpha">True</property>
-                <property name="title" translatable="yes">Pick Obstructed Color</property>
-              </object>
-              <packing>
-                <property name="left-attach">1</property>
-                <property name="top-attach">5</property>
+                <property name="top-attach">8</property>
               </packing>
             </child>
             <child>
@@ -229,7 +238,70 @@
               </object>
               <packing>
                 <property name="left-attach">1</property>
+                <property name="top-attach">7</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">end</property>
+                <property name="margin-right">3</property>
+                <property name="label" translatable="yes">Unobstructed Color:</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">7</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">end</property>
+                <property name="margin-right">3</property>
+                <property name="label" translatable="yes">Obstructed Color:</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
                 <property name="top-attach">6</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkColorButton" id="obstructed_color_button">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-alpha">True</property>
+                <property name="title" translatable="yes">Pick Obstructed Color</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">6</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="margin-right">3</property>
+                <property name="label" translatable="yes">Obstruction Map Update Interval:</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="obstruction_map_interval_entry">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="input-purpose">number</property>
+                <property name="adjustment">obstructionadjustment</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">5</property>
               </packing>
             </child>
           </object>
@@ -285,43 +357,6 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkAdjustment" id="historyadjustment">
-    <property name="lower">60</property>
-    <property name="upper">900</property>
-    <property name="value">900</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">1</property>
-  </object>
-  <object class="GtkAdjustment" id="intervaladjustment">
-    <property name="lower">500</property>
-    <property name="upper">1500</property>
-    <property name="value">1000</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">10</property>
-  </object>
-  <object class="GtkAdjustment" id="outagedurationadjustment">
-    <property name="upper">5</property>
-    <property name="value">2</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">1</property>
-  </object>
-  <object class="GtkListStore" id="outagestore">
-    <columns>
-      <!-- column-name Time -->
-      <column type="gchararray"/>
-      <!-- column-name Reason -->
-      <column type="gchararray"/>
-      <!-- column-name Duration -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkAdjustment" id="ticksadjustment">
-    <property name="lower">2</property>
-    <property name="upper">4</property>
-    <property name="value">3</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">1</property>
   </object>
   <object class="GtkApplicationWindow" id="window1">
     <property name="can-focus">False</property>
