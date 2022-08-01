@@ -60,8 +60,9 @@ class Window1Signals:
         self._show_outages()
 
     def on_obstructions_clicked(self, widget=None):
-        if obstruction_update_check.get_active() and not self._obstructionstimer:
-            self._obstructionstimer = GLib.timeout_add_seconds(10, self._show_obstruction_map)
+        #if obstruction_update_check.get_active() and not self._obstructionstimer:
+        #    self._obstructionstimer = GLib.timeout_add_seconds(10, self._show_obstruction_map)
+        self.auto_obstruction_toggle()
 
         self._show_obstruction_map()
         obstructionwindow.show()
@@ -75,10 +76,10 @@ class Window1Signals:
 
         obstructionimage.set_from_pixbuf(pixbuf)
         os.unlink(map)  # Remove the temp file
-        obstruction_timer_label.set_text('Last Update: ' + str(datetime.datetime.now()))
+        obstruction_timer_label.set_text('Last Update: ' + str(datetime.datetime.now().strftime("%I:%M:%S %p")))
         return True
 
-    def auto_obstruction_toggle(self, widget):
+    def auto_obstruction_toggle(self, widget=None):
         if obstruction_update_check.get_active():
             if self._obstructionstimer is None:
                 self._obstructionstimer = GLib.timeout_add_seconds(10, self._show_obstruction_map)
