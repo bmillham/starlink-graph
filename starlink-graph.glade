@@ -635,11 +635,51 @@ Select the correct directory in the following dialog.</property>
     <property name="attached-to">window1</property>
     <signal name="delete-event" handler="on_obstructionwindow_delete_event" swapped="no"/>
     <child>
-      <object class="GtkImage" id="obstructionimage">
+      <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <property name="icon-name">emblem-unreadable</property>
-        <property name="icon_size">6</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkCheckButton" id="obstruction_update_check">
+            <property name="label" translatable="yes">Automatically update map</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="halign">center</property>
+            <property name="draw-indicator">True</property>
+            <signal name="toggled" handler="auto_obstruction_toggle" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkImage" id="obstructionimage">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="icon-name">emblem-unreadable</property>
+            <property name="icon_size">6</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="obstruction_timer_label">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">label</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
       </object>
     </child>
   </object>

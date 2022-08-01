@@ -6,7 +6,7 @@
 import gi
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GdkPixbuf, Gdk
+from gi.repository import Gtk, GdkPixbuf, Gdk, GLib
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtk3agg import (FigureCanvasGTK3Agg as FigureCanvas)
 import matplotlib.animation as animation
@@ -36,6 +36,9 @@ except ModuleNotFoundError:
 
 
 class Window1Signals:
+    def __init__(self):
+        self._obstructionstimer = None
+
     def on_nogrpc_ok_button_clicked(self, widget):
         pass
 
@@ -56,17 +59,42 @@ class Window1Signals:
     def on_outage_clicked(self, widget):
         self._show_outages()
 
-    def on_obstructions_clicked(self, widget):
+    def on_obstructions_clicked(self, widget=None):
+        if obstruction_update_check.get_active() and not self._obstructionstimer:
+            self._obstructionstimer = GLib.timeout_add_seconds(10, self._show_obstruction_map)
+
+        self._show_obstruction_map()
+        obstructionwindow.show()
+
+    @staticmethod
+    def _show_obstruction_map():
         map = sd.obstruction_map()  # Get the latest obstruction map in a temp file
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(map,
                                                         width=400,
                                                         height=400)
 
         obstructionimage.set_from_pixbuf(pixbuf)
-        obstructionwindow.show()
         os.unlink(map)  # Remove the temp file
+        obstruction_timer_label.set_text('Last Update: ' + str(datetime.datetime.now()))
+        return True
+
+    def auto_obstruction_toggle(self, widget):
+        if obstruction_update_check.get_active():
+            if self._obstructionstimer is None:
+                self._obstructionstimer = GLib.timeout_add_seconds(10, self._show_obstruction_map)
+            else:
+                print('timer already running')
+        else:
+            if self._obstructionstimer is None:
+                print('timer already stopped')
+            else:
+                GLib.source_remove(self._obstructionstimer)
+                self._obstructionstimer = None
 
     def on_obstructionwindow_delete_event(self, *args):
+        if self._obstructionstimer is not None:
+            GLib.source_remove(self._obstructionstimer)
+            self._obstructionstimer = None
         obstructionwindow.hide()
         return True
 
@@ -175,6 +203,8 @@ obstructionimage = builder.get_object('obstructionimage')
 obstructed_color_button = builder.get_object('obstructed_color_button')
 unobstructed_color_button = builder.get_object('unobstructed_color_button')
 no_data_color_button = builder.get_object('no_data_color_button')
+obstruction_timer_label = builder.get_object('obstruction_timer_label')
+obstruction_update_check = builder.get_object('obstruction_update_check')
 builder.connect_signals(Window1Signals())
 
 # Get the options from the ini file
