@@ -1,3 +1,6 @@
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gdk
 import starlink_grpc
 import leapseconds
 import datetime
@@ -17,15 +20,23 @@ class StarlinkData:
         self._last_data = None
         self._last_obstructions = None
         self._last_alerts = None
-        self._opts = opts
-        self._obstructed_color_a, self._obstructed_color_r, self._obstructed_color_g, self._obstructed_color_b = self._color_conv(self._opts.get('obstructed_color'))
-        self._unobstructed_color_a, self._unobstructed_color_r, self._unobstructed_color_g, self._unobstructed_color_b = self._color_conv(self._opts.get('unobstructed_color'))
-        self._no_data_color_a, self._no_data_color_r, self._no_data_color_g, self._no_data_color_b = self._color_conv(self._opts.get('no_data_color'))
+        self.load_colors(opts)
 
+    @staticmethod
+    def _color_conv(color):
+        rgba_color = Gdk.RGBA()
+        rgba_color.parse(color)
+        return int(rgba_color.alpha * 255), int(rgba_color.red * 255), int(rgba_color.green * 255), int(rgba_color.blue*255)
 
-    def _color_conv(self, colorstr):
-        color = int(colorstr, 16)
-        return (color >> 24) & 255, (color >> 16) & 255, (color >> 8) & 255, color & 255
+    def load_colors(self, opts=None):
+        if opts is not None:
+            self._opts = opts
+        self._obstructed_color_a, self._obstructed_color_r, self._obstructed_color_g, self._obstructed_color_b = self._color_conv(
+            self._opts.get('obstructed_color'))
+        self._unobstructed_color_a, self._unobstructed_color_r, self._unobstructed_color_g, self._unobstructed_color_b = self._color_conv(
+            self._opts.get('unobstructed_color'))
+        self._no_data_color_a, self._no_data_color_r, self._no_data_color_g, self._no_data_color_b = self._color_conv(
+            self._opts.get('no_data_color'))
 
     def current_data(self):
         try:

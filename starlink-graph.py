@@ -6,14 +6,13 @@
 import gi
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk, GdkPixbuf, Gdk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtk3agg import (FigureCanvasGTK3Agg as FigureCanvas)
 import matplotlib.animation as animation
 import datetime
 from statistics import mean, StatisticsError
 import sys
-# import leapseconds
 import configparser
 import os
 import importlib
@@ -82,12 +81,16 @@ class Window1Signals:
                              'duration': str(int(durationentry.get_value())),
                              'history': str(int(historyentry.get_value())),
                              'ticks': str(int(ticksentry.get_value())),
+                             'obstructed_color': obstructed_color_button.get_rgba().to_string(),
+                             'unobstructed_color': unobstructed_color_button.get_rgba().to_string(),
+                             'no_data_color': no_data_color_button.get_rgba().to_string(),
                              'grpctools': '' if toolslocation.get_filename() is None else toolslocation.get_filename()}
         with open(configfile, 'w') as f:
             config.write(f)
         configwindow.hide()
         if savetools != opts.get('grpctools') or saveinterval != opts.getint('updateinterval'):
             os.execv(__file__, sys.argv)  # Restart the script
+        sd.load_colors(opts) # Load the new colors
         sd.outages(min_duration=opts.getfloat('duration'))
         sd.history()
         animate(1)  # Force an update.
@@ -169,6 +172,9 @@ ticksentry.configure(builder.get_object('ticksadjustment'), 1, 0)
 nogrpcwindow = builder.get_object('nogrpcwindow')
 obstructionwindow = builder.get_object('obstructionwindow')
 obstructionimage = builder.get_object('obstructionimage')
+obstructed_color_button = builder.get_object('obstructed_color_button')
+unobstructed_color_button = builder.get_object('unobstructed_color_button')
+no_data_color_button = builder.get_object('no_data_color_button')
 builder.connect_signals(Window1Signals())
 
 # Get the options from the ini file
@@ -177,7 +183,15 @@ updateentry.set_value(opts.getint('updateinterval'))
 durationentry.set_value(opts.getint('duration'))
 historyentry.set_value(opts.getint('history'))
 ticksentry.set_value(opts.getint('ticks'))
-
+ob_rgba_color = Gdk.RGBA()
+ob_rgba_color.parse(opts.get('obstructed_color'))
+un_rgba_color = Gdk.RGBA()
+un_rgba_color.parse(opts.get('unobstructed_color'))
+no_rgba_color = Gdk.RGBA()
+no_rgba_color.parse(opts.get('no_data_color'))
+obstructed_color_button.set_rgba(ob_rgba_color)
+unobstructed_color_button.set_rgba(un_rgba_color)
+no_data_color_button.set_rgba(no_rgba_color)
 
 def animate(i):
     sd.current_data()
