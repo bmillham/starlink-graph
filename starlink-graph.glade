@@ -4,6 +4,7 @@
   <requires lib="gtk+" version="3.10"/>
   <object class="GtkWindow" id="configwindow">
     <property name="can-focus">False</property>
+    <property name="title" translatable="yes">Starlink-graph Configuration</property>
     <property name="window-position">center-on-parent</property>
     <property name="gravity">center</property>
     <signal name="delete-event" handler="on_configcancelbutton_clicked" swapped="no"/>
@@ -25,7 +26,7 @@
           </packing>
         </child>
         <child>
-          <!-- n-columns=2 n-rows=5 -->
+          <!-- n-columns=2 n-rows=8 -->
           <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
@@ -153,6 +154,84 @@
                 <property name="top-attach">4</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">end</property>
+                <property name="margin-right">3</property>
+                <property name="label" translatable="yes">Obstructed Color:</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">end</property>
+                <property name="margin-right">3</property>
+                <property name="label" translatable="yes">Unobstructed Color:</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">6</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">end</property>
+                <property name="margin-right">3</property>
+                <property name="label" translatable="yes">No Data Color</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">7</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkColorButton" id="no_data_color_button">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-alpha">True</property>
+                <property name="title" translatable="yes">Pick No Data Color</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">7</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkColorButton" id="obstructed_color_button">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-alpha">True</property>
+                <property name="title" translatable="yes">Pick Obstructed Color</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkColorButton" id="unobstructed_color_button">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-alpha">True</property>
+                <property name="title" translatable="yes">Pick Unobstructed Color</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">6</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -201,7 +280,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
-            <property name="position">2</property>
+            <property name="position">5</property>
           </packing>
         </child>
       </object>
@@ -220,104 +299,6 @@
     <property name="value">1000</property>
     <property name="step-increment">1</property>
     <property name="page-increment">10</property>
-  </object>
-  <object class="GtkWindow" id="nogrpcwindow">
-    <property name="can-focus">False</property>
-    <property name="type">popup</property>
-    <property name="window-position">center-always</property>
-    <property name="type-hint">notification</property>
-    <property name="gravity">center</property>
-    <child>
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="homogeneous">True</property>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">ERROR</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-              <attribute name="scale" value="2"/>
-            </attributes>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkImage">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="stock">gtk-stop</property>
-            <property name="icon_size">6</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Unable to import starlink-grpc.
-Select the correct directory in the following dialog.</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <child>
-              <object class="GtkButton" id="nogrpc_ok_button">
-                <property name="label" translatable="yes">Open the settings dialog</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <signal name="clicked" handler="on_settings_clicked" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton">
-                <property name="label" translatable="yes">Quit</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <signal name="clicked" handler="on_window1_destroy" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="pack-type">end</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="pack-type">end</property>
-            <property name="position">4</property>
-          </packing>
-        </child>
-      </object>
-    </child>
   </object>
   <object class="GtkAdjustment" id="outagedurationadjustment">
     <property name="upper">5</property>
@@ -541,6 +522,105 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
         </child>
         <child>
           <placeholder/>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="nogrpcwindow">
+    <property name="can-focus">False</property>
+    <property name="type">popup</property>
+    <property name="window-position">center-always</property>
+    <property name="type-hint">splashscreen</property>
+    <property name="gravity">center</property>
+    <property name="attached-to">window1</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="homogeneous">True</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">ERROR</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+              <attribute name="scale" value="2"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="icon-name">dialog-error</property>
+            <property name="icon_size">6</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Unable to import starlink-grpc.
+Select the correct directory in the following dialog.</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkButton" id="nogrpc_ok_button">
+                <property name="label" translatable="yes">Open the settings dialog</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <signal name="clicked" handler="on_settings_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">Quit</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <signal name="clicked" handler="on_window1_destroy" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack-type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack-type">end</property>
+            <property name="position">4</property>
+          </packing>
         </child>
       </object>
     </child>
