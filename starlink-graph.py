@@ -104,6 +104,7 @@ class Window1Signals:
     def on_configsavebutton_clicked(self, widget):
         savetools = opts.get('grpctools')
         saveinterval = opts.getint('updateinterval')
+        saveobstructions = opts.getint('obstructioninterval')
         config['options'] = {'updateinterval': f'{updateentry.get_value():.0f}',
                              'duration': str(int(durationentry.get_value())),
                              'history': str(int(historyentry.get_value())),
@@ -118,6 +119,11 @@ class Window1Signals:
         configwindow.hide()
         if savetools != opts.get('grpctools') or saveinterval != opts.getint('updateinterval'):
             os.execv(__file__, sys.argv)  # Restart the script
+        if saveobstructions != opts.getint('obstructioninterval'):
+            if self._obstructionstimer is not None: # If updates are currently running, stop/start the timer
+                GLib.source_remove(self._obstructionstimer)
+                self._obstructionstimer = GLib.timeout_add_seconds(opts.getint('obstructioninterval'),
+                                                                   self._show_obstruction_map)
         sd.load_colors(opts) # Load the new colors
         sd.outages(min_duration=opts.getfloat('duration'))
         sd.history()
