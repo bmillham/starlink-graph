@@ -60,8 +60,6 @@ class Window1Signals:
         self._show_outages()
 
     def on_obstructions_clicked(self, widget=None):
-        #if obstruction_update_check.get_active() and not self._obstructionstimer:
-        #    self._obstructionstimer = GLib.timeout_add_seconds(10, self._show_obstruction_map)
         self.auto_obstruction_toggle()
 
         self._show_obstruction_map()
@@ -82,7 +80,7 @@ class Window1Signals:
     def auto_obstruction_toggle(self, widget=None):
         if obstruction_update_check.get_active():
             if self._obstructionstimer is None:
-                self._obstructionstimer = GLib.timeout_add_seconds(10, self._show_obstruction_map)
+                self._obstructionstimer = GLib.timeout_add_seconds(opts.getint('obstructioninterval'), self._show_obstruction_map)
             else:
                 print('timer already running')
         else:
@@ -113,6 +111,7 @@ class Window1Signals:
                              'obstructed_color': obstructed_color_button.get_rgba().to_string(),
                              'unobstructed_color': unobstructed_color_button.get_rgba().to_string(),
                              'no_data_color': no_data_color_button.get_rgba().to_string(),
+                             'obstructioninterval': str(int(obstruction_map_interval_entry.get_value())),
                              'grpctools': '' if toolslocation.get_filename() is None else toolslocation.get_filename()}
         with open(configfile, 'w') as f:
             config.write(f)
@@ -192,6 +191,7 @@ updateentry = builder.get_object('updateentry')
 durationentry = builder.get_object('durationentry')
 historyentry = builder.get_object('historyentry')
 ticksentry = builder.get_object('ticksentry')
+obstruction_map_interval_entry = builder.get_object('obstruction_map_interval_entry')
 nogrpcwindow = builder.get_object('nogrpcwindow')
 obstructionwindow = builder.get_object('obstructionwindow')
 obstructionimage = builder.get_object('obstructionimage')
@@ -208,6 +208,7 @@ updateentry.set_value(opts.getint('updateinterval'))
 durationentry.set_value(opts.getint('duration'))
 historyentry.set_value(opts.getint('history'))
 ticksentry.set_value(opts.getint('ticks'))
+obstruction_map_interval_entry.set_value(opts.getint('obstructioninterval'))
 ob_rgba_color = Gdk.RGBA()
 ob_rgba_color.parse(opts.get('obstructed_color'))
 un_rgba_color = Gdk.RGBA()
