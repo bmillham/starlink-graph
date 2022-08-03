@@ -7,6 +7,7 @@ import datetime
 import png
 import tempfile
 import os
+import io
 
 class StarlinkData:
     def __init__(self, opts=None):
@@ -83,7 +84,10 @@ class StarlinkData:
         dtstart = datetime.datetime.now().astimezone() - datetime.timedelta(seconds=seconds)
         self._clear_stats()
         for i in range(0, seconds-1):
-            l = {k: z[k][i] for k in z.keys()}
+            try:
+                l = {k: z[k][i] for k in z.keys()}
+            except IndexError:
+                l = 0
             self._xaxis.append(dtstart)
             try:
                 if l['pop_ping_latency_ms'] is None:
@@ -94,7 +98,7 @@ class StarlinkData:
                 self._upload.append(l['uplink_throughput_bps'])
                 self._avail.append(100 - (l['pop_ping_drop_rate'] * 100))
             except:
-                print('something went wrong:', l, dtstart)
+                #print('something went wrong:', l, dtstart)
                 self._latency.append(0)
                 self._download.append(0)
                 self._upload.append(0)
@@ -164,3 +168,7 @@ class StarlinkData:
         with os.fdopen(thandle, "wb") as f:
             writer.write(f, (bytes(pixel_bytes(row)) for row in snr_data))
         return tfname
+        #handle = io.BytesIO()
+        #writer.write(handle, (bytes(pixel_bytes(row)) for row in snr_data))
+        #return handle
+        #return writer

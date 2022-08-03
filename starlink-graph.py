@@ -16,6 +16,7 @@ import sys
 import configparser
 import os
 import importlib
+import png
 
 # Use humanize if it's available. Install with
 # pip3 install humanize
@@ -68,10 +69,27 @@ class Window1Signals:
     @staticmethod
     def _show_obstruction_map():
         map = sd.obstruction_map()  # Get the latest obstruction map in a temp file
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(map,
-                                                        width=400,
-                                                        height=400)
-
+        #map.seek(0)
+        #m1 = map.read()
+        #print(m1)
+        #p1 = png.Reader(bytes=m1).read()
+        #print(dir(p1[2]), type(p1[2]))
+        #img = p1[2]
+        #pixbuf = GdkPixbuf.Pixbuf.new_from_data(m1,
+        #                                         False,
+        #                                         False,
+        #                                         8,
+        #                                         400,
+        #                                         400,
+        #                                         1, None)
+        """TODO: Check map! """
+        try:
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(map,
+                                                            width=400,
+                                                            height=400)
+        except:
+            print('Bad map!')
+            return True
         obstructionimage.set_from_pixbuf(pixbuf)
         os.unlink(map)  # Remove the temp file
         obstruction_timer_label.set_text('Last Update: ' + str(datetime.datetime.now().strftime("%I:%M:%S %p")))
