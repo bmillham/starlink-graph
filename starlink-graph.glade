@@ -17,7 +17,7 @@
     <property name="page-increment">10</property>
   </object>
   <object class="GtkAdjustment" id="obstructionadjustment">
-    <property name="lower">10</property>
+    <property name="lower">1</property>
     <property name="upper">900</property>
     <property name="value">10</property>
     <property name="step-increment">10</property>
