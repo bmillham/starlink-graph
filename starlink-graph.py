@@ -68,7 +68,7 @@ class Window1Signals:
 
     @staticmethod
     def _show_obstruction_map():
-        map = sd.obstruction_map()  # Get the latest obstruction map in a temp file
+        map = sd.obstruction_map(opts=opts)  # Get the latest obstruction map in a temp file
         #map.seek(0)
         #m1 = map.read()
         #print(m1)
@@ -91,7 +91,8 @@ class Window1Signals:
             print('Bad map!')
             return True
         obstructionimage.set_from_pixbuf(pixbuf)
-        os.unlink(map)  # Remove the temp file
+        if opts.get('obstructionhistorylocation') == '':
+            os.unlink(map)  # Remove the temp file
         obstruction_timer_label.set_text('Last Update: ' + str(datetime.datetime.now().strftime("%I:%M:%S %p")))
         return True
 
@@ -131,6 +132,7 @@ class Window1Signals:
                              'unobstructed_color': unobstructed_color_button.get_rgba().to_string(),
                              'no_data_color': no_data_color_button.get_rgba().to_string(),
                              'obstructioninterval': str(int(obstruction_map_interval_entry.get_value())),
+                             'obstructionhistorylocation': '' if obstructionhistorylocation.get_filename() is None else obstructionhistorylocation.get_filename(),
                              'grpctools': '' if toolslocation.get_filename() is None else toolslocation.get_filename()}
         with open(configfile, 'w') as f:
             config.write(f)
@@ -174,6 +176,9 @@ class Window1Signals:
 
     def outage_toggled(self, widget):
         self._show_outages(all=widget.get_active())
+
+    def clear_history_button_clicked(self, widget):
+        obstructionhistorylocation.unselect_all()
 
 
 config = configparser.ConfigParser()
@@ -224,10 +229,16 @@ unobstructed_color_button = builder.get_object('unobstructed_color_button')
 no_data_color_button = builder.get_object('no_data_color_button')
 obstruction_timer_label = builder.get_object('obstruction_timer_label')
 obstruction_update_check = builder.get_object('obstruction_update_check')
+obstructionhistorylocation = builder.get_object('obstructionhistorylocation')
+clear_history_button = builder.get_object('clear_history_button')
 builder.connect_signals(Window1Signals())
 
 # Get the options from the ini file
 toolslocation.set_filename(opts.get('grpctools'))
+try:
+    obstructionhistorylocation.set_filename(opts.get('obstructionhistorylocation'))
+except TypeError:
+    obstructionhistorylocation.set_filename('')
 updateentry.set_value(opts.getint('updateinterval'))
 durationentry.set_value(opts.getint('duration'))
 historyentry.set_value(opts.getint('history'))

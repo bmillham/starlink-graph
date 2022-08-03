@@ -7,7 +7,6 @@ import datetime
 import png
 import tempfile
 import os
-import io
 
 class StarlinkData:
     def __init__(self, opts=None):
@@ -98,7 +97,6 @@ class StarlinkData:
                 self._upload.append(l['uplink_throughput_bps'])
                 self._avail.append(100 - (l['pop_ping_drop_rate'] * 100))
             except:
-                #print('something went wrong:', l, dtstart)
                 self._latency.append(0)
                 self._download.append(0)
                 self._upload.append(0)
@@ -131,7 +129,7 @@ class StarlinkData:
             else:
                 self._outages_by_cause[cause] += duration
 
-    def obstruction_map(self):
+    def obstruction_map(self, opts=None):
         try:
             snr_data = starlink_grpc.obstruction_map()
         except:
@@ -164,11 +162,13 @@ class StarlinkData:
                             len(snr_data),
                             alpha=True,
                             greyscale=False)
-        thandle, tfname = tempfile.mkstemp()
+        if opts.get('obstructionhistorylocation') != '':
+            name_template = f'obstruction_{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}.png'
+            tfname = os.path.join(opts.get('obstructionhistorylocation'), name_template)
+            print(tfname)
+            thandle = os.open(tfname, os.O_RDWR | os.O_CREAT)
+        else:
+            thandle, tfname = tempfile.mkstemp()
         with os.fdopen(thandle, "wb") as f:
             writer.write(f, (bytes(pixel_bytes(row)) for row in snr_data))
         return tfname
-        #handle = io.BytesIO()
-        #writer.write(handle, (bytes(pixel_bytes(row)) for row in snr_data))
-        #return handle
-        #return writer
