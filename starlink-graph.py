@@ -69,19 +69,6 @@ class Window1Signals:
     @staticmethod
     def _show_obstruction_map():
         map = sd.obstruction_map(opts=opts)  # Get the latest obstruction map in a temp file
-        #map.seek(0)
-        #m1 = map.read()
-        #print(m1)
-        #p1 = png.Reader(bytes=m1).read()
-        #print(dir(p1[2]), type(p1[2]))
-        #img = p1[2]
-        #pixbuf = GdkPixbuf.Pixbuf.new_from_data(m1,
-        #                                         False,
-        #                                         False,
-        #                                         8,
-        #                                         400,
-        #                                         400,
-        #                                         1, None)
         """TODO: Check map! """
         try:
             pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(map,
@@ -180,6 +167,9 @@ class Window1Signals:
     def clear_history_button_clicked(self, widget):
         obstructionhistorylocation.unselect_all()
 
+    def save_history_cb_toggled(self, widget):
+        pass
+
 
 config = configparser.ConfigParser()
 configfile = 'starlink-graph.ini'
@@ -212,7 +202,7 @@ outagelist = builder.get_object('outagelist')
 outagebox = builder.get_object('outagebox')
 outagestore = builder.get_object('outagestore')
 outagelabel = builder.get_object('outagelabel')
-configwindow = builder.get_object('configwindow')
+configwindow = builder.get_object('configwindow1')
 configsavebutton = builder.get_object('configsavebutton')
 configcancelbutton = builder.get_object('configcancelbutton')
 toolslocation = builder.get_object('toolslocation')
@@ -231,6 +221,7 @@ obstruction_timer_label = builder.get_object('obstruction_timer_label')
 obstruction_update_check = builder.get_object('obstruction_update_check')
 obstructionhistorylocation = builder.get_object('obstructionhistorylocation')
 clear_history_button = builder.get_object('clear_history_button')
+save_history_cb = builder.get_object('save_history_cb')
 builder.connect_signals(Window1Signals())
 
 # Get the options from the ini file
