@@ -2,53 +2,7 @@
 <!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.10"/>
-  <object class="GtkWindow" id="configwindow">
-    <property name="can-focus">False</property>
-    <property name="title" translatable="yes">Starlink-graph Configuration</property>
-    <property name="window-position">center-on-parent</property>
-    <property name="gravity">center</property>
-    <signal name="delete-event" handler="on_configcancelbutton_clicked" swapped="no"/>
-    <child>
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Starlink-graph Configuration</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">end</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">5</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
+  <object class="GtkAction" id="action1"/>
   <object class="GtkAdjustment" id="historyadjustment">
     <property name="lower">60</property>
     <property name="upper">900</property>
@@ -92,413 +46,6 @@
     <property name="value">3</property>
     <property name="step-increment">1</property>
     <property name="page-increment">1</property>
-  </object>
-  <object class="GtkWindow" id="configwindow1">
-    <property name="can-focus">False</property>
-    <property name="title" translatable="yes">Starlink-graph Configuration</property>
-    <child>
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkNotebook">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="scrollable">True</property>
-            <child>
-              <!-- n-columns=2 n-rows=5 -->
-              <object class="GtkGrid" id="basicgrid">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">end</property>
-                    <property name="label" translatable="yes">Tools Location:</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkFileChooserButton" id="toolslocation">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="tooltip-text" translatable="yes">Starlink-graph will automatically restart if this value is changed.</property>
-                    <property name="action">select-folder</property>
-                    <property name="title" translatable="yes">Location of the starlink-grpc-tools directory</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">end</property>
-                    <property name="label" translatable="yes">Update Interval (ms):</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkSpinButton" id="updateentry">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="tooltip-text" translatable="yes">Starlink-graph will automatically restart if this value is changed.</property>
-                    <property name="text" translatable="yes">1000</property>
-                    <property name="input-purpose">number</property>
-                    <property name="adjustment">intervaladjustment</property>
-                    <property name="value">1000</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">end</property>
-                    <property name="label" translatable="yes">Minimum Outage Duration:</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkSpinButton" id="durationentry">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="text" translatable="yes">2.00</property>
-                    <property name="input-purpose">number</property>
-                    <property name="adjustment">outagedurationadjustment</property>
-                    <property name="digits">2</property>
-                    <property name="value">2</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">end</property>
-                    <property name="label" translatable="yes">Seconds of history to keep:</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">3</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkSpinButton" id="historyentry">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="text" translatable="yes">900</property>
-                    <property name="input-purpose">number</property>
-                    <property name="adjustment">historyadjustment</property>
-                    <property name="value">900</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">3</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">9</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">end</property>
-                    <property name="label" translatable="yes">Number of graph time labels:</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">4</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkSpinButton" id="ticksentry">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="text" translatable="yes">3</property>
-                    <property name="input-purpose">number</property>
-                    <property name="adjustment">ticksadjustment</property>
-                    <property name="value">3</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">4</property>
-                  </packing>
-                </child>
-              </object>
-            </child>
-            <child type="tab">
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Basic</property>
-              </object>
-              <packing>
-                <property name="tab-expand">True</property>
-                <property name="tab-fill">False</property>
-              </packing>
-            </child>
-            <child>
-              <!-- n-columns=2 n-rows=5 -->
-              <object class="GtkGrid" id="obstructionsgid">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">Obstruction Map Update Interval:</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">end</property>
-                    <property name="label" translatable="yes">Obstructed Color:</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">end</property>
-                    <property name="label" translatable="yes">Unobstructed Color:</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">end</property>
-                    <property name="label" translatable="yes">No Data Color:</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">3</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">end</property>
-                    <property name="label" translatable="yes">Obstruction History Location:</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">4</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <child>
-                      <object class="GtkFileChooserButton" id="obstructionhistorylocation">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="action">select-folder</property>
-                        <property name="title" translatable="yes">Location of the obstruction history png files</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="clear_history_button">
-                        <property name="label" translatable="yes">Clear</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">True</property>
-                        <signal name="clicked" handler="clear_history_button_clicked" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">4</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkSpinButton" id="obstruction_map_interval_entry">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="input-purpose">number</property>
-                    <property name="adjustment">obstructionadjustment</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkColorButton" id="obstructed_color_button">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                    <property name="use-alpha">True</property>
-                    <property name="title" translatable="yes">Pick Obstructed Color</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkColorButton" id="unobstructed_color_button">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                    <property name="use-alpha">True</property>
-                    <property name="title" translatable="yes">Pick Unobstructed Color</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkColorButton" id="no_data_color_button">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                    <property name="use-alpha">True</property>
-                    <property name="title" translatable="yes">Pick No Data Color</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">3</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child type="tab">
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Obstructions</property>
-              </object>
-              <packing>
-                <property name="position">1</property>
-                <property name="tab-expand">True</property>
-                <property name="tab-fill">False</property>
-              </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child type="tab">
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">end</property>
-            <child>
-              <object class="GtkButton" id="configcancelbutton">
-                <property name="label">gtk-cancel</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="use-stock">True</property>
-                <property name="image-position">right</property>
-                <signal name="clicked" handler="on_configcancelbutton_clicked" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="configsavebutton">
-                <property name="label">gtk-save</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="use-stock">True</property>
-                <property name="image-position">right</property>
-                <signal name="clicked" handler="on_configsavebutton_clicked" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-    </child>
   </object>
   <object class="GtkApplicationWindow" id="window1">
     <property name="can-focus">False</property>
@@ -703,6 +250,431 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
       </object>
     </child>
   </object>
+  <object class="GtkWindow" id="configwindow">
+    <property name="can-focus">False</property>
+    <property name="title" translatable="yes">Starlink-graph Configuration</property>
+    <property name="window-position">center-on-parent</property>
+    <property name="gravity">center</property>
+    <property name="transient-for">window1</property>
+    <property name="attached-to">window1</property>
+    <signal name="delete-event" handler="on_configcancelbutton_clicked" swapped="no"/>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkNotebook">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="scrollable">True</property>
+            <child>
+              <!-- n-columns=2 n-rows=5 -->
+              <object class="GtkGrid" id="basicgrid">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="label" translatable="yes">Tools Location:</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFileChooserButton" id="toolslocation">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="tooltip-text" translatable="yes">Starlink-graph will automatically restart if this value is changed.</property>
+                    <property name="action">select-folder</property>
+                    <property name="title" translatable="yes">Location of the starlink-grpc-tools directory</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="label" translatable="yes">Update Interval (ms):</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSpinButton" id="updateentry">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="tooltip-text" translatable="yes">Starlink-graph will automatically restart if this value is changed.</property>
+                    <property name="text" translatable="yes">1000</property>
+                    <property name="input-purpose">number</property>
+                    <property name="adjustment">intervaladjustment</property>
+                    <property name="value">1000</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="label" translatable="yes">Minimum Outage Duration:</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSpinButton" id="durationentry">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="text" translatable="yes">2.00</property>
+                    <property name="input-purpose">number</property>
+                    <property name="adjustment">outagedurationadjustment</property>
+                    <property name="digits">2</property>
+                    <property name="value">2</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="label" translatable="yes">Seconds of history to keep:</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSpinButton" id="historyentry">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="text" translatable="yes">900</property>
+                    <property name="input-purpose">number</property>
+                    <property name="adjustment">historyadjustment</property>
+                    <property name="value">900</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="label" translatable="yes">Number of graph time labels:</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSpinButton" id="ticksentry">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="text" translatable="yes">3</property>
+                    <property name="input-purpose">number</property>
+                    <property name="adjustment">ticksadjustment</property>
+                    <property name="value">3</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">4</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Basic</property>
+              </object>
+              <packing>
+                <property name="tab-expand">True</property>
+                <property name="tab-fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <!-- n-columns=2 n-rows=5 -->
+                  <object class="GtkGrid" id="obstructionsgid">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Obstruction Map Update Interval:</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes">Obstructed Color:</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes">Unobstructed Color:</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes">No Data Color:</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes">Obstruction History Location:</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <child>
+                          <object class="GtkFileChooserButton" id="obstructionhistorylocation">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="action">select-folder</property>
+                            <property name="title" translatable="yes">Location of the obstruction history png files</property>
+                            <signal name="file-set" handler="enable_map_cb" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="clear_history_button">
+                            <property name="label" translatable="yes">Clear</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                            <signal name="clicked" handler="clear_history_button_clicked" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="obstruction_map_interval_entry">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="text" translatable="yes">10</property>
+                        <property name="input-purpose">number</property>
+                        <property name="adjustment">obstructionadjustment</property>
+                        <property name="value">10</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkColorButton" id="obstructed_color_button">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                        <property name="use-alpha">True</property>
+                        <property name="title" translatable="yes">Pick Obstructed Color</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkColorButton" id="unobstructed_color_button">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                        <property name="use-alpha">True</property>
+                        <property name="title" translatable="yes">Pick Unobstructed Color</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkColorButton" id="no_data_color_button">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                        <property name="use-alpha">True</property>
+                        <property name="title" translatable="yes">Pick No Data Color</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">3</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="save_map_when_window_closed_cb">
+                    <property name="label" translatable="yes">Save obstruction map images when Obstruction Window is closed.</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="draw-indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Obstructions</property>
+              </object>
+              <packing>
+                <property name="position">1</property>
+                <property name="tab-expand">True</property>
+                <property name="tab-fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child type="tab">
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="halign">end</property>
+            <child>
+              <object class="GtkButton" id="configcancelbutton">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+                <property name="image-position">right</property>
+                <signal name="clicked" handler="on_configcancelbutton_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="configsavebutton">
+                <property name="label">gtk-save</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+                <property name="image-position">right</property>
+                <signal name="clicked" handler="on_configsavebutton_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkWindow" id="nogrpcwindow">
     <property name="can-focus">False</property>
     <property name="type">popup</property>
@@ -833,23 +805,6 @@ Select the correct directory in the following dialog.</property>
           </packing>
         </child>
         <child>
-          <object class="GtkCheckButton" id="save_history_cb">
-            <property name="label" translatable="yes">Save Image History</property>
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">False</property>
-            <property name="tooltip-text" translatable="yes">Save the obstruction map images. You must have selected the directory to save to in Settings. If this option is selected then the map files will be created even when this window is closed.</property>
-            <property name="halign">center</property>
-            <property name="draw-indicator">True</property>
-            <signal name="toggled" handler="save_history_cb_toggled" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkImage" id="obstructionimage">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
@@ -859,7 +814,7 @@ Select the correct directory in the following dialog.</property>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">2</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -871,7 +826,7 @@ Select the correct directory in the following dialog.</property>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">3</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>

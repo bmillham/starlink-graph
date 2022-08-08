@@ -97,10 +97,12 @@ class Window1Signals:
                 self._obstructionstimer = None
 
     def on_obstructionwindow_delete_event(self, *args):
+        obstructionwindow.hide()
+        #if save_map_when_window_closed_cb.get_sensitive() and save_map_when_window_closed_cb.get_active():
         if self._obstructionstimer is not None:
             GLib.source_remove(self._obstructionstimer)
             self._obstructionstimer = None
-        obstructionwindow.hide()
+
         return True
 
     def on_configcancelbutton_clicked(self, *args):
@@ -136,6 +138,9 @@ class Window1Signals:
         sd.history()
         animate(1)  # Force an update.
 
+    def enable_map_cb(self, widget):
+        save_map_when_window_closed_cb.set_sensitive(True)
+
     def on_settings_clicked(self, widget):
         nogrpcwindow.hide()
         configwindow.show()
@@ -166,6 +171,7 @@ class Window1Signals:
 
     def clear_history_button_clicked(self, widget):
         obstructionhistorylocation.unselect_all()
+        save_map_when_window_closed_cb.set_sensitive(False)
 
     def save_history_cb_toggled(self, widget):
         pass
@@ -202,7 +208,7 @@ outagelist = builder.get_object('outagelist')
 outagebox = builder.get_object('outagebox')
 outagestore = builder.get_object('outagestore')
 outagelabel = builder.get_object('outagelabel')
-configwindow = builder.get_object('configwindow1')
+configwindow = builder.get_object('configwindow')
 configsavebutton = builder.get_object('configsavebutton')
 configcancelbutton = builder.get_object('configcancelbutton')
 toolslocation = builder.get_object('toolslocation')
@@ -222,6 +228,7 @@ obstruction_update_check = builder.get_object('obstruction_update_check')
 obstructionhistorylocation = builder.get_object('obstructionhistorylocation')
 clear_history_button = builder.get_object('clear_history_button')
 save_history_cb = builder.get_object('save_history_cb')
+save_map_when_window_closed_cb = builder.get_object('save_map_when_window_closed_cb')
 builder.connect_signals(Window1Signals())
 
 # Get the options from the ini file
@@ -230,6 +237,10 @@ try:
     obstructionhistorylocation.set_filename(opts.get('obstructionhistorylocation'))
 except TypeError:
     obstructionhistorylocation.set_filename('')
+
+if opts.get('obstructionhistorylocation') == '':
+    save_map_when_window_closed_cb.set_sensitive(False)
+
 updateentry.set_value(opts.getint('updateinterval'))
 durationentry.set_value(opts.getint('duration'))
 historyentry.set_value(opts.getint('history'))
@@ -244,6 +255,7 @@ no_rgba_color.parse(opts.get('no_data_color'))
 obstructed_color_button.set_rgba(ob_rgba_color)
 unobstructed_color_button.set_rgba(un_rgba_color)
 no_data_color_button.set_rgba(no_rgba_color)
+
 
 def animate(i):
     sd.current_data()
