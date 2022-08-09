@@ -3,6 +3,9 @@
 # starlink-graph.py
 # (C) 2022: Brian Millham
 
+# To create video
+# at *.png | ffmpeg -r 10  -f image2pipe  -i - -vcodec libx264 -s 400x400 -crf 25 -pix_fmt yuv420p obs.mp4
+
 import gi
 
 gi.require_version('Gtk', '3.0')
@@ -17,6 +20,7 @@ import configparser
 import os
 import importlib
 import png
+import time
 
 # Use humanize if it's available. Install with
 # pip3 install humanize
@@ -84,7 +88,7 @@ class Window1Signals:
         return True
 
     def auto_obstruction_toggle(self, widget=None):
-        if obstruction_update_check.get_active():
+        if obstruction_update_check.get_active() or save_map_when_window_closed_cb.get_active():
             if self._obstructionstimer is None:
                 self._obstructionstimer = GLib.timeout_add_seconds(opts.getint('obstructioninterval'), self._show_obstruction_map)
             else:
@@ -122,7 +126,10 @@ class Window1Signals:
                              'no_data_color': no_data_color_button.get_rgba().to_string(),
                              'obstructioninterval': str(int(obstruction_map_interval_entry.get_value())),
                              'obstructionhistorylocation': '' if obstructionhistorylocation.get_filename() is None else obstructionhistorylocation.get_filename(),
-                             'grpctools': '' if toolslocation.get_filename() is None else toolslocation.get_filename()}
+                             'grpctools': '' if toolslocation.get_filename() is None else toolslocation.get_filename(),
+                             'keep_history_images': keep_history_images.get_active()
+                             }
+
         with open(configfile, 'w') as f:
             config.write(f)
         configwindow.hide()
@@ -175,6 +182,10 @@ class Window1Signals:
 
     def save_history_cb_toggled(self, widget):
         pass
+
+    def save_map_when_window_closed_cb_toggled(self, widget):
+        self.auto_obstruction_toggle()
+        #if save_map_when_window_closed_cb.get_active():
 
 
 config = configparser.ConfigParser()
@@ -229,6 +240,8 @@ obstructionhistorylocation = builder.get_object('obstructionhistorylocation')
 clear_history_button = builder.get_object('clear_history_button')
 save_history_cb = builder.get_object('save_history_cb')
 save_map_when_window_closed_cb = builder.get_object('save_map_when_window_closed_cb')
+keep_history_images = builder.get_object('keep_history_images')
+image_history_store = builder.get_object('image_history_store')
 builder.connect_signals(Window1Signals())
 
 # Get the options from the ini file
@@ -255,6 +268,7 @@ no_rgba_color.parse(opts.get('no_data_color'))
 obstructed_color_button.set_rgba(ob_rgba_color)
 unobstructed_color_button.set_rgba(un_rgba_color)
 no_data_color_button.set_rgba(no_rgba_color)
+keep_history_images.set_active(opts.getint('keep_history_images'))
 
 
 def animate(i):
@@ -362,8 +376,41 @@ def animate(i):
                             labels=[f'Min: {latmin:.0f}',
                                     f'Ave: {latave:.0f}',
                                     f'Max: {max(sd._latency):.0f}'])
+    clear_history_images()
     return True
 
+def clear_history_images():
+    obs_dir = opts.get('obstructionhistorylocation')
+    if obs_dir == '':
+        return
+    dir_list = os.listdir(obs_dir)
+    histtime = keep_history_images.get_model()[opts.getint('keep_history_images')][1]
+    if histtime == -1:
+        return
+    target_time = time.time() - (histtime * 60 * 60)
+    to_delete = 0
+    to_keep = 0
+    to_ignore = 0
+    bad_file = 0
+    for f in dir_list:
+        if not f.startswith("obstruction_"):
+            to_ignore += 1
+            continue
+        if not f.endswith('.png'):
+            to_ignore += 1
+            continue
+        # Get the creation name from the file instead of using ctime because ctime could have been changed
+        try:
+            fctime = datetime.datetime.fromisoformat(f.split('_')[1].split('.')[0]).timestamp()
+        except:
+            print(f'Unable to find ctime of: {f}')
+            bad_file += 1
+            continue
+        if fctime < target_time:
+            to_delete += 1
+            os.unlink(os.path.join(obs_dir, f))
+        else:
+            to_keep += 1
 
 def startup():
     # On startup, grab the data right away so the graph can be populated.

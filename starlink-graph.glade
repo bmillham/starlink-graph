@@ -10,6 +10,44 @@
     <property name="step-increment">1</property>
     <property name="page-increment">1</property>
   </object>
+  <object class="GtkListStore" id="image_history_store">
+    <columns>
+      <!-- column-name historylabel -->
+      <column type="gchararray"/>
+      <!-- column-name historyvalue -->
+      <column type="gint"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Forever</col>
+        <col id="1">-1</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">12 Hours</col>
+        <col id="1">12</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">24 Hours</col>
+        <col id="1">24</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">36 Hours</col>
+        <col id="1">36</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">48 Hours</col>
+        <col id="1">48</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkTreeStore" id="image_history_tree_store">
+    <columns>
+      <!-- column-name gchararray1 -->
+      <column type="gchararray"/>
+      <!-- column-name gint1 -->
+      <column type="gint"/>
+    </columns>
+  </object>
   <object class="GtkAdjustment" id="intervaladjustment">
     <property name="lower">500</property>
     <property name="upper">1500</property>
@@ -423,7 +461,7 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
                 <property name="can-focus">False</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <!-- n-columns=2 n-rows=5 -->
+                  <!-- n-columns=2 n-rows=6 -->
                   <object class="GtkGrid" id="obstructionsgid">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
@@ -577,6 +615,37 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
                         <property name="top-attach">3</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="margin-right">3</property>
+                        <property name="label" translatable="yes">Keep History Images For:</property>
+                      </object>
+                      <packing>
+                        <property name="left-attach">0</property>
+                        <property name="top-attach">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="keep_history_images">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="model">image_history_store</property>
+                        <property name="active">0</property>
+                        <child>
+                          <object class="GtkCellRendererText"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left-attach">1</property>
+                        <property name="top-attach">5</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -591,6 +660,7 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
                     <property name="draw-indicator">True</property>
+                    <signal name="toggled" handler="save_map_when_window_closed_cb_toggled" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
