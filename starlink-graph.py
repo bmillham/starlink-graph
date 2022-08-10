@@ -21,6 +21,7 @@ import os
 import importlib
 import png
 import time
+import subprocess
 
 # Use humanize if it's available. Install with
 # pip3 install humanize
@@ -186,6 +187,28 @@ class Window1Signals:
     def save_map_when_window_closed_cb_toggled(self, widget):
         self.auto_obstruction_toggle()
         #if save_map_when_window_closed_cb.get_active():
+    def on_create_animation_clicked(self, widget):
+        obs_dir = opts.get('obstructionhistorylocation')
+        if obs_dir == '':
+            return
+        duration = 30
+        out_dir = 'animations'
+        video_format = 'mp4'
+        video_codec = 'libx264'
+        out_size = '600x600'
+        dir_list = os.listdir(obs_dir)
+        frame_rate = len(dir_list) / duration
+        print('frame rate', frame_rate)
+        name_template = f'obstruction_animation_{datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")}.{video_format}'
+        cat_cmd = ['cat', f'{obs_dir}/*.png']
+        cat_pipe = subprocess.Popen(f"cat {obs_dir}/*.png", stdout=subprocess.PIPE, shell=True)
+
+        cmd_line = f"ffmpeg -f image2pipe -r {frame_rate} -i - -vcodec {video_codec} -s {out_size} -pix_fmt yuv420p {out_dir}/{name_template}"
+        cargs = cmd_line.split(" ")
+        print(cmd_line)
+        print(cargs)
+        output = subprocess.check_output(cargs, stdin=cat_pipe.stdout)
+        cat_pipe.wait()
 
 
 config = configparser.ConfigParser()
