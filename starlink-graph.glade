@@ -3,6 +3,13 @@
 <interface>
   <requires lib="gtk+" version="3.10"/>
   <object class="GtkAction" id="action1"/>
+  <object class="GtkTextBuffer" id="ani_out_buffer"/>
+  <object class="GtkAdjustment" id="duration_adjustment">
+    <property name="lower">30</property>
+    <property name="upper">600</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
   <object class="GtkAdjustment" id="historyadjustment">
     <property name="lower">60</property>
     <property name="upper">900</property>
@@ -39,14 +46,6 @@
         <col id="1">48</col>
       </row>
     </data>
-  </object>
-  <object class="GtkTreeStore" id="image_history_tree_store">
-    <columns>
-      <!-- column-name gchararray1 -->
-      <column type="gchararray"/>
-      <!-- column-name gint1 -->
-      <column type="gint"/>
-    </columns>
   </object>
   <object class="GtkAdjustment" id="intervaladjustment">
     <property name="lower">500</property>
@@ -85,6 +84,65 @@
     <property name="step-increment">1</property>
     <property name="page-increment">1</property>
   </object>
+  <object class="GtkListStore" id="video_codec_store">
+    <columns>
+      <!-- column-name gchararray1 -->
+      <column type="gchararray"/>
+      <!-- column-name gchararray2 -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">X264</col>
+        <col id="1" translatable="yes">libx264</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">X265</col>
+        <col id="1" translatable="yes">libx265</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="video_format_store">
+    <columns>
+      <!-- column-name gchararray1 -->
+      <column type="gchararray"/>
+      <!-- column-name gchararray2 -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Matroska</col>
+        <col id="1" translatable="yes">mkv</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">MP4</col>
+        <col id="1" translatable="yes">mp4</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="video_size_store">
+    <columns>
+      <!-- column-name gchararray1 -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">100x100</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">200x200</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">400x400</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">600x600</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">800x800</col>
+      </row>
+    </data>
+  </object>
   <object class="GtkApplicationWindow" id="window1">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Starlink</property>
@@ -120,6 +178,15 @@
                         <property name="label" translatable="yes">_Settings</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_settings_clicked" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Delete Obstruction Images</property>
+                        <property name="use-underline">True</property>
+                        <signal name="activate" handler="delete_obstruction_images" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -266,7 +333,7 @@
     <property name="transient-for">window1</property>
     <property name="attached-to">window1</property>
     <property name="program-name">Starlink-Graph</property>
-    <property name="version">0.3</property>
+    <property name="version">0.5</property>
     <property name="copyright" translatable="yes">(2022) Brian Millham</property>
     <property name="comments" translatable="yes">Dishy Version:
 Uptime:</property>
@@ -315,6 +382,102 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
         </child>
         <child>
           <placeholder/>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="ani_window">
+    <property name="can-focus">False</property>
+    <property name="title" translatable="yes">Creating Anination</property>
+    <property name="window-position">center-on-parent</property>
+    <property name="gravity">center</property>
+    <property name="transient-for">window1</property>
+    <property name="attached-to">window1</property>
+    <signal name="delete-event" handler="on_ani_window_delete" swapped="no"/>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <!-- n-columns=2 n-rows=2 -->
+          <object class="GtkGrid">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Output Directory:</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Animation File:</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="animation_directory_label">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="animation_file_label">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="ani_progress">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="show-text">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="ani_button">
+            <property name="label" translatable="yes">Cancel</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <signal name="clicked" handler="on_ani_window_delete" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
+          </packing>
         </child>
       </object>
     </child>
@@ -699,6 +862,9 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -717,7 +883,7 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
               </packing>
             </child>
             <child>
-              <!-- n-columns=2 n-rows=3 -->
+              <!-- n-columns=2 n-rows=5 -->
               <object class="GtkGrid">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
@@ -725,7 +891,9 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">label</property>
+                    <property name="halign">end</property>
+                    <property name="margin-right">3</property>
+                    <property name="label" translatable="yes">Video Format:</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -736,7 +904,9 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">label</property>
+                    <property name="halign">end</property>
+                    <property name="margin-right">3</property>
+                    <property name="label" translatable="yes">Video Codec:</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -744,16 +914,125 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="margin-right">3</property>
+                    <property name="label" translatable="yes">Video Size:</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">2</property>
+                  </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="margin-right">3</property>
+                    <property name="label" translatable="yes">Duration:</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">3</property>
+                  </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkComboBox" id="video_format_cb">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="model">video_format_store</property>
+                    <property name="active">0</property>
+                    <property name="id-column">0</property>
+                    <child>
+                      <object class="GtkCellRendererText"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">0</property>
+                  </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkComboBox" id="video_codec_cb">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="model">video_codec_store</property>
+                    <property name="active">0</property>
+                    <property name="id-column">0</property>
+                    <child>
+                      <object class="GtkCellRendererText"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkComboBox" id="video_size_cb">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="model">video_size_store</property>
+                    <property name="active">0</property>
+                    <property name="id-column">0</property>
+                    <child>
+                      <object class="GtkCellRendererText"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSpinButton" id="video_duration_spin_button">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="input-purpose">digits</property>
+                    <property name="adjustment">duration_adjustment</property>
+                    <property name="value">30</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="margin-right">3</property>
+                    <property name="label" translatable="yes">Animation Output Directory:</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFileChooserButton" id="animation_output_directory">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="action">select-folder</property>
+                    <property name="title" translatable="yes">Location of animation files</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">4</property>
+                  </packing>
                 </child>
               </object>
               <packing>
@@ -814,6 +1093,75 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
                 <property name="use-stock">True</property>
                 <property name="image-position">right</property>
                 <signal name="clicked" handler="on_configsavebutton_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="delete_confirmation_window">
+    <property name="can-focus">False</property>
+    <property name="title" translatable="yes">Delete Obstruction Map Images</property>
+    <property name="window-position">center-on-parent</property>
+    <property name="type-hint">dialog</property>
+    <property name="gravity">center</property>
+    <property name="transient-for">window1</property>
+    <property name="attached-to">window1</property>
+    <signal name="delete-event" handler="on_delete_confirmation_window_delete_event" swapped="no"/>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel" id="really_delete_label">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Really delete?</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="halign">end</property>
+            <child>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">Yes</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <signal name="clicked" handler="on_delete_confirmation_yes_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">No</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <signal name="clicked" handler="on_delete_confirmation_window_delete_event" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>

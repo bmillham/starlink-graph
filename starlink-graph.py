@@ -3,13 +3,10 @@
 # starlink-graph.py
 # (C) 2022: Brian Millham
 
-# To create video
-# at *.png | ffmpeg -r 10  -f image2pipe  -i - -vcodec libx264 -s 400x400 -crf 25 -pix_fmt yuv420p obs.mp4
-
 import gi
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GdkPixbuf, Gdk, GLib
+from gi.repository import Gtk, GdkPixbuf, Gdk, GLib, GLib
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtk3agg import (FigureCanvasGTK3Agg as FigureCanvas)
 import matplotlib.animation as animation
@@ -128,7 +125,12 @@ class Window1Signals:
                              'obstructioninterval': str(int(obstruction_map_interval_entry.get_value())),
                              'obstructionhistorylocation': '' if obstructionhistorylocation.get_filename() is None else obstructionhistorylocation.get_filename(),
                              'grpctools': '' if toolslocation.get_filename() is None else toolslocation.get_filename(),
-                             'keep_history_images': keep_history_images.get_active()
+                             'keep_history_images': keep_history_images.get_active(),
+                             'video_format': video_format_cb.get_active(),
+                             'video_codec': video_codec_cb.get_active(),
+                             'video_size': video_size_cb.get_active(),
+                             'video_duration': str(int(video_duration_spin_button.get_value())),
+                             'animation_directory': '' if animation_output_directory.get_filename() is None else animation_output_directory.get_filename(),
                              }
 
         with open(configfile, 'w') as f:
@@ -188,28 +190,111 @@ class Window1Signals:
         self.auto_obstruction_toggle()
         #if save_map_when_window_closed_cb.get_active():
     def on_create_animation_clicked(self, widget):
+        #ani_window.show()
+        #ani_out_buffer.set_text('Creating animation\n')
+        #self._on_create_animation_clicked()
+        pass
+
+    def on_create_animation_clicked(self, widget):
+        task = self._on_create_animation_clicked()
+        GLib.idle_add(task.__next__)
+
+    def _on_create_animation_clicked(self):
+        ani_button.set_label('Creating')
+        ani_button.set_sensitive(False)
+        ani_window.show()
+        yield True
+        ani_progress.pulse()
         obs_dir = opts.get('obstructionhistorylocation')
         if obs_dir == '':
             return
-        duration = 30
-        out_dir = 'animations'
-        video_format = 'mp4'
-        video_codec = 'libx264'
-        out_size = '600x600'
+
+        video_format = video_format_cb.get_model()[opts.getint('video_format')][1]
+        video_codec = video_codec_cb.get_model()[opts.getint('video_codec')][1]
+        out_size = video_size_cb.get_model()[opts.getint('video_size')][0]
+        out_dir = animation_output_directory.get_filename()
+        duration = video_duration_spin_button.get_value()
         dir_list = os.listdir(obs_dir)
+        animation_directory_label.set_text(obs_dir)
+
+        if len(dir_list) < duration: # Make sure that there is at least enough images for a 1FPS video
+            ani_progress.set_text('Not enough files to create animation')
+            ani_progress.set_fraction(1.0)
+            ani_button.set_sensitive(True)
+            ani_button.set_label('Done')
+            yield False
+            return
+
         frame_rate = len(dir_list) / duration
-        print('frame rate', frame_rate)
         name_template = f'obstruction_animation_{datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")}.{video_format}'
-        cat_cmd = ['cat', f'{obs_dir}/*.png']
-        cat_pipe = subprocess.Popen(f"cat {obs_dir}/*.png", stdout=subprocess.PIPE, shell=True)
+        animation_file_label.set_text(name_template)
+        cat_pipe = subprocess.Popen(f"cat {obs_dir}/*.png", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
-        cmd_line = f"ffmpeg -f image2pipe -r {frame_rate} -i - -vcodec {video_codec} -s {out_size} -pix_fmt yuv420p {out_dir}/{name_template}"
-        cargs = cmd_line.split(" ")
-        print(cmd_line)
-        print(cargs)
-        output = subprocess.check_output(cargs, stdin=cat_pipe.stdout)
+        ff_cmd = ["ffmpeg",
+                  "-f",
+                  "image2pipe",
+                  "-r",
+                  str(frame_rate),
+                  "-i",
+                  "-",
+                  "-vcodec",
+                  video_codec,
+                  "-s",
+                  out_size,
+                  "-pix_fmt",
+                  "yuv420p",
+                  f"{out_dir}/{name_template}"]
+
+        output = subprocess.Popen(ff_cmd, bufsize=1, universal_newlines=True, stdin=cat_pipe.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        ani_progress.pulse()
+        yield True
+        while True:
+            line = output.stderr.readline()
+            if not line:
+                break
+            ani_progress.set_text(line.rstrip())
+            ani_progress.pulse()
+            yield True
+        cat_pipe.stdout.close()
         cat_pipe.wait()
+        ani_progress.set_text('Created')
+        ani_progress.set_fraction(1.0)
+        ani_button.set_label('Done')
+        ani_button.set_sensitive(True)
+        yield False
 
+    def on_ani_window_delete(self, widget, event=None):
+        ani_window.hide()
+        return True
+
+    def _get_png_files(self):
+        obs_dir = opts.get('obstructionhistorylocation')
+        if obs_dir == '':
+            return (obs_dir, [])
+        dir_list = os.listdir(obs_dir)
+        # Return list of all obstruction_*.png files in obs_dir
+        return (obs_dir, list(filter(lambda f: f.startswith('obstruction_') and f.endswith('.png'), dir_list)))
+
+    def delete_obstruction_images(self, widget):
+        obs_dir, dir_list = self._get_png_files()
+        if len(dir_list) == 0:
+            really_delete_label.set_text('No files found to remove')
+        else:
+            really_delete_label.set_text(f'Really delete {len(dir_list)} files from {obs_dir}?')
+        delete_confirmation_window.show()
+
+    def on_delete_confirmation_window_delete_event(self, widget, event=None):
+        delete_confirmation_window.hide()
+        return True
+
+    def on_delete_confirmation_yes_clicked(self, widget):
+        print('deleting!')
+        obs_dir, files = self._get_png_files()
+        for f in files:
+            fn = os.path.join(obs_dir, f)
+            print(f'Deleting: {fn}')
+            os.unlink(fn)
+        delete_confirmation_window.hide()
 
 config = configparser.ConfigParser()
 configfile = 'starlink-graph.ini'
@@ -265,6 +350,21 @@ save_history_cb = builder.get_object('save_history_cb')
 save_map_when_window_closed_cb = builder.get_object('save_map_when_window_closed_cb')
 keep_history_images = builder.get_object('keep_history_images')
 image_history_store = builder.get_object('image_history_store')
+ani_window = builder.get_object('ani_window')
+ani_progress = builder.get_object('ani_progress')
+ani_button = builder.get_object('ani_button')
+video_format_cb = builder.get_object('video_format_cb')
+video_format_store = builder.get_object('video_format_store')
+video_codec_cb = builder.get_object('video_codec_cb')
+video_codec_store = builder.get_object('video_codec_store')
+video_size_cb = builder.get_object('video_size_cb')
+video_size_store = builder.get_object('video_size_store')
+video_duration_spin_button = builder.get_object('video_duration_spin_button')
+animation_output_directory = builder.get_object('animation_output_directory')
+animation_directory_label = builder.get_object('animation_directory_label')
+animation_file_label = builder.get_object('animation_file_label')
+delete_confirmation_window = builder.get_object('delete_confirmation_window')
+really_delete_label = builder.get_object('really_delete_label')
 builder.connect_signals(Window1Signals())
 
 # Get the options from the ini file
@@ -292,7 +392,11 @@ obstructed_color_button.set_rgba(ob_rgba_color)
 unobstructed_color_button.set_rgba(un_rgba_color)
 no_data_color_button.set_rgba(no_rgba_color)
 keep_history_images.set_active(opts.getint('keep_history_images'))
-
+video_format_cb.set_active(opts.getint('video_format'))
+video_codec_cb.set_active(opts.getint('video_codec'))
+video_size_cb.set_active(opts.getint('video_size'))
+video_duration_spin_button.set_value(opts.getint('video_duration'))
+animation_output_directory.set_filename(opts.get('animation_directory'))
 
 def animate(i):
     sd.current_data()
