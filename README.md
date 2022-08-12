@@ -13,7 +13,7 @@ the script should run. If you don't have it set you will prompted to select the 
 # Release Notes
 V 0.2: Removed command line options in favor of having a GUI setting window.<br/>
 V 0.3: Added basic obstruction map<br/>
-V 0.4: Added controls to the obstruction map
+V 0.4: Added controls to the obstruction map<br/>
 V 0.5: Added ability to save obstructions history and create an animation from the history
 
 
