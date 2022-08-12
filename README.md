@@ -16,5 +16,8 @@ V 0.3: Added basic obstruction map<br/>
 V 0.4: Added controls to the obstruction map<br/>
 V 0.5: Added ability to save obstructions history and create an animation from the history
 
+## Windows Notes
+Install Python from python.org (use the latest version)
+
 
 
