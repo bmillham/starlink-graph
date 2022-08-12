@@ -260,14 +260,6 @@
                         <signal name="activate" handler="on_create_animation_clicked" swapped="no"/>
                       </object>
                     </child>
-                    <child>
-                      <object class="GtkMenuItem">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">View</property>
-                        <property name="use-underline">True</property>
-                      </object>
-                    </child>
                   </object>
                 </child>
               </object>
