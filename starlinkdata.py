@@ -165,7 +165,6 @@ class StarlinkData:
         if opts.get('obstructionhistorylocation') != '':
             name_template = f'obstruction_{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}.png'
             tfname = os.path.join(opts.get('obstructionhistorylocation'), name_template)
-            print(tfname)
             thandle = os.open(tfname, os.O_RDWR | os.O_CREAT)
         else:
             thandle, tfname = tempfile.mkstemp()

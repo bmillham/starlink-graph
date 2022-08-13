@@ -177,7 +177,8 @@
                         <property name="tooltip-text" translatable="yes">Change application settings (not yet implimented)</property>
                         <property name="label" translatable="yes">_Settings</property>
                         <property name="use-underline">True</property>
-                        <signal name="activate" handler="on_settings_clicked" swapped="no"/>
+                        <signal name="activate" handler="no_grpc_hide" object="nogrpcwindow" swapped="no"/>
+                        <signal name="activate" handler="on_settings_clicked" object="configwindow" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -186,7 +187,7 @@
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Delete Obstruction Images</property>
                         <property name="use-underline">True</property>
-                        <signal name="activate" handler="delete_obstruction_images" swapped="no"/>
+                        <signal name="activate" handler="delete_obstruction_images" object="delete_confirmation_window" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -225,7 +226,7 @@
                         <property name="tooltip-text" translatable="yes">View outages in the last 12 hours</property>
                         <property name="label" translatable="yes">_Outages</property>
                         <property name="use-underline">True</property>
-                        <signal name="activate" handler="on_outage_clicked" swapped="no"/>
+                        <signal name="activate" handler="on_outage_clicked" object="outagewindow" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -234,7 +235,7 @@
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">O_bstructions</property>
                         <property name="use-underline">True</property>
-                        <signal name="activate" handler="on_obstructions_clicked" swapped="no"/>
+                        <signal name="activate" handler="on_obstructions_clicked" object="obstructionwindow" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -280,7 +281,7 @@
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">_About</property>
                         <property name="use-underline">True</property>
-                        <signal name="activate" handler="on_about_dialog_click" swapped="no"/>
+                        <signal name="activate" handler="on_about_dialog_click" object="aboutdialog" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -357,7 +358,7 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <signal name="clicked" handler="on_about_close_button" swapped="no"/>
+                <signal name="clicked" handler="on_about_close_button" object="aboutdialog" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -463,7 +464,7 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
-            <signal name="clicked" handler="on_ani_window_delete" swapped="no"/>
+            <signal name="clicked" handler="on_ani_window_delete" object="ani_window" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1068,7 +1069,7 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
                 <property name="receives-default">True</property>
                 <property name="use-stock">True</property>
                 <property name="image-position">right</property>
-                <signal name="clicked" handler="on_configcancelbutton_clicked" swapped="no"/>
+                <signal name="clicked" handler="on_configcancelbutton_clicked" object="configwindow" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1084,7 +1085,7 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
                 <property name="receives-default">True</property>
                 <property name="use-stock">True</property>
                 <property name="image-position">right</property>
-                <signal name="clicked" handler="on_configsavebutton_clicked" swapped="no"/>
+                <signal name="clicked" handler="on_configsavebutton_clicked" object="configwindow" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1139,7 +1140,7 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <signal name="clicked" handler="on_delete_confirmation_yes_clicked" swapped="no"/>
+                <signal name="clicked" handler="on_delete_confirmation_yes_clicked" object="delete_confirmation_window" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1153,7 +1154,7 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <signal name="clicked" handler="on_delete_confirmation_window_delete_event" swapped="no"/>
+                <signal name="clicked" handler="on_delete_confirmation_window_delete_event" object="delete_confirmation_window" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>

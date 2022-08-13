@@ -19,6 +19,7 @@ import importlib
 import png
 import time
 import subprocess
+from Signals import Signals
 
 # Use humanize if it's available. Install with
 # pip3 install humanize
@@ -45,143 +46,12 @@ class Window1Signals:
     def on_nogrpc_ok_button_clicked(self, widget):
         pass
 
-    def on_window1_destroy(self, widget):
-        Gtk.main_quit()
+ #   def enable_map_cb(self, widget):
+ #       save_map_when_window_closed_cb.set_sensitive(True)
 
-    def on_about_dialog_click(self, widget):
-        # Show current dish info
-        sd.current_data()
-        aboutdialog.set_comments(
-            f'Dishy: {sd._last_data["software_version"]}\nUptime: {naturaldelta(sd._last_data["uptime"])}')
-        aboutdialog.show()
-
-    def on_about_close_button(self, widget):
-        aboutdialog.hide()
-        return True
-
-    def on_outage_clicked(self, widget):
-        self._show_outages()
-
-    def on_obstructions_clicked(self, widget=None):
-        self.auto_obstruction_toggle()
-
-        self._show_obstruction_map()
-        obstructionwindow.show()
-
-    @staticmethod
-    def _show_obstruction_map():
-        map = sd.obstruction_map(opts=opts)  # Get the latest obstruction map in a temp file
-        """TODO: Check map! """
-        try:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(map,
-                                                            width=400,
-                                                            height=400)
-        except:
-            print('Bad map!')
-            return True
-        obstructionimage.set_from_pixbuf(pixbuf)
-        if opts.get('obstructionhistorylocation') == '':
-            os.unlink(map)  # Remove the temp file
-        obstruction_timer_label.set_text('Last Update: ' + str(datetime.datetime.now().strftime("%I:%M:%S %p")))
-        return True
-
-    def auto_obstruction_toggle(self, widget=None):
-        if obstruction_update_check.get_active() or save_map_when_window_closed_cb.get_active():
-            if self._obstructionstimer is None:
-                self._obstructionstimer = GLib.timeout_add_seconds(opts.getint('obstructioninterval'), self._show_obstruction_map)
-            else:
-                print('timer already running')
-        else:
-            if self._obstructionstimer is None:
-                print('timer already stopped')
-            else:
-                GLib.source_remove(self._obstructionstimer)
-                self._obstructionstimer = None
-
-    def on_obstructionwindow_delete_event(self, *args):
-        obstructionwindow.hide()
-        #if save_map_when_window_closed_cb.get_sensitive() and save_map_when_window_closed_cb.get_active():
-        if self._obstructionstimer is not None:
-            GLib.source_remove(self._obstructionstimer)
-            self._obstructionstimer = None
-
-        return True
-
-    def on_configcancelbutton_clicked(self, *args):
-        configwindow.hide()
-        return True
-
-    def on_configsavebutton_clicked(self, widget):
-        savetools = opts.get('grpctools')
-        saveinterval = opts.getint('updateinterval')
-        saveobstructions = opts.getint('obstructioninterval')
-        config['options'] = {'updateinterval': f'{updateentry.get_value():.0f}',
-                             'duration': str(int(durationentry.get_value())),
-                             'history': str(int(historyentry.get_value())),
-                             'ticks': str(int(ticksentry.get_value())),
-                             'obstructed_color': obstructed_color_button.get_rgba().to_string(),
-                             'unobstructed_color': unobstructed_color_button.get_rgba().to_string(),
-                             'no_data_color': no_data_color_button.get_rgba().to_string(),
-                             'obstructioninterval': str(int(obstruction_map_interval_entry.get_value())),
-                             'obstructionhistorylocation': '' if obstructionhistorylocation.get_filename() is None else obstructionhistorylocation.get_filename(),
-                             'grpctools': '' if toolslocation.get_filename() is None else toolslocation.get_filename(),
-                             'keep_history_images': keep_history_images.get_active(),
-                             'video_format': video_format_cb.get_active(),
-                             'video_codec': video_codec_cb.get_active(),
-                             'video_size': video_size_cb.get_active(),
-                             'video_duration': str(int(video_duration_spin_button.get_value())),
-                             'animation_directory': '' if animation_output_directory.get_filename() is None else animation_output_directory.get_filename(),
-                             }
-
-        with open(configfile, 'w') as f:
-            config.write(f)
-        configwindow.hide()
-        if savetools != opts.get('grpctools') or saveinterval != opts.getint('updateinterval'):
-            os.execv(__file__, sys.argv)  # Restart the script
-        if saveobstructions != opts.getint('obstructioninterval'):
-            if self._obstructionstimer is not None: # If updates are currently running, stop/start the timer
-                GLib.source_remove(self._obstructionstimer)
-                self._obstructionstimer = GLib.timeout_add_seconds(opts.getint('obstructioninterval'),
-                                                                   self._show_obstruction_map)
-        sd.load_colors(opts) # Load the new colors
-        sd.outages(min_duration=opts.getfloat('duration'))
-        sd.history()
-        animate(1)  # Force an update.
-
-    def enable_map_cb(self, widget):
-        save_map_when_window_closed_cb.set_sensitive(True)
-
-    def on_settings_clicked(self, widget):
-        nogrpcwindow.hide()
-        configwindow.show()
-
-    def _show_outages(self, all=False):
-        outagestore.clear()
-        if all:
-            sd.outages(min_duration=0.0)
-        else:
-            sd.outages(min_duration=opts.getfloat('duration'))  # Re-read outage info
-        if len(sd._outages) == 0:
-            outagelabel.set_text(
-                f'There have been no outages in the last 12 hours over {opts.getint("duration")} seconds!')
-        else:
-            outagelabel.set_text(
-                f'There have been {len(sd._outages)} outages {"over " + opts.get("duration") + " seconds" if not all else ""} in the last 12 hours')
-
-        for out in sd._outages:
-            outagestore.append([out['time'].strftime("%I:%M%p"), out['cause'], str(out['duration'])])
-        outagewindow.show()
-
-    def outage_close(self, *args, **kwargs):
-        outagewindow.hide()
-        return True
-
-    def outage_toggled(self, widget):
-        self._show_outages(all=widget.get_active())
-
-    def clear_history_button_clicked(self, widget):
-        obstructionhistorylocation.unselect_all()
-        save_map_when_window_closed_cb.set_sensitive(False)
+#    def clear_history_button_clicked(self, widget):
+#        obstructionhistorylocation.unselect_all()
+#        save_map_when_window_closed_cb.set_sensitive(False)
 
     def save_history_cb_toggled(self, widget):
         pass
@@ -189,7 +59,7 @@ class Window1Signals:
     def save_map_when_window_closed_cb_toggled(self, widget):
         self.auto_obstruction_toggle()
         #if save_map_when_window_closed_cb.get_active():
-    def on_create_animation_clicked(self, widget):
+    """ def on_create_animation_clicked(self, widget):
         #ani_window.show()
         #ani_out_buffer.set_text('Creating animation\n')
         #self._on_create_animation_clicked()
@@ -248,53 +118,24 @@ class Window1Signals:
         output = subprocess.Popen(ff_cmd, bufsize=1, universal_newlines=True, stdin=cat_pipe.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         ani_progress.pulse()
         yield True
-        while True:
-            line = output.stderr.readline()
-            if not line:
-                break
-            ani_progress.set_text(line.rstrip())
-            ani_progress.pulse()
-            yield True
-        cat_pipe.stdout.close()
-        cat_pipe.wait()
-        ani_progress.set_text('Created')
-        ani_progress.set_fraction(1.0)
-        ani_button.set_label('Done')
-        ani_button.set_sensitive(True)
-        yield False
+#        while True:
+#            line = output.stderr.readline()
+#            if not line:
+#                break
+#            ani_progress.set_text(line.rstrip())
+#            ani_progress.pulse()
+#            yield True
+#        cat_pipe.stdout.close()
+#        cat_pipe.wait()
+#        ani_progress.set_text('Created')
+#        ani_progress.set_fraction(1.0)
+#        ani_button.set_label('Done')
+#        ani_button.set_sensitive(True)
+#        yield False"""
 
-    def on_ani_window_delete(self, widget, event=None):
-        ani_window.hide()
-        return True
-
-    def _get_png_files(self):
-        obs_dir = opts.get('obstructionhistorylocation')
-        if obs_dir == '':
-            return (obs_dir, [])
-        dir_list = os.listdir(obs_dir)
-        # Return list of all obstruction_*.png files in obs_dir
-        return (obs_dir, list(filter(lambda f: f.startswith('obstruction_') and f.endswith('.png'), dir_list)))
-
-    def delete_obstruction_images(self, widget):
-        obs_dir, dir_list = self._get_png_files()
-        if len(dir_list) == 0:
-            really_delete_label.set_text('No files found to remove')
-        else:
-            really_delete_label.set_text(f'Really delete {len(dir_list)} files from {obs_dir}?')
-        delete_confirmation_window.show()
-
-    def on_delete_confirmation_window_delete_event(self, widget, event=None):
-        delete_confirmation_window.hide()
-        return True
-
-    def on_delete_confirmation_yes_clicked(self, widget):
-        print('deleting!')
-        obs_dir, files = self._get_png_files()
-        for f in files:
-            fn = os.path.join(obs_dir, f)
-            print(f'Deleting: {fn}')
-            os.unlink(fn)
-        delete_confirmation_window.hide()
+#    def on_ani_window_delete(self, widget, event=None):
+#        ani_window.hide()
+#        return True
 
 config = configparser.ConfigParser()
 configfile = 'starlink-graph.ini'
@@ -319,84 +160,47 @@ upchart = fig.add_subplot(4, 1, 4)
 builder = Gtk.Builder()
 builder.add_from_file("starlink-graph.glade")
 
-window = builder.get_object("window1")
-sw = builder.get_object("scrolledwindow1")
-aboutdialog = builder.get_object('aboutdialog')
-outagewindow = builder.get_object('outagewindow')
-outagelist = builder.get_object('outagelist')
-outagebox = builder.get_object('outagebox')
-outagestore = builder.get_object('outagestore')
-outagelabel = builder.get_object('outagelabel')
-configwindow = builder.get_object('configwindow')
-configsavebutton = builder.get_object('configsavebutton')
-configcancelbutton = builder.get_object('configcancelbutton')
-toolslocation = builder.get_object('toolslocation')
-updateentry = builder.get_object('updateentry')
-durationentry = builder.get_object('durationentry')
-historyentry = builder.get_object('historyentry')
-ticksentry = builder.get_object('ticksentry')
-obstruction_map_interval_entry = builder.get_object('obstruction_map_interval_entry')
-nogrpcwindow = builder.get_object('nogrpcwindow')
-obstructionwindow = builder.get_object('obstructionwindow')
-obstructionimage = builder.get_object('obstructionimage')
-obstructed_color_button = builder.get_object('obstructed_color_button')
-unobstructed_color_button = builder.get_object('unobstructed_color_button')
-no_data_color_button = builder.get_object('no_data_color_button')
-obstruction_timer_label = builder.get_object('obstruction_timer_label')
-obstruction_update_check = builder.get_object('obstruction_update_check')
-obstructionhistorylocation = builder.get_object('obstructionhistorylocation')
-clear_history_button = builder.get_object('clear_history_button')
-save_history_cb = builder.get_object('save_history_cb')
-save_map_when_window_closed_cb = builder.get_object('save_map_when_window_closed_cb')
-keep_history_images = builder.get_object('keep_history_images')
-image_history_store = builder.get_object('image_history_store')
-ani_window = builder.get_object('ani_window')
-ani_progress = builder.get_object('ani_progress')
-ani_button = builder.get_object('ani_button')
-video_format_cb = builder.get_object('video_format_cb')
-video_format_store = builder.get_object('video_format_store')
-video_codec_cb = builder.get_object('video_codec_cb')
-video_codec_store = builder.get_object('video_codec_store')
-video_size_cb = builder.get_object('video_size_cb')
-video_size_store = builder.get_object('video_size_store')
-video_duration_spin_button = builder.get_object('video_duration_spin_button')
-animation_output_directory = builder.get_object('animation_output_directory')
-animation_directory_label = builder.get_object('animation_directory_label')
-animation_file_label = builder.get_object('animation_file_label')
-delete_confirmation_window = builder.get_object('delete_confirmation_window')
-really_delete_label = builder.get_object('really_delete_label')
-builder.connect_signals(Window1Signals())
+# Build dict of all widgets with an ID
+widgets = {}
+for o in builder.get_objects():
+    try:
+        widgets[Gtk.Buildable.get_name(o)] = o
+    except TypeError:
+        pass
+
+my_signals = Signals(widgets=widgets, opts=opts, configfile=configfile, config=config)
+builder.connect_signals(my_signals)
 
 # Get the options from the ini file
-toolslocation.set_filename(opts.get('grpctools'))
+widgets['toolslocation' ].set_filename(opts.get('grpctools'))
 try:
-    obstructionhistorylocation.set_filename(opts.get('obstructionhistorylocation'))
+    widgets['obstructionhistorylocation'].set_filename(opts.get('obstructionhistorylocation'))
 except TypeError:
-    obstructionhistorylocation.set_filename('')
+    widgets['obstructionhistorylocation'].set_filename('')
 
 if opts.get('obstructionhistorylocation') == '':
-    save_map_when_window_closed_cb.set_sensitive(False)
+    widgets['save_map_when_window_closed_cb'].set_sensitive(False)
 
-updateentry.set_value(opts.getint('updateinterval'))
-durationentry.set_value(opts.getint('duration'))
-historyentry.set_value(opts.getint('history'))
-ticksentry.set_value(opts.getint('ticks'))
-obstruction_map_interval_entry.set_value(opts.getint('obstructioninterval'))
+widgets['updateentry'].set_value(opts.getint('updateinterval'))
+widgets['durationentry'].set_value(opts.getint('duration'))
+widgets['historyentry'].set_value(opts.getint('history'))
+widgets['ticksentry'].set_value(opts.getint('ticks'))
+widgets['obstruction_map_interval_entry'].set_value(opts.getint('obstructioninterval'))
 ob_rgba_color = Gdk.RGBA()
 ob_rgba_color.parse(opts.get('obstructed_color'))
 un_rgba_color = Gdk.RGBA()
 un_rgba_color.parse(opts.get('unobstructed_color'))
 no_rgba_color = Gdk.RGBA()
 no_rgba_color.parse(opts.get('no_data_color'))
-obstructed_color_button.set_rgba(ob_rgba_color)
-unobstructed_color_button.set_rgba(un_rgba_color)
-no_data_color_button.set_rgba(no_rgba_color)
-keep_history_images.set_active(opts.getint('keep_history_images'))
-video_format_cb.set_active(opts.getint('video_format'))
-video_codec_cb.set_active(opts.getint('video_codec'))
-video_size_cb.set_active(opts.getint('video_size'))
-video_duration_spin_button.set_value(opts.getint('video_duration'))
-animation_output_directory.set_filename(opts.get('animation_directory'))
+widgets['obstructed_color_button'].set_rgba(ob_rgba_color)
+widgets['unobstructed_color_button'].set_rgba(un_rgba_color)
+widgets['no_data_color_button'].set_rgba(no_rgba_color)
+widgets['keep_history_images'].set_active(opts.getint('keep_history_images'))
+widgets['video_format_cb'].set_active(opts.getint('video_format'))
+widgets['video_codec_cb'].set_active(opts.getint('video_codec'))
+widgets['video_size_cb'].set_active(opts.getint('video_size'))
+widgets['video_duration_spin_button'].set_value(opts.getint('video_duration'))
+widgets['animation_output_directory'].set_filename(opts.get('animation_directory'))
 
 def animate(i):
     sd.current_data()
@@ -511,7 +315,7 @@ def clear_history_images():
     if obs_dir == '':
         return
     dir_list = os.listdir(obs_dir)
-    histtime = keep_history_images.get_model()[opts.getint('keep_history_images')][1]
+    histtime = widgets['keep_history_images'].get_model()[opts.getint('keep_history_images')][1]
     if histtime == -1:
         return
     target_time = time.time() - (histtime * 60 * 60)
@@ -542,7 +346,7 @@ def clear_history_images():
 def startup():
     # On startup, grab the data right away so the graph can be populated.
     canvas = FigureCanvas(fig)
-    sw.add(canvas)
+    widgets['scrolledwindow1'].add(canvas)
     sd.history()
     sd.outages()
     # Force an update right away.
@@ -556,12 +360,14 @@ except:
     StarlinkData = None
 
 if StarlinkData is None:
-    window.show_all()
-    nogrpcwindow.show()
+    widgets['window1'].show_All()
+    widgets['nogrpswindow'].show_all()
 else:
     sd = StarlinkData(opts=opts)
+    my_signals.set_sd(sd)
+    #my_signals.sd = sd
     ani = startup()
 
-window.show_all()
+widgets['window1'].show_all()
 
 Gtk.main()
