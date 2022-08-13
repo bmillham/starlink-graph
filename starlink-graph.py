@@ -13,7 +13,7 @@ import matplotlib.animation as animation
 import datetime
 from statistics import mean, StatisticsError
 import sys
-import configparser
+from Config import Config
 import os
 import importlib
 import time
@@ -30,20 +30,14 @@ except ModuleNotFoundError:
     def naturalsize(x):
         return f"{x:.1f} kB"
 
-config = configparser.ConfigParser()
 configfile = 'starlink-graph.ini'
 defaultconfigfile = 'starlink-graph-default.ini'
+config = Config(configfile=configfile, defaultconfigfile=defaultconfigfile)
 
-try:
-    config.read([defaultconfigfile, configfile])
-except:
-    print('No config files found!')
-    exit()
+opts = config.opts
 
-opts = config['options']
-
-if config.get('options', 'grpctools') != '':
-    sys.path.insert(0, opts.get('grpctools'))
+if config.grpctools is not None:
+    sys.path.insert(0, config.grpctools)
 
 fig = Figure()
 availchart = fig.add_subplot(4, 1, 1)
@@ -65,35 +59,7 @@ my_signals = Signals(widgets=widgets, opts=opts, configfile=configfile, config=c
 builder.connect_signals(my_signals)
 
 # Get the options from the ini file
-widgets['toolslocation' ].set_filename(opts.get('grpctools'))
-try:
-    widgets['obstructionhistorylocation'].set_filename(opts.get('obstructionhistorylocation'))
-except TypeError:
-    widgets['obstructionhistorylocation'].set_filename('')
-
-if opts.get('obstructionhistorylocation') == '':
-    widgets['save_map_when_window_closed_cb'].set_sensitive(False)
-
-widgets['updateentry'].set_value(opts.getint('updateinterval'))
-widgets['durationentry'].set_value(opts.getint('duration'))
-widgets['historyentry'].set_value(opts.getint('history'))
-widgets['ticksentry'].set_value(opts.getint('ticks'))
-widgets['obstruction_map_interval_entry'].set_value(opts.getint('obstructioninterval'))
-ob_rgba_color = Gdk.RGBA()
-ob_rgba_color.parse(opts.get('obstructed_color'))
-un_rgba_color = Gdk.RGBA()
-un_rgba_color.parse(opts.get('unobstructed_color'))
-no_rgba_color = Gdk.RGBA()
-no_rgba_color.parse(opts.get('no_data_color'))
-widgets['obstructed_color_button'].set_rgba(ob_rgba_color)
-widgets['unobstructed_color_button'].set_rgba(un_rgba_color)
-widgets['no_data_color_button'].set_rgba(no_rgba_color)
-widgets['keep_history_images'].set_active(opts.getint('keep_history_images'))
-widgets['video_format_cb'].set_active(opts.getint('video_format'))
-widgets['video_codec_cb'].set_active(opts.getint('video_codec'))
-widgets['video_size_cb'].set_active(opts.getint('video_size'))
-widgets['video_duration_spin_button'].set_value(opts.getint('video_duration'))
-widgets['animation_output_directory'].set_filename(opts.get('animation_directory'))
+config.set_widget_values(widgets)
 
 def animate(i):
     sd.current_data()
