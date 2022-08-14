@@ -55,7 +55,7 @@ for o in builder.get_objects():
     except TypeError:
         pass
 
-my_signals = Signals(widgets=widgets, opts=opts, configfile=configfile, config=config)
+my_signals = Signals(widgets=widgets, exe_file=__file__, opts=opts, configfile=configfile, config=config)
 builder.connect_signals(my_signals)
 
 # Get the options from the ini file
@@ -174,7 +174,10 @@ def clear_history_images():
     if obs_dir == '':
         return
     dir_list = os.listdir(obs_dir)
-    histtime = widgets['keep_history_images'].get_model()[opts.getint('keep_history_images')][1]
+    try:
+        histtime = widgets['keep_history_images'].get_model()[opts.getint('keep_history_images')][1]
+    except TypeError:
+        histtime = -1
     if histtime == -1:
         return
     target_time = time.time() - (histtime * 60 * 60)
@@ -219,8 +222,8 @@ except:
     StarlinkData = None
 
 if StarlinkData is None:
-    widgets['window1'].show_All()
-    widgets['nogrpswindow'].show_all()
+    widgets['window1'].show_all()
+    widgets['nogrpcwindow'].show_all()
 else:
     sd = StarlinkData(config=config)
     my_signals.sd = sd

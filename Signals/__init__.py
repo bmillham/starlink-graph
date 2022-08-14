@@ -18,13 +18,14 @@ class Signals(object):
     from .delete_dialog import on_delete_confirmation_window_delete_event, on_delete_confirmation_yes_clicked
     from .animation_window import on_ani_window_delete
 
-    def __init__(self, widgets=None, opts=None, configfile=None, config=None):
+    def __init__(self, widgets=None, exe_file=None, opts=None, configfile=None, config=None):
         self._obstructionstimer = None
         self._sd = None
         self._widgets = widgets
         self._opts = opts
         self._configfile = configfile
         self._config = config
+        self._exe_file = exe_file
 
     @property
     def sd(self):
@@ -36,7 +37,7 @@ class Signals(object):
 
 
     @staticmethod
-    def on_window1_destroy(widget):
+    def on_window1_destroy(widget, event=None):
         Gtk.main_quit()
 
     def _get_png_files(self):

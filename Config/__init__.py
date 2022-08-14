@@ -8,7 +8,7 @@ import configparser
 class Config(object):
     from .set_widget_values import set_widget_values
 
-    def __init__(self, configfile=None, defaultconfigfile=None):
+    def __init__(self, exe_file=None, configfile=None, defaultconfigfile=None):
         self._config = configparser.ConfigParser()
         try:
             self._config.read([defaultconfigfile, configfile])
@@ -21,6 +21,7 @@ class Config(object):
         self._un_rgba_color = Gdk.RGBA()
         self._no_rgba_color = Gdk.RGBA()
         self._widgets = dict()
+        self._exe_file = exe_file
 
     def save(self, filename=None):
         self._config['options'] = {'updateinterval': f'{self._widgets["updateentry"].get_value():.0f}',
@@ -66,7 +67,10 @@ class Config(object):
 
     @property
     def obstructionhistorylocation(self):
-        return self._opts['obstructionhistorylocation']
+        try:
+            return self._opts['obstructionhistorylocation']
+        except KeyError:
+            return ''
 
     @property
     def updateinterval(self):

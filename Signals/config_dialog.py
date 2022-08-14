@@ -1,8 +1,10 @@
 import os
+import sys
 
 
 def on_settings_clicked(self, widget):
     widget.show()
+    self._widgets['nogrpcwindow'].hide()
 
 
 def no_grpc_hide(self, widget):
@@ -22,7 +24,7 @@ def on_configsavebutton_clicked(self, widget):
 
     widget.hide()
     if savetools != self._opts.get('grpctools') or saveinterval != self._opts.getint('updateinterval'):
-        os.execv(__file__, sys.argv)  # Restart the script
+        os.execv(self._exe_file, sys.argv)  # Restart the script
     if saveobstructions != self._opts.getint('obstructioninterval'):
         if self._obstructionstimer is not None: # If updates are currently running, stop/start the timer
             GLib.source_remove(self._obstructionstimer)

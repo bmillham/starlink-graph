@@ -1174,11 +1174,14 @@ Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
   </object>
   <object class="GtkWindow" id="nogrpcwindow">
     <property name="can-focus">False</property>
-    <property name="type">popup</property>
-    <property name="window-position">center-always</property>
-    <property name="type-hint">splashscreen</property>
+    <property name="has-focus">True</property>
+    <property name="receives-default">True</property>
+    <property name="window-position">center-on-parent</property>
+    <property name="destroy-with-parent">True</property>
+    <property name="type-hint">dialog</property>
     <property name="gravity">center</property>
-    <property name="attached-to">window1</property>
+    <property name="transient-for">window1</property>
+    <signal name="delete-event" handler="on_window1_destroy" swapped="no"/>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -1237,7 +1240,7 @@ Select the correct directory in the following dialog.</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <signal name="clicked" handler="on_settings_clicked" swapped="no"/>
+                <signal name="clicked" handler="on_settings_clicked" object="configwindow" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
