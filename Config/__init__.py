@@ -1,6 +1,6 @@
 from gi.repository import Gdk
-
 import configparser
+
 
 class Config(object):
     from .set_widget_values import set_widget_values
