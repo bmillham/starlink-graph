@@ -1,34 +1,43 @@
 import subprocess
+import os
+import datetime
+from gi.repository import GLib
 
-def _on_create_animation_clicked(self):
-    ani_button.set_label('Creating')
-    ani_button.set_sensitive(False)
-    ani_window.show()
+
+def on_create_animation_clicked(self, widget):
+    task = self.create_animation()
+    GLib.idle_add(task.__next__)
+
+
+def create_animation(self):
+    self._widgets['ani_button'].set_label('Creating')
+    self._widgets['ani_button'].set_sensitive(False)
+    self._widgets['ani_window'].show()
     yield True
-    ani_progress.pulse()
-    obs_dir = opts.get('obstructionhistorylocation')
+    self._widgets['ani_progress'].pulse()
+    obs_dir = self._config.obstructionhistorylocation
     if obs_dir == '':
         return
 
-    video_format = video_format_cb.get_model()[opts.getint('video_format')][1]
-    video_codec = video_codec_cb.get_model()[opts.getint('video_codec')][1]
-    out_size = video_size_cb.get_model()[opts.getint('video_size')][0]
-    out_dir = animation_output_directory.get_filename()
-    duration = video_duration_spin_button.get_value()
+    video_format = self._widgets['video_format_cb'].get_model()[self._config.video_format][1]
+    video_codec = self._widgets['video_codec_cb'].get_model()[self._config.video_codec][1]
+    out_size = self._widgets['video_size_cb'].get_model()[self._config.video_size][0]
+    out_dir = self._widgets['animation_output_directory'].get_filename()
+    duration = self._widgets['video_duration_spin_button'].get_value()
     dir_list = os.listdir(obs_dir)
-    animation_directory_label.set_text(obs_dir)
+    self._widgets['animation_directory_label'].set_text(out_dir)
 
     if len(dir_list) < duration:  # Make sure that there is at least enough images for a 1FPS video
-        ani_progress.set_text('Not enough files to create animation')
-        ani_progress.set_fraction(1.0)
-        ani_button.set_sensitive(True)
-        ani_button.set_label('Done')
+        self._widgets['ani_progress'].set_text('Not enough files to create animation')
+        self._widgets['ani_progress'].set_fraction(1.0)
+        self._widgets['ani_button'].set_sensitive(True)
+        self._widgets['ani_button'].set_label('Done')
         yield False
         return
 
     frame_rate = len(dir_list) / duration
     name_template = f'obstruction_animation_{datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")}.{video_format}'
-    animation_file_label.set_text(name_template)
+    self._widgets['animation_file_label'].set_text(name_template)
     cat_pipe = subprocess.Popen(f"cat {obs_dir}/*.png", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
     ff_cmd = ["ffmpeg",
@@ -48,21 +57,21 @@ def _on_create_animation_clicked(self):
 
     output = subprocess.Popen(ff_cmd, bufsize=1, universal_newlines=True, stdin=cat_pipe.stdout, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
-    ani_progress.pulse()
+    self._widgets['ani_progress'].pulse()
     yield True
     while True:
         line = output.stderr.readline()
         if not line:
             break
-        ani_progress.set_text(line.rstrip())
-        ani_progress.pulse()
+        self._widgets['ani_progress'].set_text(line.rstrip())
+        self._widgets['ani_progress'].pulse()
         yield True
     cat_pipe.stdout.close()
     cat_pipe.wait()
-    ani_progress.set_text('Created')
-    ani_progress.set_fraction(1.0)
-    ani_button.set_label('Done')
-    ani_button.set_sensitive(True)
+    self._widgets['ani_progress'].set_text('Created')
+    self._widgets['ani_progress'].set_fraction(1.0)
+    self._widgets['ani_button'].set_label('Done')
+    self._widgets['ani_button'].set_sensitive(True)
     yield False
 
 
