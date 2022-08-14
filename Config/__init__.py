@@ -22,6 +22,33 @@ class Config(object):
         self._no_rgba_color = Gdk.RGBA()
         self._widgets = dict()
 
+    def save(self, filename=None):
+        self._config['options'] = {'updateinterval': f'{self._widgets["updateentry"].get_value():.0f}',
+                                   'duration': str(int(self._widgets["durationentry"].get_value())),
+                                   'history': str(int(self._widgets['historyentry'].get_value())),
+                                   'ticks': str(int(self._widgets['ticksentry'].get_value())),
+                                   'obstructed_color': self._widgets['obstructed_color_button'].get_rgba().to_string(),
+                                   'unobstructed_color': self._widgets[
+                                       'unobstructed_color_button'].get_rgba().to_string(),
+                                   'no_data_color': self._widgets['no_data_color_button'].get_rgba().to_string(),
+                                   'obstructioninterval': str(
+                                       int(self._widgets['obstruction_map_interval_entry'].get_value())),
+                                   'obstructionhistorylocation': '' if self._widgets[
+                                                                           'obstructionhistorylocation'].get_filename() is None else
+                                   self._widgets['obstructionhistorylocation'].get_filename(),
+                                   'grpctools': '' if self._widgets['toolslocation'].get_filename() is None else
+                                   self._widgets['toolslocation'].get_filename(),
+                                   'keep_history_images': self._widgets['keep_history_images'].get_active(),
+                                   'video_format': self._widgets['video_format_cb'].get_active(),
+                                   'video_codec': self._widgets['video_codec_cb'].get_active(),
+                                   'video_size': self._widgets['video_size_cb'].get_active(),
+                                   'video_duration': str(int(self._widgets['video_duration_spin_button'].get_value())),
+                                   'animation_directory': '' if self._widgets[
+                                                                    'animation_output_directory'].get_filename() is None else
+                                   self._widgets['animation_output_directory'].get_filename(),
+                                   }
+        with open(filename, 'w') as f:
+            self._config.write(f)
     @property
     def config(self):
         return self._config

@@ -40,7 +40,7 @@ class Signals(object):
         Gtk.main_quit()
 
     def _get_png_files(self):
-        obs_dir = self._opts.get('obstructionhistorylocation')
+        obs_dir = self._config.obstructionhistorylocation
         if obs_dir == '':
             return obs_dir, []
         dir_list = os.listdir(obs_dir)
@@ -54,7 +54,7 @@ class Signals(object):
         return GLib.timeout_add_seconds(interval, func)
 
     def show_obstruction_map(self):
-        map = self._sd.obstruction_map(opts=self._opts)  # Get the latest obstruction map in a temp file
+        map = self._sd.obstruction_map(config=self._config)  # Get the latest obstruction map in a temp file
         try:
             pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(map,
                                                             width=400,
@@ -63,7 +63,7 @@ class Signals(object):
             print('Bad map!')
             return True
         self._widgets['obstructionimage'].set_from_pixbuf(pixbuf)
-        if self._opts.get('obstructionhistorylocation') == '':
+        if self._config.obstructionhistorylocation == '':
             os.unlink(map)  # Remove the temp file
         self._widgets['obstruction_timer_label'].set_text(
             'Last Update: ' + str(datetime.datetime.now().strftime("%I:%M:%S %p")))
@@ -74,13 +74,13 @@ class Signals(object):
         if all:
             self._sd.outages(min_duration=0.0)
         else:
-            self._sd.outages(min_duration=self._opts.getfloat('duration'))  # Re-read outage info
+            self._sd.outages(min_duration=self._config.duration)  # Re-read outage info
         if len(self._sd._outages) == 0:
             self._widgets['outagelabel'].set_text(
-                f'There have been no outages in the last 12 hours over {self._opts.getint("duration")} seconds!')
+                f'There have been no outages in the last 12 hours over {self._config.duration} seconds!')
         else:
             self._widgets['outagelabel'].set_text(
-                f'There have been {len(self._sd._outages)} outages {"over " + self._opts.get("duration") + " seconds" if not all else ""} in the last 12 hours')
+                f'There have been {len(self._sd._outages)} outages {"over " + str(self._config.duration) + " seconds" if not all else ""} in the last 12 hours')
 
         for out in self._sd._outages:
             self._widgets['outagestore'].append([out['time'].strftime("%I:%M%p"), out['cause'], str(out['duration'])])
@@ -105,13 +105,13 @@ class Signals(object):
         self._widgets['ani_window'].show()
         yield True
         self._widgets['ani_progress'].pulse()
-        obs_dir = self._opts.get('obstructionhistorylocation')
+        obs_dir = self._config.obstructionhistorylocation
         if obs_dir == '':
             return
 
-        video_format = self._widgets['video_format_cb'].get_model()[self._opts.getint('video_format')][1]
-        video_codec = self._widgets['video_codec_cb'].get_model()[self._opts.getint('video_codec')][1]
-        out_size = self._widgets['video_size_cb'].get_model()[self._opts.getint('video_size')][0]
+        video_format = self._widgets['video_format_cb'].get_model()[self._config.video_format][1]
+        video_codec = self._widgets['video_codec_cb'].get_model()[self._config.video_codec][1]
+        out_size = self._widgets['video_size_cb'].get_model()[self._config.video_size][0]
         out_dir = self._widgets['animation_output_directory'].get_filename()
         duration = self._widgets['video_duration_spin_button'].get_value()
         dir_list = os.listdir(obs_dir)

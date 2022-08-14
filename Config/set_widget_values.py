@@ -21,3 +21,4 @@ def set_widget_values(self, widgets):
 
     if self.obstructionhistorylocation == '':
         widgets['save_map_when_window_closed_cb'].set_sensitive(False)
+    self._widgets = widgets

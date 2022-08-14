@@ -222,7 +222,7 @@ if StarlinkData is None:
     widgets['window1'].show_All()
     widgets['nogrpswindow'].show_all()
 else:
-    sd = StarlinkData(opts=opts)
+    sd = StarlinkData(config=config)
     my_signals.sd = sd
     ani = startup()
 
