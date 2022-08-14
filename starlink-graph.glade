@@ -326,7 +326,7 @@
     <property name="transient-for">window1</property>
     <property name="attached-to">window1</property>
     <property name="program-name">Starlink-Graph</property>
-    <property name="version">0.5</property>
+    <property name="version">0.6</property>
     <property name="copyright" translatable="yes">(2022) Brian Millham</property>
     <property name="comments" translatable="yes">Dishy Version:
 Uptime:</property>

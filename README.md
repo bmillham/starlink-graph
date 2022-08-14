@@ -15,9 +15,6 @@ V 0.2: Removed command line options in favor of having a GUI setting window.<br/
 V 0.3: Added basic obstruction map<br/>
 V 0.4: Added controls to the obstruction map<br/>
 V 0.5: Added ability to save obstructions history and create an animation from the history
-
-## Windows Notes
-Install Python from python.org (use the latest version)
-
+V 0.6: No real functional changes, but major code re-factoring and cleanup
 
 

@@ -15,7 +15,7 @@ def on_obstructions_clicked(self, widget):
 def auto_obstruction_toggle(self, widget=None):
     if self._widgets['obstruction_update_check'].get_active() or self._widgets['save_map_when_window_closed_cb'].get_active():
         if self._obstructionstimer is None:
-            self._obstructionstimer = self.add_timer(self._opts.getint('obstructioninterval'), self.show_obstruction_map)
+            self._obstructionstimer = self.add_timer(self._config.obstructioninterval, self.show_obstruction_map)
         else:
             print('timer already running')
     else:

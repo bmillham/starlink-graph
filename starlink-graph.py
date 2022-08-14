@@ -6,7 +6,7 @@
 import gi
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GdkPixbuf, Gdk, GLib, GLib
+from gi.repository import Gtk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtk3agg import (FigureCanvasGTK3Agg as FigureCanvas)
 import matplotlib.animation as animation
@@ -24,7 +24,7 @@ configfile = 'starlink-graph.ini'
 defaultconfigfile = 'starlink-graph-default.ini'
 config = Config(configfile=configfile, defaultconfigfile=defaultconfigfile)
 
-opts = config.opts
+#opts = config.opts
 
 if config.grpctools is not None:
     sys.path.insert(0, config.grpctools)
@@ -45,7 +45,6 @@ for o in builder.get_objects():
     except TypeError:
         pass
 
-#my_signals = Signals(widgets=widgets, exe_file=__file__, opts=opts, configfile=configfile, config=config)
 my_signals = Signals(widgets=widgets, exe_file=__file__, configfile=configfile, config=config)
 builder.connect_signals(my_signals)
 
@@ -61,7 +60,7 @@ def animate(i):
     else:
         # Things are working normally, so only check outages every 5 seconds
         if sd._xaxis[-1].second % 5 == 0:
-            sd.outages(min_duration=opts.getfloat('duration'))
+            sd.outages(min_duration=config.duration)
 
     hdl = sd._download[-1]
     hul = sd._upload[-1]
@@ -115,9 +114,9 @@ def animate(i):
     downchart.xaxis.set_ticks([])
     latencychart.xaxis.set_ticks([])
     # Set the tick interval
-    tick_count = int(len(sd._xaxis) / (opts.getint('ticks') - 1))
+    tick_count = int(len(sd._xaxis) / (config.ticks - 1))
     tick_vals = sd._xaxis[::tick_count]
-    if len(tick_vals) < opts.getint('ticks'):
+    if len(tick_vals) < config.ticks:
         tick_vals.append(sd._xaxis[-1])
     tick_labels = [f'{v.astimezone().strftime("%I:%M%p")}' for v in tick_vals]
     upchart.xaxis.set_ticks(tick_vals, labels=tick_labels)
@@ -163,12 +162,12 @@ def animate(i):
 
 
 def clear_history_images():
-    obs_dir = opts.get('obstructionhistorylocation')
+    obs_dir = config.obstructionhistorylocation
     if obs_dir == '':
         return
     dir_list = os.listdir(obs_dir)
     try:
-        histtime = widgets['keep_history_images'].get_model()[opts.getint('keep_history_images')][1]
+        histtime = widgets['keep_history_images'].get_model()[config.keep_history_images][1]
     except TypeError:
         histtime = -1
     if histtime == -1:
@@ -207,7 +206,7 @@ def startup():
     sd.outages()
     # Force an update right away.
     animate(1)
-    return animation.FuncAnimation(fig, animate, interval=opts.getint('updateinterval'))
+    return animation.FuncAnimation(fig, animate, interval=config.updateinterval)
 
 
 try:

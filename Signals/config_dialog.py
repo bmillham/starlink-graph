@@ -30,7 +30,7 @@ def on_configsavebutton_clicked(self, widget):
         if self._obstructionstimer is not None: # If updates are currently running, stop/start the timer
             GLib.source_remove(self._obstructionstimer)
             self._obstructionstimer = GLib.timeout_add_seconds(self._config.obstructioninterval,
-            self._show_obstruction_map)
+            self.show_obstruction_map)
     self._sd.load_colors(self._config) # Load the new colors
     self._sd.outages(min_duration=self._config.duration)
     self._sd.history()
