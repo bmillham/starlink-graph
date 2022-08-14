@@ -9,7 +9,7 @@ import tempfile
 import os
 
 class StarlinkData:
-    def __init__(self, opts=None):
+    def __init__(self, config=None):
         self._xaxis = []
         self._latency = []
         self._upload = []
@@ -20,7 +20,8 @@ class StarlinkData:
         self._last_data = None
         self._last_obstructions = None
         self._last_alerts = None
-        self.load_colors(opts)
+        self._config = config
+        self.load_colors(config)
 
     @staticmethod
     def _color_conv(color):
@@ -28,15 +29,13 @@ class StarlinkData:
         rgba_color.parse(color)
         return int(rgba_color.alpha * 255), int(rgba_color.red * 255), int(rgba_color.green * 255), int(rgba_color.blue*255)
 
-    def load_colors(self, opts=None):
-        if opts is not None:
-            self._opts = opts
+    def load_colors(self, config=None):
         self._obstructed_color_a, self._obstructed_color_r, self._obstructed_color_g, self._obstructed_color_b = self._color_conv(
-            self._opts.get('obstructed_color'))
+            config.obstructed_color)
         self._unobstructed_color_a, self._unobstructed_color_r, self._unobstructed_color_g, self._unobstructed_color_b = self._color_conv(
-            self._opts.get('unobstructed_color'))
+            config.unobstructed_color)
         self._no_data_color_a, self._no_data_color_r, self._no_data_color_g, self._no_data_color_b = self._color_conv(
-            self._opts.get('no_data_color'))
+            config.no_data_color)
 
     def current_data(self):
         try:
@@ -57,7 +56,7 @@ class StarlinkData:
         self.pop_history()
 
     def pop_history(self):
-        while (self._xaxis[-1] - self._xaxis[0]).seconds > self._opts.getint('history'):
+        while (self._xaxis[-1] - self._xaxis[0]).seconds > self._config.history:
             self._xaxis.pop(0)
             self._latency.pop(0)
             self._upload.pop(0)
@@ -78,8 +77,8 @@ class StarlinkData:
                                       datetime.timedelta(seconds=(timestamp/1000000000)+tzoff))
 
     def history(self):
-        z = starlink_grpc.history_bulk_data(self._opts.getint('history'))[1]
-        seconds = self._opts.getint('history')
+        z = starlink_grpc.history_bulk_data(self._config.history)[1]
+        seconds = self._config.history
         dtstart = datetime.datetime.now().astimezone() - datetime.timedelta(seconds=seconds)
         self._clear_stats()
         for i in range(0, seconds-1):
@@ -105,7 +104,7 @@ class StarlinkData:
 
     def outages(self, min_duration=None):
         if min_duration is None:
-            min_duration = self._opts.getfloat('duration')
+            min_duration = self._config.duration
         # Clear old data
         self._outages.clear()
         self._outages_by_cause.clear()
@@ -129,7 +128,7 @@ class StarlinkData:
             else:
                 self._outages_by_cause[cause] += duration
 
-    def obstruction_map(self, opts=None):
+    def obstruction_map(self, config=None):
         try:
             snr_data = starlink_grpc.obstruction_map()
         except:
@@ -162,10 +161,9 @@ class StarlinkData:
                             len(snr_data),
                             alpha=True,
                             greyscale=False)
-        if opts.get('obstructionhistorylocation') != '':
+        if config.obstructionhistorylocation != '':
             name_template = f'obstruction_{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}.png'
-            tfname = os.path.join(opts.get('obstructionhistorylocation'), name_template)
-            print(tfname)
+            tfname = os.path.join(config.obstructionhistorylocation, name_template)
             thandle = os.open(tfname, os.O_RDWR | os.O_CREAT)
         else:
             thandle, tfname = tempfile.mkstemp()
