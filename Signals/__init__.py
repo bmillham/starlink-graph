@@ -1,13 +1,7 @@
-import gi
-
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GdkPixbuf, Gdk, GLib, GLib
+from gi.repository import Gtk, GdkPixbuf, Gdk, GLib
 
 import os
 import datetime
-from humanize import naturalsize
-#from humanize.time import naturaldelta
-import subprocess
 
 
 class Signals(object):
