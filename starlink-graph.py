@@ -15,9 +15,7 @@ from statistics import mean, StatisticsError
 import sys
 from Config import Config
 import os
-import importlib
 import time
-import subprocess
 from Signals import Signals
 
 # Use humanize if it's available. Install with
@@ -27,6 +25,7 @@ try:
 except ModuleNotFoundError:
     print('Humazine module not installed. Install with pip3')
     # Use a tacky simple naturalsize
+
     def naturalsize(x):
         return f"{x:.1f} kB"
 
@@ -59,7 +58,8 @@ my_signals = Signals(widgets=widgets, exe_file=__file__, opts=opts, configfile=c
 builder.connect_signals(my_signals)
 
 # Get the options from the ini file
-config.set_widget_values(widgets)
+config.set_widget_values(widgets=widgets)
+
 
 def animate(i):
     sd.current_data()
@@ -169,6 +169,7 @@ def animate(i):
     clear_history_images()
     return True
 
+
 def clear_history_images():
     obs_dir = opts.get('obstructionhistorylocation')
     if obs_dir == '':
@@ -204,6 +205,7 @@ def clear_history_images():
             os.unlink(os.path.join(obs_dir, f))
         else:
             to_keep += 1
+
 
 def startup():
     # On startup, grab the data right away so the graph can be populated.

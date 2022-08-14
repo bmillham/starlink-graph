@@ -1,4 +1,4 @@
-def set_widget_values(self, widgets):
+def set_widget_values(self, widgets=None):
     widgets['updateentry'].set_value(self.updateinterval)
     widgets['durationentry'].set_value(self.duration)
     widgets['historyentry'].set_value(self.history)
