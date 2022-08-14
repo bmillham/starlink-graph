@@ -1,4 +1,5 @@
-from humanize.time import naturaldelta
+#rom humanize.time import naturaldelta
+from SimpleHuman import naturaldelta
 
 
 def on_about_close_button(self, widget):

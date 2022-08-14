@@ -18,16 +18,21 @@ import os
 import time
 from Signals import Signals
 
+#from SimpleHuman
+from SimpleHuman import naturalsize
+
+#SM = SimpleHuman()
+naturalsize(10000000000000)
 # Use humanize if it's available. Install with
 # pip3 install humanize
-try:
-    from humanize import naturalsize
-except ModuleNotFoundError:
-    print('Humazine module not installed. Install with pip3')
-    # Use a tacky simple naturalsize
-
-    def naturalsize(x):
-        return f"{x:.1f} kB"
+#try:
+#    from humanize import naturalsize
+#except ModuleNotFoundError:
+#    print('Humazine module not installed. Install with pip3')
+#    # Use a tacky simple naturalsize
+#
+#    def naturalsize(x):
+#        return f"{x:.1f} kB"
 
 configfile = 'starlink-graph.ini'
 defaultconfigfile = 'starlink-graph-default.ini'
