@@ -24,7 +24,7 @@ def create_animation(self):
     out_size = self._widgets['video_size_cb'].get_model()[self._config.video_size][0]
     out_dir = self._widgets['animation_output_directory'].get_filename()
     duration = self._widgets['video_duration_spin_button'].get_value()
-    dir_list = os.listdir(obs_dir)
+    dir_list = self._get_png_files()[1]
     self._widgets['animation_directory_label'].set_text(out_dir)
 
     if len(dir_list) < duration:  # Make sure that there is at least enough images for a 1FPS video
@@ -38,7 +38,8 @@ def create_animation(self):
     frame_rate = len(dir_list) / duration
     name_template = f'obstruction_animation_{datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")}.{video_format}'
     self._widgets['animation_file_label'].set_text(name_template)
-    cat_pipe = subprocess.Popen(f"cat {obs_dir}/*.png", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    cat_pipe = subprocess.Popen(f"cat {os.path.join(obs_dir, 'obstruction_*.png')}", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    frame_count = len(dir_list)
 
     ff_cmd = ["ffmpeg",
               "-f",
@@ -53,18 +54,23 @@ def create_animation(self):
               out_size,
               "-pix_fmt",
               "yuv420p",
-              f"{out_dir}/{name_template}"]
+              os.path.join(out_dir, name_template)]
 
     output = subprocess.Popen(ff_cmd, bufsize=1, universal_newlines=True, stdin=cat_pipe.stdout, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
     self._widgets['ani_progress'].pulse()
     yield True
     while True:
-        line = output.stderr.readline()
+        # Get rid of extra spaces
+        line = " ".join(output.stderr.readline().lstrip().split())
         if not line:
             break
-        self._widgets['ani_progress'].set_text(line.rstrip())
-        self._widgets['ani_progress'].pulse()
+        if line.startswith("frame="):
+            current_frame = line.split("=")[1].strip().split()[0]
+            self._widgets['ani_progress'].set_fraction(int(current_frame) / frame_count)
+        else:
+            self._widgets['ani_progress'].pulse()
+        self._widgets['ani_progress'].set_text(line)
         yield True
     cat_pipe.stdout.close()
     cat_pipe.wait()
