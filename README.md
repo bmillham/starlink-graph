@@ -3,7 +3,11 @@ Show Starlink stats in a nice graph in an app instead of using a web browser. It
 # Prerequisites
 You will need starlink-grps-tools from https://github.com/sparky8512/starlink-grpc-tools
 Some distributions (Manjaro) do not have matplotlib installed by default. Install it with pip install matplotlib
-To create the new onstruction animation ffmpeg is required (called directly so no python modules are needed)
+To create the new obstruction animation ffmpeg is required (called directly so no python modules are needed)
+# MacOS Notes
+Thank you to reddit user u/virtuallynathan for the following information
+Use brew to install these packages: cairo, gtk+3, gtksourceview3 gobject-introspection
+Use pip3 to install: pyGObject, pychairo, humanize, matplotlib
 # Optional
 The humanize module is used if installed. Install it with pip3 install humanize
 # Running
