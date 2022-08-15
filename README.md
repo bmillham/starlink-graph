@@ -15,10 +15,10 @@ Just clone the git and run the script: python starlink-graph.py
 If you have the environment variable PYTHONPATH set to include the location of starlink-grpc-tools then
 the script should run. If you don't have it set you will prompted to select the location of starlink-grpc-tools
 # Release Notes
-V 0.2: Removed command line options in favor of having a GUI setting window.<br/>
-V 0.3: Added basic obstruction map<br/>
-V 0.4: Added controls to the obstruction map<br/>
-V 0.5: Added ability to save obstructions history and create an animation from the history
-V 0.6: No real functional changes, but major code re-factoring and cleanup
-
-
+<ul>
+<li>V 0.2: Removed command line options in favor of having a GUI setting window.</li>
+<li>V 0.3: Added basic obstruction map</li>
+<li>V 0.4: Added controls to the obstruction map</li>
+<li>V 0.5: Added ability to save obstructions history and create an animation from the history</li>
+<li>V 0.6: No real functional changes, but major code re-factoring and cleanup</li>
+</ul>
