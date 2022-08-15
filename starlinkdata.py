@@ -1,5 +1,3 @@
-import gi
-gi.require_version('Gtk', '3.0')
 from gi.repository import Gdk
 import starlink_grpc
 import leapseconds
