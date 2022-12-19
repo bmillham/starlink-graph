@@ -17,7 +17,6 @@ from Config import Config
 import os
 import time
 from Signals import Signals
-from History import History
 
 from SimpleHuman import naturalsize
 
@@ -30,7 +29,6 @@ config = Config(configfile=configfile, defaultconfigfile=defaultconfigfile)
 if config.grpctools is not None:
     sys.path.insert(0, config.grpctools)
 
-history_db = History()
 fig = Figure()
 availchart = fig.add_subplot(4, 1, 1)
 latencychart = fig.add_subplot(4, 1, 2)
@@ -68,8 +66,6 @@ def animate(i):
     hul = sd._upload[-1]
     hmdl = max(sd._download)
     hmul = max(sd._upload)
-    # Save the data to the database
-    history_db.insert_data(sd)
     # Get averages, excluding an 0 values
     try:
         dlave = mean([z for z in sd._download if z > 0])
@@ -206,11 +202,8 @@ def startup():
     # On startup, grab the data right away so the graph can be populated.
     canvas = FigureCanvas(fig)
     widgets['scrolledwindow1'].add(canvas)
-    history_db.connect()
     sd.history()
     sd.outages()
-    # Populate missing data in the database
-    history_db.populate(sd)
     # Force an update right away.
     animate(1)
     return animation.FuncAnimation(fig, animate, interval=config.updateinterval)
