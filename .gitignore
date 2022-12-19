@@ -15,3 +15,7 @@ starlink-graph.ini
 /.idea/vcs.xml
 /videocreation.sh
 /YaketySax-trimmed.mp3
+*.pyc
+/pythonsqlite.db
+/sqlite-test.py
+/starlink-history.db
