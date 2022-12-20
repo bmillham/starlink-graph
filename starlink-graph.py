@@ -32,10 +32,13 @@ if config.grpctools is not None:
 
 history_db = History()
 fig = Figure()
-availchart = fig.add_subplot(4, 1, 1)
-latencychart = fig.add_subplot(4, 1, 2)
-downchart = fig.add_subplot(4, 1, 3)
-upchart = fig.add_subplot(4, 1, 4)
+
+usagechart = fig.add_subplot(5, 1, 1)
+usagechart.set(title='Test title')
+availchart = fig.add_subplot(5, 1, 2)
+latencychart = fig.add_subplot(5, 1, 3)
+downchart = fig.add_subplot(5, 1, 4)
+upchart = fig.add_subplot(5, 1, 5)
 builder = Gtk.Builder()
 builder.add_from_file("starlink-graph.glade")
 
@@ -53,7 +56,16 @@ builder.connect_signals(my_signals)
 # Get the options from the ini file
 config.set_widget_values(widgets=widgets)
 
-
+def set_bar_text(chart, bar, text):
+    for idx, rect in enumerate(bar):
+        height = rect.get_height()
+        width = rect.get_width()
+        #usagechart.text(rect.get_y() + 0.5*width, rect.get_height()/2,
+        #chart.text(rect.get_y() + 0.5*width, rect.get_y() + height/2,
+        #chart.text(rect.get_y() + width*0.01, rect.get_y() + height*0.5,
+        chart.text(rect.get_y(), rect.get_y() + height*0.5,
+                f" {text}",
+                ha='left', va='center')
 def animate(i):
     sd.current_data()
     if sd._last_data['state'] != 'CONNECTED':
@@ -97,6 +109,24 @@ def animate(i):
     dlave = naturalsize(dlave)
     upave = naturalsize(upave)
 
+
+    sday, eday, prx, ptx, pavg, puptime, nrx, ntx, nave, nuptime, tave, tuptime = history_db.get_cycle_usage()
+    usagechart.clear()
+    usagechart.set(title=f"Cycle Dates: {sday.split(' ')[0]} - {eday.split(' ')[0]}")
+    #usagechart.plot([0, 500], [0, 0], linewidth=15, color='blue')
+    nprxbar = usagechart.barh(['Non\nPrime'], [nrx], label='RX', color=['orange'])
+    usagechart.barh(['Non\nPrime'], [ntx], label='TX', left=[nrx], color=['purple'])
+    rxbar = usagechart.barh(['Prime'], [prx], label='RX', color=['orange'])
+    txbar = usagechart.barh(['Prime'], [ptx], label='TX', left=[prx], color=['purple'])
+    tbar = usagechart.barh(['Total'], [prx + nrx], label='RX', color=['orange'])
+    set_bar_text(usagechart, rxbar, f'RX: {naturalsize(prx)} TX: {naturalsize(ptx)} Total: {naturalsize(prx+ptx)}')
+    set_bar_text(usagechart, nprxbar, f'RX: {naturalsize(nrx)} TX: {naturalsize(ntx)} Total: {naturalsize(nrx+ntx)}')
+    set_bar_text(usagechart, tbar, f'RX: {naturalsize(nrx+prx)} TX: {naturalsize(ntx+ptx)} Total: {naturalsize(prx+ptx+nrx+ntx)}')
+    usagechart.barh(['Total'], [ptx + ntx], label='TX', left=[prx + nrx], color=['purple'])
+    usagechart.legend(handles=[rxbar, txbar])
+    usagechart.yaxis.set_label_text('Usage')
+    usagechart.yaxis.set_label_position('right')
+    usagechart.xaxis.set_ticks([0, prx + ptx + nrx + ntx], labels=['', naturalsize(prx + ptx + nrx + ntx)])
     availchart.clear()
     availchart.plot(sd._xaxis, sd._avail, linewidth=1, color='green')
     availchart.plot(sd._xaxis, availave, linewidth=1, linestyle='dotted', color='black')
@@ -136,7 +166,7 @@ def animate(i):
     availchart.yaxis.set_label_position('right')
     availchart.xaxis.set_ticks([])
     availchart.set_yticks([100, availave[0], 0], labels=[f'{"" if availave[0] > 85.0 else "100%"}',
-                                                         f'Ave: {availave[0] / 100:.2%}', '0%'])
+                                                         f'Ave:\n{availave[0] / 100:.2%}', '0%'])
     if len(sd._outages_by_cause) == 0:
         availchart.text(sd._xaxis[0], 10, "No outages in the last 12 hours",
                         bbox={'facecolor': 'green',
