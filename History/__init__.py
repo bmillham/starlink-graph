@@ -37,9 +37,14 @@ class History(object):
         self._db = history_db
         self._config = config
         self.conn = None
-        self._prime_start = config.prime_start
-        self._prime_end = config.prime_end
-        self._cycle_start_day = config.billing_date
+        if config is None:
+            self._prime_start = 7
+            self._prime_end = 23
+            self._cycle_start_day = 27
+        else:
+            self._prime_start = config.prime_start
+            self._prime_end = config.prime_end
+            self._cycle_start_day = config.billing_date
 
 
     def connect(self):
