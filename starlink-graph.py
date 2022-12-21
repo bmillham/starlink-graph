@@ -34,11 +34,15 @@ history_db = History(config=config)
 fig = Figure()
 
 usagechart = fig.add_subplot(5, 1, 1)
-usagechart.set(title='Test title')
 availchart = fig.add_subplot(5, 1, 2)
 latencychart = fig.add_subplot(5, 1, 3)
 downchart = fig.add_subplot(5, 1, 4)
 upchart = fig.add_subplot(5, 1, 5)
+
+today_fig = Figure()
+todaychart = today_fig.add_subplot(1, 1, 1)
+todaychart.set(title='Test title')
+
 builder = Gtk.Builder()
 builder.add_from_file("starlink-graph.glade")
 
@@ -95,6 +99,7 @@ def animate(i):
         availave = 0
         print('No data received')
 
+
     daveline = [dlave] * len(sd._xaxis)
     uaveline = [upave] * len(sd._xaxis)
     lataveline = [latave] * len(sd._xaxis)
@@ -111,6 +116,11 @@ def animate(i):
 
 
     sday, eday, prx, ptx, pavg, puptime, nrx, ntx, nave, nuptime, tave, tuptime = history_db.get_cycle_usage()
+    # Update the today chart
+    if widgets['usagewindow'].is_visible():
+        todaychart.clear()
+        todaychart.set(title=f"Cycle Dates: {sday.split(' ')[0]} - {eday.split(' ')[0]}")
+
     usagechart.clear()
     usagechart.set(title=f"Cycle Dates: {sday.split(' ')[0]} - {eday.split(' ')[0]}")
     #usagechart.plot([0, 500], [0, 0], linewidth=15, color='blue')
@@ -235,7 +245,9 @@ def clear_history_images():
 def startup():
     # On startup, grab the data right away so the graph can be populated.
     canvas = FigureCanvas(fig)
+    todaycanvas = FigureCanvas(today_fig)
     widgets['scrolledwindow1'].add(canvas)
+    widgets['todayview'].add(todaycanvas)
     history_db.connect()
     sd.history()
     sd.outages()
@@ -253,6 +265,7 @@ except:
 
 if StarlinkData is None:
     widgets['window1'].show_all()
+    #widgets['usagewindow'].show_all()
     widgets['nogrpcwindow'].show_all()
 else:
     sd = StarlinkData(config=config)
@@ -260,5 +273,6 @@ else:
     ani = startup()
 
 widgets['window1'].show_all()
+#widgets['usagewindow'].show_all()
 
 Gtk.main()

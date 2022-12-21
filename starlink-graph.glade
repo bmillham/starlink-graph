@@ -84,89 +84,31 @@
     <property name="step-increment">1</property>
     <property name="page-increment">1</property>
   </object>
-  <object class="GtkWindow" id="useagewindow">
+  <object class="GtkWindow" id="usagewindow">
     <property name="name">useagewindow</property>
     <property name="can-focus">False</property>
     <child>
-      <object class="GtkNotebook">
+      <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can-focus">True</property>
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkScrolledWindow">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="shadow-type">in</property>
-            <child>
-              <object class="GtkViewport">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">label</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child type="tab">
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Today</property>
-          </object>
-          <packing>
-            <property name="tab-fill">False</property>
-          </packing>
+          <placeholder/>
         </child>
         <child>
-          <object class="GtkScrolledWindow">
+          <object class="GtkScrolledWindow" id="todayview">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
+            <property name="vexpand">True</property>
             <property name="shadow-type">in</property>
             <child>
               <placeholder/>
             </child>
           </object>
           <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
-          </packing>
-        </child>
-        <child type="tab">
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Yesterday</property>
-          </object>
-          <packing>
-            <property name="position">1</property>
-            <property name="tab-fill">False</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkScrolledWindow">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="shadow-type">in</property>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child type="tab">
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Month</property>
-          </object>
-          <packing>
-            <property name="position">2</property>
-            <property name="tab-fill">False</property>
           </packing>
         </child>
       </object>
@@ -332,7 +274,7 @@
                         <property name="can-focus">False</property>
                         <property name="tooltip-text" translatable="yes">View information about data used</property>
                         <property name="label" translatable="yes">Usage</property>
-                        <signal name="activate" handler="on_usage_clicked" object="useagewindow" swapped="no"/>
+                        <signal name="activate" handler="on_usage_clicked" object="usagewindow" swapped="no"/>
                       </object>
                     </child>
                   </object>
