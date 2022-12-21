@@ -12,6 +12,8 @@ Use <b>brew</b> to install these packages: cairo, gtk+3, gtksourceview3 gobject-
 Use <b>pip3</b> to install: pyGObject, pychairo, humanize, matplotlib
 # Optional
 The humanize module is used if installed. Install it with pip3 install humanize
+# Preperation
+Copy the exemple starlink-graph-default.ini to starlink-graph.ini and edit it to change billing_date to the start day of your billing cycle.
 # Running
 Just clone the git and run the script: python starlink-graph.py
 If you have the environment variable PYTHONPATH set to include the location of starlink-grpc-tools then
@@ -23,4 +25,5 @@ the script should run. If you don't have it set you will prompted to select the 
 <li>V 0.4: Added controls to the obstruction map</li>
 <li>V 0.5: Added ability to save obstructions history and create an animation from the history</li>
 <li>V 0.6: No real functional changes, but major code re-factoring and cleanup</li>
+<li>This branch is experimental!</li>
 </ul>

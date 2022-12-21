@@ -30,7 +30,7 @@ config = Config(configfile=configfile, defaultconfigfile=defaultconfigfile)
 if config.grpctools is not None:
     sys.path.insert(0, config.grpctools)
 
-history_db = History()
+history_db = History(config=config)
 fig = Figure()
 
 usagechart = fig.add_subplot(5, 1, 1)

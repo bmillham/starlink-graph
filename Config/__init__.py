@@ -137,6 +137,17 @@ class Config(object):
         return self._opts.getint('video_duration')
 
     @property
+    def billing_date(self):
+        return self._opts.getint('billing_date')
+
+    @property
+    def prime_start(self):
+        return self._opts.getint('prime_start')
+
+    @property
+    def prime_end(self):
+        return self._opts.getint('prime_end')
+    @property
     def animation_directory(self):
         return self._opts.get('animation_directory')
 

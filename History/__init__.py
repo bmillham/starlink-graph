@@ -33,12 +33,14 @@ FIRST_DATE = "select timestamp from history order by timestamp asc limit 1"
 END_DATE = "select timestamp from history order by timestamp DESC LIMIT 1"
 
 class History(object):
-    def __init__(self, history_db="starlink-history.db"):
+    def __init__(self, history_db="starlink-history.db", config=None):
         self._db = history_db
+        self._config = config
         self.conn = None
-        self._prime_start = 7
-        self._prime_end = 23
-        self._cycle_start_day = 27
+        self._prime_start = config.prime_start
+        self._prime_end = config.prime_end
+        self._cycle_start_day = config.billing_date
+
 
     def connect(self):
         if sqlite3 is None:
