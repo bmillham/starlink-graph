@@ -19,3 +19,4 @@ starlink-graph.ini
 /pythonsqlite.db
 /sqlite-test.py
 /starlink-history.db
+/starlink-graph.ini.save
