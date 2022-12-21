@@ -208,7 +208,6 @@ class History(object):
     @prime_start.setter
     def prime_start(self, hour):
         self._prime_start = hour
-    
 
     @property
     def prime_end(self):
@@ -217,3 +216,11 @@ class History(object):
     @prime_end.setter
     def prime_end(self, hour):
         self._prime_end = hour
+
+    @property
+    def billing_date(self):
+        return self._cycle_start_day
+
+    @billing_date.setter
+    def billing_date(self, day):
+        self._cycle_start_day = day

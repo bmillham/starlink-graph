@@ -71,6 +71,12 @@ def set_bar_text(chart, bar, text):
                 f" {text}",
                 ha='left', va='center')
 def animate(i):
+    if config.config_changed:
+        print('config changed')
+        history_db.prime_start = config.prime_start
+        history_db.prime_end = config.prime_end
+        history_db.billing_date = config.billing_date
+        config.config_changed = False
     sd.current_data()
     if sd._last_data['state'] != 'CONNECTED':
         print(f'Not connected: {sd._last_data["state"]}@{sd._last_data["datetimestamp_utc"]}')

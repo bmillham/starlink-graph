@@ -19,6 +19,7 @@ class Config(object):
         self._no_rgba_color = Gdk.RGBA()
         self._widgets = dict()
         self._exe_file = exe_file
+        self._config_changed = False
 
     def save(self, filename=None):
         self._config['options'] = {'updateinterval': f'{self._widgets["updateentry"].get_value():.0f}',
@@ -41,12 +42,17 @@ class Config(object):
                                    'video_codec': self._widgets['video_codec_cb'].get_active(),
                                    'video_size': self._widgets['video_size_cb'].get_active(),
                                    'video_duration': str(int(self._widgets['video_duration_spin_button'].get_value())),
+                                   'prime_start': int(self._widgets['primestartspin'].get_value()),
+                                   'prime_end': int(self._widgets['primeendspin'].get_value()),
+                                   'billing_date': int(self._widgets['billingdayspin'].get_value()),
                                    'animation_directory': '' if self._widgets[
                                                                     'animation_output_directory'].get_filename() is None else
                                    self._widgets['animation_output_directory'].get_filename(),
                                    }
         with open(filename, 'w') as f:
             self._config.write(f)
+        self.config_changed = True
+        
     @property
     def config(self):
         return self._config
@@ -151,3 +157,10 @@ class Config(object):
     def animation_directory(self):
         return self._opts.get('animation_directory')
 
+    @property
+    def config_changed(self):
+        return self._config_changed
+
+    @config_changed.setter
+    def config_changed(self, value):
+        self._config_changed = value

@@ -25,4 +25,7 @@ def set_widget_values(self, widgets=None):
         widgets['obstructionhistorylocation'].set_filename('')
     if self.obstructionhistorylocation == '':
         widgets['save_map_when_window_closed_cb'].set_sensitive(False)
+    widgets['primestartspin'].set_value(self.prime_start)
+    widgets['primeendspin'].set_value(self.prime_end)
+    widgets['billingdayspin'].set_value(self.billing_date)
     self._widgets = widgets
