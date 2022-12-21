@@ -170,7 +170,10 @@ class History(object):
                 sum(nruse), sum(ntuse), self._average(nluse), self._average(nuuse), self._average(tluse), self._average(tuuse))
 
     def _average(self, list):
-        return sum(list) / len(list)
+        try:
+            return sum(list) / len(list)
+        except ZeroDivisionError:
+            return 0
 
     def _isodate(self, date):
         csy, csm, csd = date.split(' ')[0].split('-')

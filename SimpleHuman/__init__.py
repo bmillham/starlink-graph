@@ -5,7 +5,7 @@
 try:
     import humanize
 except ModuleNotFoundError:
-    print('Humazine module not installed. Install with pip3')
+    print('Humanize module not installed. Install with pip3')
     humanize = None
 
 

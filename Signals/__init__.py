@@ -11,6 +11,7 @@ class Signals(object):
     from .outage_window import outage_close, outage_toggled, on_outage_clicked, show_outages
     from .delete_dialog import on_delete_confirmation_window_delete_event, on_delete_confirmation_yes_clicked
     from .animation_window import on_ani_window_delete, create_animation, on_create_animation_clicked
+    from .usage_window import on_usage_clicked
 
     def __init__(self, widgets=None, exe_file=None, opts=None, configfile=None, config=None):
         self._obstructionstimer = None
