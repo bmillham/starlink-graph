@@ -21,6 +21,7 @@ import time
 from Signals import Signals
 from History import History
 import numpy as np
+from tempfile import TemporaryFile
 
 from SimpleHuman import naturalsize
 
@@ -103,9 +104,11 @@ class UpdateCharts:
         m = [max(rx), max(tx)]
         ax.yaxis.set_ticks([0, min(m), max(m)], labels=['', naturalsize(min(m)), naturalsize(max(m))])
         fig.tight_layout()
-        pyplot.savefig('test.png', format='png', bbox_inches='tight', dpi=300)
-        pyplot.close()
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale('test.png', width=800, height=800, preserve_aspect_ratio=True)
+        with TemporaryFile() as tmp:
+            print(tmp.name)
+            pyplot.savefig(tmp, format='png', bbox_inches='tight', dpi=300)
+            pyplot.close()
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale('test.png', width=800, height=800, preserve_aspect_ratio=True)
         widgets['todayimage'].set_from_pixbuf(pixbuf)
         self.last_update = now.minute
 
