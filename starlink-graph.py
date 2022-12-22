@@ -6,7 +6,8 @@
 import gi
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, GdkPixbuf
+from matplotlib import pyplot
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtk3agg import (FigureCanvasGTK3Agg as FigureCanvas)
 import matplotlib.animation as animation
@@ -15,16 +16,18 @@ from statistics import mean, StatisticsError
 import sys
 from Config import Config
 import os
+import io
 import time
 from Signals import Signals
 from History import History
+import numpy as np
 
 from SimpleHuman import naturalsize
 
 configfile = 'starlink-graph.ini'
 defaultconfigfile = 'starlink-graph-default.ini'
 config = Config(configfile=configfile, defaultconfigfile=defaultconfigfile)
-
+today_chart_last_update = -1
 #opts = config.opts
 
 if config.grpctools is not None:
@@ -39,9 +42,10 @@ latencychart = fig.add_subplot(5, 1, 3)
 downchart = fig.add_subplot(5, 1, 4)
 upchart = fig.add_subplot(5, 1, 5)
 
-today_fig = Figure()
-todaychart = today_fig.add_subplot(1, 1, 1)
-todaychart.set(title='Test title')
+#today_fig = Figure()
+#todaychart = today_fig.add_subplot(1, 1, 1)
+
+#todaychart.set(title='Test title')
 
 builder = Gtk.Builder()
 builder.add_from_file("starlink-graph.glade")
@@ -64,13 +68,50 @@ def set_bar_text(chart, bar, text):
     for idx, rect in enumerate(bar):
         height = rect.get_height()
         width = rect.get_width()
-        #usagechart.text(rect.get_y() + 0.5*width, rect.get_height()/2,
-        #chart.text(rect.get_y() + 0.5*width, rect.get_y() + height/2,
-        #chart.text(rect.get_y() + width*0.01, rect.get_y() + height*0.5,
         chart.text(rect.get_y(), rect.get_y() + height*0.5,
                 f" {text}",
                 ha='left', va='center')
-def animate(i):
+
+class UpdateCharts:
+    def __init__(self, db=None):
+        self.last_update = -1
+        self.db = db
+
+    def do_today_chart(self):
+        now = datetime.datetime.now()
+        if now.minute == self.last_update:
+            return
+
+        # Update the today chart
+        fig1, ax = pyplot.subplots()
+        ax.set_title(f'Todays Hourly Usage Updated: {now.hour:02}:{now.minute:02}')
+        h = 0
+        width = 0.35
+        rx = []
+        tx = []
+        hour = []
+        while h< 24:
+            r, t, ave, update = self.db.get_hour_usage(now.year, now.month, now.day, h)
+            rx.append(r)
+            tx.append(t)
+            hour.append(str(h))
+            h += 1
+        x = np.arange(len(hour))
+        rects1 = ax.bar(x - width/2, rx, width, label='RX')
+        rects2 = ax.bar(x + width/2, tx, width, label='TX')
+        ax.legend()
+        m = [max(rx), max(tx)]
+        ax.yaxis.set_ticks([0, min(m), max(m)], labels=['', naturalsize(min(m)), naturalsize(max(m))])
+        fig.tight_layout()
+        pyplot.savefig('test.png', format='png', bbox_inches='tight', dpi=300)
+        pyplot.close()
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale('test.png', width=800, height=800, preserve_aspect_ratio=True)
+        widgets['todayimage'].set_from_pixbuf(pixbuf)
+        self.last_update = now.minute
+
+updatecharts = UpdateCharts(db=history_db)
+
+def animate(i, update_today=False):
     if config.config_changed:
         print('config changed')
         history_db.prime_start = config.prime_start
@@ -122,14 +163,13 @@ def animate(i):
 
 
     sday, eday, prx, ptx, pavg, puptime, nrx, ntx, nave, nuptime, tave, tuptime = history_db.get_cycle_usage()
-    # Update the today chart
-    if widgets['usagewindow'].is_visible():
-        todaychart.clear()
-        todaychart.set(title=f"Cycle Dates: {sday.split(' ')[0]} - {eday.split(' ')[0]}")
+
+    if widgets['animation_notebook'].get_current_page() == 1:
+        updatecharts.do_today_chart()
 
     usagechart.clear()
     usagechart.set(title=f"Cycle Dates: {sday.split(' ')[0]} - {eday.split(' ')[0]}")
-    #usagechart.plot([0, 500], [0, 0], linewidth=15, color='blue')
+
     nprxbar = usagechart.barh(['Non\nPrime'], [nrx], label='RX', color=['orange'])
     usagechart.barh(['Non\nPrime'], [ntx], label='TX', left=[nrx], color=['purple'])
     rxbar = usagechart.barh(['Prime'], [prx], label='RX', color=['orange'])
@@ -251,9 +291,8 @@ def clear_history_images():
 def startup():
     # On startup, grab the data right away so the graph can be populated.
     canvas = FigureCanvas(fig)
-    todaycanvas = FigureCanvas(today_fig)
     widgets['scrolledwindow1'].add(canvas)
-    widgets['todayview'].add(todaycanvas)
+
     history_db.connect()
     sd.history()
     sd.outages()
@@ -271,7 +310,6 @@ except:
 
 if StarlinkData is None:
     widgets['window1'].show_all()
-    #widgets['usagewindow'].show_all()
     widgets['nogrpcwindow'].show_all()
 else:
     sd = StarlinkData(config=config)
