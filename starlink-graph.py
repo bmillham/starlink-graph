@@ -43,11 +43,6 @@ latencychart = fig.add_subplot(5, 1, 3)
 downchart = fig.add_subplot(5, 1, 4)
 upchart = fig.add_subplot(5, 1, 5)
 
-#today_fig = Figure()
-#todaychart = today_fig.add_subplot(1, 1, 1)
-
-#todaychart.set(title='Test title')
-
 builder = Gtk.Builder()
 builder.add_from_file("starlink-graph.glade")
 
@@ -105,7 +100,6 @@ class UpdateCharts:
         ax.yaxis.set_ticks([0, min(m), max(m)], labels=['', naturalsize(min(m)), naturalsize(max(m))])
         fig.tight_layout()
         with TemporaryFile() as tmp:
-            print(tmp.name)
             pyplot.savefig(tmp, format='png', bbox_inches='tight', dpi=300)
             pyplot.close()
             pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale('test.png', width=800, height=800, preserve_aspect_ratio=True)
