@@ -6,9 +6,11 @@
 import gi
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk
 from matplotlib import pyplot
 from matplotlib.figure import Figure
+from matplotlib.backends.backend_gtk3 import (
+    NavigationToolbar2GTK3 as NavigationToolbar)
 from matplotlib.backends.backend_gtk3agg import (FigureCanvasGTK3Agg as FigureCanvas)
 import matplotlib.animation as animation
 import datetime
@@ -21,7 +23,6 @@ import time
 from Signals import Signals
 from History import History
 import numpy as np
-from tempfile import TemporaryFile
 
 from SimpleHuman import naturalsize
 
@@ -70,41 +71,93 @@ def set_bar_text(chart, bar, text):
 
 class UpdateCharts:
     def __init__(self, db=None):
-        self.last_update = -1
+        self.day_last_update = -1
+        self.today_last_update = -1
         self.db = db
+
+        # The today tab
+        #self.today_fig = Figure(figsize=(5, 4), dpi=100)
+        self.today_fig = Figure()
+        self.today_ax = self.today_fig.add_subplot()
+        #self.today_total_ax = self.today_fig.add_subplot(2, 1, 2)
+        #self.today_total_canvas = FigureCanvas(self.today_fig)
+        self.today_canvas = FigureCanvas(self.today_fig)
+        self.today_ax.set_title('Please wait, gathering data...')
+
+        #self.today_total_ax.set_title('Totals')
+        
+        #widgets['todaybox'].pack_start(self.today_total_canvas, True, True, 0)
+        widgets['todaybox'].pack_start(self.today_canvas, True, True, 0)
+        #self.today_toolbar = NavigationToolbar(self.today_canvas, window=widgets['window1'])
+        #widgets['todaybox'].pack_start(self.today_toolbar, False, False, 0)
+
+        # The daily tab
+        self.day_fig = Figure(figsize=(5, 4), dpi=100)
+        self.day_ax = self.day_fig.add_subplot()
+        self.day_canvas = FigureCanvas(self.day_fig)
+        widgets['dailybox'].pack_start(self.day_canvas, True, True, 0)
+        #self.daily_toolbar = NavigationToolbar(self.day_canvas, window=widgets['window1'])
+        #widgets['dailybox'].pack_start(self.daily_toolbar, False, False, 0)
+
+    def do_daily_chart(self):
+        print('updating daily')
+
+        #s, e, r, t, l, u, nr, nt, nl, nu, tl, tu = history.get_cycle_usage()
+        #rx, tx, avg, uptime = history.get_prime_usage(year, month, day)
+        #nrx, ntx, navg, nuptime = history.get_non_prime_usage(year, month, day)
+        self.day_canvas.draw()
+        #self.day_last_update = now.minute
 
     def do_today_chart(self):
         now = datetime.datetime.now()
-        if now.minute == self.last_update:
+        if now.minute == self.today_last_update:
             return
 
-        # Update the today chart
-        fig1, ax = pyplot.subplots()
-        ax.set_title(f'Todays Hourly Usage Updated: {now.hour:02}:{now.minute:02}')
-        h = 0
+        prime_rx, prime_tx, l, u = history_db.get_prime_usage(now.year, now.month, now.day)
+        nonprime_rx, nonprime_tx, l, u = history_db.get_non_prime_usage(now.year, now.month, now.day)
+
+        widgets['prime_rx_label'].set_text(naturalsize(prime_rx))
+        widgets['prime_tx_label'].set_text(naturalsize(prime_tx))
+        widgets['prime_total_label'].set_text(naturalsize(prime_rx + prime_tx))
+        widgets['nonprime_rx_label'].set_text(naturalsize(nonprime_rx))
+        widgets['nonprime_tx_label'].set_text(naturalsize(nonprime_tx))
+        widgets['nonprime_total_label'].set_text(naturalsize(nonprime_rx + nonprime_tx))
+        widgets['total_rx_label'].set_text(naturalsize(prime_rx + nonprime_rx))
+        widgets['total_tx_label'].set_text(naturalsize(prime_tx + nonprime_tx))
+        widgets['total_total_label'].set_text(naturalsize(prime_rx + prime_tx + nonprime_rx + nonprime_tx))
+        self.today_ax.clear()
+        #self.today_ax.set_title(f'Hourly Usage Updated: {now.hour:02d}:{now.minute:02}')
+        widgets['hourly_usage_label'].set_text(f'Hourly Usage for {now.year}-{now.month:02}-{now.day:02} Updated:')
+        widgets['today_label'].set_text(f'{now.hour:02}:{now.minute:02}')
         width = 0.35
         rx = []
         tx = []
-        hour = []
-        while h< 24:
-            r, t, ave, update = self.db.get_hour_usage(now.year, now.month, now.day, h)
+        latency = []
+        uptime = []
+        for h in range(now.hour + 1):
+            r, t, a, u = self.db.get_hour_usage(now.year, now.month, now.day, h)
             rx.append(r)
             tx.append(t)
-            hour.append(str(h))
-            h += 1
-        x = np.arange(len(hour))
-        rects1 = ax.bar(x - width/2, rx, width, label='RX')
-        rects2 = ax.bar(x + width/2, tx, width, label='TX')
-        ax.legend()
+            if a > 0:
+                latency.append(a)
+            uptime.append(u)
+        widgets['average_latency_label'].set_text(f'{mean(latency):.0f}ms')
+        widgets['min_latency_label'].set_text(f'{min(latency):.0f}ms')
+        widgets['max_latency_label'].set_text(f'{max(latency):.0f}ms')
+        widgets['uptime_label'].set_text(f'{mean(uptime):.1f}%')
+        x = np.arange(len(rx))
+        rects1 = self.today_ax.bar(x - width/2, rx, width, label='RX')
+        rects2 = self.today_ax.bar(x + width/2, tx, width, label='TX')
+        self.today_ax.legend()
         m = [max(rx), max(tx)]
-        ax.yaxis.set_ticks([0, min(m), max(m)], labels=['', naturalsize(min(m)), naturalsize(max(m))])
-        fig.tight_layout()
-        with TemporaryFile() as tmp:
-            pyplot.savefig(tmp, format='png', bbox_inches='tight', dpi=300)
-            pyplot.close()
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale('test.png', width=800, height=800, preserve_aspect_ratio=True)
-        widgets['todayimage'].set_from_pixbuf(pixbuf)
-        self.last_update = now.minute
+        self.today_ax.yaxis.set_ticks([0, min(m), max(m)], labels=['', naturalsize(min(m)), naturalsize(max(m))])
+        self.today_ax.xaxis.set_ticks([x for x in range(now.hour + 1) if x % 2 != 0], labels=[f'{x:02}' for x in range(now.hour +1) if x % 2 != 0])
+        self.today_ax.bar_label(rects1, padding=3, labels=[naturalsize(x) if x > 0 else "" for x in rects1.datavalues], rotation=90, fontsize=5)
+        self.today_ax.bar_label(rects2, padding=3, labels=[naturalsize(x) if x > 0 else "" for x in rects2.datavalues], rotation=90, fontsize=5)
+        self.today_ax.set_xlabel('Hour')
+        self.today_fig.tight_layout()
+        self.today_canvas.draw()
+        self.today_last_update = now.minute
 
 updatecharts = UpdateCharts(db=history_db)
 
@@ -161,8 +214,11 @@ def animate(i, update_today=False):
 
     sday, eday, prx, ptx, pavg, puptime, nrx, ntx, nave, nuptime, tave, tuptime = history_db.get_cycle_usage()
 
-    if widgets['animation_notebook'].get_current_page() == 1:
+    if widgets['animation_notebook'].get_current_page() == 1 or update_today:
         updatecharts.do_today_chart()
+
+    if widgets['animation_notebook'].get_current_page() == 2:
+        updatecharts.do_daily_chart()
 
     usagechart.clear()
     usagechart.set(title=f"Cycle Dates: {sday.split(' ')[0]} - {eday.split(' ')[0]}")

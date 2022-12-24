@@ -31,12 +31,15 @@ HOUR_USAGE = """select sum(rx), sum(tx), avg(latency), avg(uptime) from history 
 
 FIRST_DATE = "select timestamp from history order by timestamp asc limit 1"
 END_DATE = "select timestamp from history order by timestamp DESC LIMIT 1"
+ALL_DATES = "SELECT DATE(timestamp, 'localtime') FROM history GROUP BY DATE(timestamp, 'localtime');"
 
 class History(object):
     def __init__(self, history_db="starlink-history.db", config=None):
         self._db = history_db
         self._config = config
         self.conn = None
+        self._last_commit = 0
+        self._commit_interval = 1 # Only commit every X seconds
         if config is None:
             self._prime_start = 7
             self._prime_end = 23
@@ -59,6 +62,12 @@ class History(object):
             self.cursor = self.conn.cursor()
             self._create_table()
 
+    def commit(self):
+        now = datetime.now().timestamp()
+        if now > self._last_commit + self._commit_interval:
+            self.conn.commit()
+            self._last_commit = now
+
     def _create_table(self):
         try:
             self.cursor.execute(CREATE_TABLE)
@@ -74,7 +83,7 @@ class History(object):
         except sqlite3.IntegrityError:
             return -1
         if commit:
-            self.conn.commit()
+            self.commit()
         return self.cursor.lastrowid
 
     def query(self, sql):
@@ -83,13 +92,20 @@ class History(object):
     def populate(self, data):
         cnt = 0
         dups = 0
-        print('Populating history to the database')
+        inserted = 0
+        self.cursor.execute('SELECT timestamp FROM history ORDER BY timestamp DESC LIMIT 1')
+        last = self.cursor.fetchone()[0]
+        print(f'Populating history to the database from {last}')
         for i in data._xaxis:
-            if self.insert_data(data, cnt, commit=False) == -1:
-                dups += 1
+            x = i.replace(microsecond=0).isoformat()
+            if x > last:
+                if self.insert_data(data, cnt, commit=False) == -1:
+                    dups += 1
+                else:
+                    inserted += 1
             cnt += 1
-        self.conn.commit()
-        print(f'Done populating history. Skipped {dups} records.')
+        self.commit()
+        print(f'Done populating history. Inserted: {inserted} Dups: {dups}')
 
     def get_prime_usage(self, year, month, day):
         self.cursor.execute(PRIME, (f'{year}-{month}-{day:02}T{self.prime_start:02}:00:00', f'{year}-{month}-{day:02}T{self.prime_end:02}:00:00'))
@@ -200,6 +216,13 @@ class History(object):
         row = self.cursor.fetchone()
         end_date = datetime.fromisoformat(row[0])
         return start_date, end_date, start_date.day, end_date.day, start_date.year, start_date.month
+
+    def get_all_dates(self):
+        self.cursor.execute(ALL_DATES)
+        dates = []
+        for r in self.cursor.fetchall():
+            dates.append(r[0])
+        return dates
         
     @property
     def prime_start(self):
