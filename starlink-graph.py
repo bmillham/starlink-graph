@@ -74,28 +74,29 @@ class UpdateCharts:
         self.day_last_update = -1
         self.today_last_update = -1
         self.db = db
+        self.last_date = None
 
         # The today tab
-        #self.today_fig = Figure(figsize=(5, 4), dpi=100)
+        self.today_usage_fig = Figure((3,1))
+        self.today_usage_ax = self.today_usage_fig.add_subplot()
+        self.today_usage_canvas = FigureCanvas(self.today_usage_fig)
+        self.today_usage_ax.set_title('Please wait, gathering data...')
         self.today_fig = Figure()
         self.today_ax = self.today_fig.add_subplot()
-        #self.today_total_ax = self.today_fig.add_subplot(2, 1, 2)
-        #self.today_total_canvas = FigureCanvas(self.today_fig)
         self.today_canvas = FigureCanvas(self.today_fig)
         self.today_ax.set_title('Please wait, gathering data...')
 
-        #self.today_total_ax.set_title('Totals')
-        
-        #widgets['todaybox'].pack_start(self.today_total_canvas, True, True, 0)
-        widgets['todaybox'].pack_start(self.today_canvas, True, True, 0)
-        #self.today_toolbar = NavigationToolbar(self.today_canvas, window=widgets['window1'])
-        #widgets['todaybox'].pack_start(self.today_toolbar, False, False, 0)
+        widgets['today_usage_box2'].pack_start(self.today_usage_canvas, True, True, 0)
+        widgets['today_usage_box1'].pack_start(self.today_canvas, True, True, 0)
+        #widgets['todaysw1'].add(self.today_usage_canvas)
+        #widgets['todaysw2'].add(self.today_canvas)
 
         # The daily tab
         self.day_fig = Figure(figsize=(5, 4), dpi=100)
         self.day_ax = self.day_fig.add_subplot()
         self.day_canvas = FigureCanvas(self.day_fig)
         widgets['dailybox'].pack_start(self.day_canvas, True, True, 0)
+
         #self.daily_toolbar = NavigationToolbar(self.day_canvas, window=widgets['window1'])
         #widgets['dailybox'].pack_start(self.daily_toolbar, False, False, 0)
 
@@ -110,37 +111,67 @@ class UpdateCharts:
 
     def do_today_chart(self):
         now = datetime.datetime.now()
-        if now.minute == self.today_last_update:
+        minute = now.minute
+        hour = now.hour
+        #    return
+        date = widgets['today_label'].get_text()
+        year, month, day = date.split('-')
+        year = int(year)
+        month = int(month)
+        day = int(day)
+        if minute == self.today_last_update and date == self.last_date:
             return
 
-        prime_rx, prime_tx, l, u = history_db.get_prime_usage(now.year, now.month, now.day)
-        nonprime_rx, nonprime_tx, l, u = history_db.get_non_prime_usage(now.year, now.month, now.day)
+        if self.last_date == date and day != now.day:
+            self.today_ax.set_title('Will not auto update')
+            self.today_canvas.draw()
+            self.today_last_update = minute
+            return
 
-        widgets['prime_rx_label'].set_text(naturalsize(prime_rx))
-        widgets['prime_tx_label'].set_text(naturalsize(prime_tx))
-        widgets['prime_total_label'].set_text(naturalsize(prime_rx + prime_tx))
-        widgets['nonprime_rx_label'].set_text(naturalsize(nonprime_rx))
-        widgets['nonprime_tx_label'].set_text(naturalsize(nonprime_tx))
-        widgets['nonprime_total_label'].set_text(naturalsize(nonprime_rx + nonprime_tx))
-        widgets['total_rx_label'].set_text(naturalsize(prime_rx + nonprime_rx))
-        widgets['total_tx_label'].set_text(naturalsize(prime_tx + nonprime_tx))
-        widgets['total_total_label'].set_text(naturalsize(prime_rx + prime_tx + nonprime_rx + nonprime_tx))
+        prime_rx, prime_tx, l, u = history_db.get_prime_usage(year, month, day)
+        nonprime_rx, nonprime_tx, l, u = history_db.get_non_prime_usage(year, month, day)
+
         self.today_ax.clear()
+
+        if prime_rx == 0 and nonprime_tx == 0:
+            self.today_ax.set_title('No data for this date')
+            self.today_fig.tight_layout()
+            self.today_canvas.draw()
+            self.today_last_update = minute
+            self.last_date = date
+            return
+    
+        #widgets['prime_rx_label'].set_text(naturalsize(prime_rx))
+        #widgets['prime_tx_label'].set_text(naturalsize(prime_tx))
+        #widgets['prime_total_label'].set_text(naturalsize(prime_rx + prime_tx))
+        #widgets['nonprime_rx_label'].set_text(naturalsize(nonprime_rx))
+        #widgets['nonprime_tx_label'].set_text(naturalsize(nonprime_tx))
+        #widgets['nonprime_total_label'].set_text(naturalsize(nonprime_rx + nonprime_tx))
+        #widgets['total_rx_label'].set_text(naturalsize(prime_rx + nonprime_rx))
+        #widgets['total_tx_label'].set_text(naturalsize(prime_tx + nonprime_tx))
+        #widgets['total_total_label'].set_text(naturalsize(prime_rx + prime_tx + nonprime_rx + nonprime_tx))
+
+        update_usage_chart(self.today_usage_ax, nonprime_rx, nonprime_tx, prime_rx, prime_tx, f'Updated: {now.hour:02d}:{now.minute:02}')
+
         #self.today_ax.set_title(f'Hourly Usage Updated: {now.hour:02d}:{now.minute:02}')
-        widgets['hourly_usage_label'].set_text(f'Hourly Usage for {now.year}-{now.month:02}-{now.day:02} Updated:')
-        widgets['today_label'].set_text(f'{now.hour:02}:{now.minute:02}')
+        #widgets['today_label'].set_text(f'{now.year}-{now.month:02}-{now.day:02}')
+        widgets['updated_label'].set_text(f'{now.hour:02}:{now.minute:02}')
         width = 0.35
         rx = []
         tx = []
         latency = []
         uptime = []
-        for h in range(now.hour + 1):
-            r, t, a, u = self.db.get_hour_usage(now.year, now.month, now.day, h)
+        for h in range(24):
+            if day == now.day and h > now.hour:
+                break
+            r, t, a, u = self.db.get_hour_usage(year, month, day, h)
             rx.append(r)
             tx.append(t)
             if a > 0:
                 latency.append(a)
             uptime.append(u)
+
+        max_hour = h
         widgets['average_latency_label'].set_text(f'{mean(latency):.0f}ms')
         widgets['min_latency_label'].set_text(f'{min(latency):.0f}ms')
         widgets['max_latency_label'].set_text(f'{max(latency):.0f}ms')
@@ -151,15 +182,36 @@ class UpdateCharts:
         self.today_ax.legend()
         m = [max(rx), max(tx)]
         self.today_ax.yaxis.set_ticks([0, min(m), max(m)], labels=['', naturalsize(min(m)), naturalsize(max(m))])
-        self.today_ax.xaxis.set_ticks([x for x in range(now.hour + 1) if x % 2 != 0], labels=[f'{x:02}' for x in range(now.hour +1) if x % 2 != 0])
+        self.today_ax.xaxis.set_ticks([x for x in range(max_hour + 1) if x % 2 != 0], labels=[f'{x:02}' for x in range(max_hour +1) if x % 2 != 0])
         self.today_ax.bar_label(rects1, padding=3, labels=[naturalsize(x) if x > 0 else "" for x in rects1.datavalues], rotation=90, fontsize=5)
         self.today_ax.bar_label(rects2, padding=3, labels=[naturalsize(x) if x > 0 else "" for x in rects2.datavalues], rotation=90, fontsize=5)
         self.today_ax.set_xlabel('Hour')
         self.today_fig.tight_layout()
+        self.today_ax.set_title( f'Updated: {now.hour:02d}:{now.minute:02}')
         self.today_canvas.draw()
-        self.today_last_update = now.minute
+        self.today_usage_canvas.draw()
+        self.today_last_update = minute
+        self.last_date = date
 
 updatecharts = UpdateCharts(db=history_db)
+
+def update_usage_chart(chart, nrx, ntx, prx, ptx, title):
+    chart.clear()
+    chart.set(title=title)
+
+    nprxbar = chart.barh(['Non\nPrime'], [nrx], label='RX', color=['orange'])
+    nptxbar = chart.barh(['Non\nPrime'], [ntx], label='TX', left=[nrx], color=['purple'])
+    rxbar = chart.barh(['Prime'], [prx], label='RX', color=['orange'])
+    txbar = chart.barh(['Prime'], [ptx], label='TX', left=[prx], color=['purple'])
+    tbar = chart.barh(['Total'], [prx + nrx], label='RX', color=['orange'])
+    set_bar_text(chart, rxbar, f'RX: {naturalsize(prx)} TX: {naturalsize(ptx)} Total: {naturalsize(prx+ptx)}')
+    set_bar_text(chart, nprxbar, f'RX: {naturalsize(nrx)} TX: {naturalsize(ntx)} Total: {naturalsize(nrx+ntx)}')
+    set_bar_text(chart, tbar, f'RX: {naturalsize(nrx+prx)} TX: {naturalsize(ntx+ptx)} Total: {naturalsize(prx+ptx+nrx+ntx)}')
+    chart.barh(['Total'], [ptx + ntx], label='TX', left=[prx + nrx], color=['purple'])
+    chart.legend(handles=[rxbar, txbar])
+    chart.yaxis.set_label_text('Usage')
+    chart.yaxis.set_label_position('right')
+    chart.xaxis.set_ticks([0, prx + ptx + nrx + ntx], labels=['', naturalsize(prx + ptx + nrx + ntx)])   
 
 def animate(i, update_today=False):
     if config.config_changed:
@@ -216,26 +268,28 @@ def animate(i, update_today=False):
 
     if widgets['animation_notebook'].get_current_page() == 1 or update_today:
         updatecharts.do_today_chart()
+        return True
 
     if widgets['animation_notebook'].get_current_page() == 2:
         updatecharts.do_daily_chart()
+        return True
 
-    usagechart.clear()
-    usagechart.set(title=f"Cycle Dates: {sday.split(' ')[0]} - {eday.split(' ')[0]}")
-
-    nprxbar = usagechart.barh(['Non\nPrime'], [nrx], label='RX', color=['orange'])
-    usagechart.barh(['Non\nPrime'], [ntx], label='TX', left=[nrx], color=['purple'])
-    rxbar = usagechart.barh(['Prime'], [prx], label='RX', color=['orange'])
-    txbar = usagechart.barh(['Prime'], [ptx], label='TX', left=[prx], color=['purple'])
-    tbar = usagechart.barh(['Total'], [prx + nrx], label='RX', color=['orange'])
-    set_bar_text(usagechart, rxbar, f'RX: {naturalsize(prx)} TX: {naturalsize(ptx)} Total: {naturalsize(prx+ptx)}')
-    set_bar_text(usagechart, nprxbar, f'RX: {naturalsize(nrx)} TX: {naturalsize(ntx)} Total: {naturalsize(nrx+ntx)}')
-    set_bar_text(usagechart, tbar, f'RX: {naturalsize(nrx+prx)} TX: {naturalsize(ntx+ptx)} Total: {naturalsize(prx+ptx+nrx+ntx)}')
-    usagechart.barh(['Total'], [ptx + ntx], label='TX', left=[prx + nrx], color=['purple'])
-    usagechart.legend(handles=[rxbar, txbar])
-    usagechart.yaxis.set_label_text('Usage')
-    usagechart.yaxis.set_label_position('right')
-    usagechart.xaxis.set_ticks([0, prx + ptx + nrx + ntx], labels=['', naturalsize(prx + ptx + nrx + ntx)])
+    #usagechart.clear()
+    #usagechart.set(title=f"Cycle Dates: {sday.split(' ')[0]} - {eday.split(' ')[0]}")
+    update_usage_chart(usagechart, nrx, ntx, prx, ptx, f"Cycle Dates: {sday.split(' ')[0]} - {eday.split(' ')[0]}")
+    #nprxbar = usagechart.barh(['Non\nPrime'], [nrx], label='RX', color=['orange'])
+    #usagechart.barh(['Non\nPrime'], [ntx], label='TX', left=[nrx], color=['purple'])
+    #rxbar = usagechart.barh(['Prime'], [prx], label='RX', color=['orange'])
+    #txbar = usagechart.barh(['Prime'], [ptx], label='TX', left=[prx], color=['purple'])
+    #tbar = usagechart.barh(['Total'], [prx + nrx], label='RX', color=['orange'])
+    #set_bar_text(usagechart, rxbar, f'RX: {naturalsize(prx)} TX: {naturalsize(ptx)} Total: {naturalsize(prx+ptx)}')
+    #set_bar_text(usagechart, nprxbar, f'RX: {naturalsize(nrx)} TX: {naturalsize(ntx)} Total: {naturalsize(nrx+ntx)}')
+    #set_bar_text(usagechart, tbar, f'RX: {naturalsize(nrx+prx)} TX: {naturalsize(ntx+ptx)} Total: {naturalsize(prx+ptx+nrx+ntx)}')
+    #usagechart.barh(['Total'], [ptx + ntx], label='TX', left=[prx + nrx], color=['purple'])
+    #usagechart.legend(handles=[rxbar, txbar])
+    #usagechart.yaxis.set_label_text('Usage')
+    #usagechart.yaxis.set_label_position('right')
+    #usagechart.xaxis.set_ticks([0, prx + ptx + nrx + ntx], labels=['', naturalsize(prx + ptx + nrx + ntx)])
     availchart.clear()
     availchart.plot(sd._xaxis, sd._avail, linewidth=1, color='green')
     availchart.plot(sd._xaxis, availave, linewidth=1, linestyle='dotted', color='black')
@@ -352,7 +406,9 @@ def startup():
     # Populate missing data in the database
     history_db.populate(sd)
     # Force an update right away.
-    animate(1)
+    #animate(1)
+    now = datetime.datetime.now()
+    widgets['today_label'].set_text(f'{now.year}-{now.month:02}-{now.day:02}')
     return animation.FuncAnimation(fig, animate, interval=config.updateinterval)
 
 

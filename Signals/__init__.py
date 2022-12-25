@@ -49,6 +49,18 @@ class Signals(object):
     def add_timer(self, interval, func):
         return GLib.timeout_add_seconds(interval, func)
 
+    def on_date_button_clicked(self, widget):
+        self._widgets['calender_dialog'].show()
+
+    def on_date_ok_clicked(self, widget):
+        #print(dir(self._widgets['date_calender']))
+        date = self._widgets['date_calender'].get_date()
+        self._widgets['today_label'].set_text(f'{date[0]}-{date[1]+1:02}-{date[2]:02}')
+        self._widgets['calender_dialog'].hide()
+
+    def on_date_cancel(self, widget):
+        self._widgets['calender_dialog'].hide()
+
     def show_obstruction_map(self):
         map = self._sd.obstruction_map(config=self._config)  # Get the latest obstruction map in a temp file
         try:
