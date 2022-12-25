@@ -22,6 +22,8 @@ PRIME = """ SELECT sum(rx), sum(tx), avg(latency), avg(uptime) FROM history
             WHERE timestamp >= ? and timestamp < ?; """
 NON_PRIME = """ SELECT sum(rx), sum(tx), avg(latency), avg(uptime) FROM history
             WHERE timestamp LIKE ? and (timestamp < ? OR timestamp >= ?); """
+#NON_PRIME = """ SELECT sum(rx), sum(tx), avg(latency), avg(uptime) FROM history
+#            WHERE timestamp < ? OR timestamp >= ?; """
 CYCLE_USAGE = """ SELECT sum(rx), sum(tx), avg(latency), avg(uptime) FROM history
              WHERE datetime(timestamp, 'localtime') >= datetime(?, '-1 month') and datetime(timestamp, 'localtime') < datetime(?) """
 CYCLE_USAGE_PRIME = """ SELECT sum(rx), sum(tx), avg(latency), avg(uptime) FROM history
@@ -39,7 +41,7 @@ class History(object):
         self._config = config
         self.conn = None
         self._last_commit = 0
-        self._commit_interval = 1 # Only commit every X seconds
+        self._commit_interval = 10 # Only commit every X seconds
         if config is None:
             self._prime_start = 7
             self._prime_end = 23
@@ -110,13 +112,14 @@ class History(object):
     def get_prime_usage(self, year, month, day):
         self.cursor.execute(PRIME, (f'{year}-{month}-{day:02}T{self.prime_start:02}:00:00', f'{year}-{month}-{day:02}T{self.prime_end:02}:00:00'))
         row = self.cursor.fetchone()
-        return (row[0] if row[0] is not None else 0, row[1] if row[1] is not None else 0,
+        return (row[0]/2 if row[0] is not None else 0, row[1]/2 if row[1] is not None else 0,
                 0 if row[2] is None else row[2], 0 if row[3] is None else row[3])
 
     def get_non_prime_usage(self, year, month, day):
         self.cursor.execute(NON_PRIME, (f'{year}-{month}-{day:02}T%', f'{year}-{month}-{day:02}T{self.prime_start:02}:00:00', f'{year}-{month}-{day:02}T{self.prime_end:02}:00:00'))
+        #self.cursor.execute(NON_PRIME, (f'{year}-{month}-{day:02}T{self.prime_start:02}:00:00', f'{year}-{month}-{day:02}T{self.prime_end:02}:00:00'))
         row = self.cursor.fetchone()
-        return (0 if row[0] is None else row[0], 0 if row[1] is None else row[1],
+        return (0 if row[0] is None else row[0]/2, 0 if row[1] is None else row[1]/2,
                 0 if row[2] is None else row[2], 0 if row[3] is None else row[3])
 
     def get_cycle_usage(self, month=None, year=None):
