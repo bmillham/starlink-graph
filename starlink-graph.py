@@ -22,6 +22,7 @@ import io
 import time
 from Signals import Signals
 from History import History
+from UpdateCharts import UpdateCharts
 import numpy as np
 
 from SimpleHuman import naturalsize
@@ -69,157 +70,8 @@ def set_bar_text(chart, bar, text):
                 f" {text}",
                 ha='left', va='center')
 
-class UpdateCharts:
-    def __init__(self, db=None):
-        self.day_last_update = -1
-        self.today_last_update = -1
-        self.db = db
-        self.last_date = None
 
-        # The today tab
-        self.today_usage_fig = Figure(layout='constrained')
-        self.today_usage_ax = self.today_usage_fig.add_subplot()
-        self.today_usage_canvas = FigureCanvas(self.today_usage_fig)
-        self.today_usage_ax.set_title('Please wait, gathering data...')
-        self.today_fig = Figure(layout='constrained')
-        self.today_ax = self.today_fig.add_subplot()
-        self.today_canvas = FigureCanvas(self.today_fig)
-        self.today_ax.set_title('Please wait, gathering data...')
-
-        widgets['today_usage_box2'].pack_start(self.today_usage_canvas, True, True, 0)
-        widgets['today_usage_box1'].pack_start(self.today_canvas, True, True, 0)
-
-        # The daily tab
-        self.day_fig = Figure()
-        self.day_ax = self.day_fig.add_subplot()
-        self.day_canvas = FigureCanvas(self.day_fig)
-        widgets['dailybox'].pack_start(self.day_canvas, True, True, 0)
-
-    def do_daily_chart(self):
-        now = datetime.datetime.now()
-        date = widgets['today_label1'].get_text()
-        if now.minute == self.day_last_update and date == self.last_date:
-            return
-
-        sday, eday, prx, ptx, pavg, puptime, nrx, ntx, nave, nuptime, tave, tuptime = history_db.get_cycle_usage()
-        y, m, d = sday.split(' ')[0].split('-')
-        cycle_dates = history_db.get_cycle_dates(int(y), int(m), int(d))
-        labels = []
-        prime_rx = []
-        prime_tx = []
-        prime_total = []
-        nonprime_rx = []
-        nonprime_tx = []
-        nonprime_total = []
-        self.day_ax.clear()
-        for day in cycle_dates:
-            r, t, l, u = history_db.get_prime_usage(day.year, day.month, day.day)
-            labels.append(f'{day.year}-{day.month:02}-{day.day:02}')
-            prime_rx.append(r)
-            prime_tx.append(t)
-            prime_total.append(r+t)
-            r, t, l, u = history_db.get_non_prime_usage(day.year, day.month, day.day)
-            nonprime_rx.append(r)
-            nonprime_tx.append(t)
-            nonprime_total.append(r+t)
-            
-        width=0.35
-        x = np.arange(len(labels))
-        rect1 = self.day_ax.bar(x - width/2, prime_rx, width, label='Prime RX')
-        self.day_ax.bar(x - width/2, prime_tx, width, bottom=prime_rx, label='Prime TX')
-        rect2 = self.day_ax.bar(x + width/2, nonprime_rx, width, label='Non-Prime RX')
-        self.day_ax.bar(x + width/2, nonprime_tx, width, bottom=nonprime_rx, label='Non-Prime TX')
-
-        self.day_ax.yaxis.set_ticks([0, min(prime_total), max(prime_total), max(nonprime_total)], labels=['', naturalsize(min(prime_total)), naturalsize(max(prime_total)), naturalsize(max(nonprime_total))])
-        self.day_ax.xaxis.set_ticks([z for z in x if z % 2 != 0], labels=[labels[z] for z in x if z % 2 != 0])
-        self.day_ax.legend()
-        self.day_fig.autofmt_xdate()
-        self.day_ax.set_xlabel('Day')
-        #self.day_fig.tight_layout()
-        self.day_ax.set_title(f'Updated: {now.hour:02}:{now.minute:02}')
-        self.day_canvas.draw()
-        self.day_last_update = now.minute
-        self.last_date = date
-        widgets['cycle_usage_label'].set_text(f'{labels[0]} - {labels[-1]}')
-
-
-    def do_today_chart(self):
-        now = datetime.datetime.now()
-        minute = now.minute
-        hour = now.hour
-        date = widgets['today_label1'].get_text()
-        year, month, day = date.split('-')
-        year = int(year)
-        month = int(month)
-        day = int(day)
-        if minute == self.today_last_update and date == self.last_date:
-            return
-
-        if self.last_date == date and day != now.day:
-            self.today_ax.set_title('Will not auto update')
-            self.today_canvas.draw()
-            self.today_last_update = minute
-            return
-
-        prime_rx, prime_tx, l, u = history_db.get_prime_usage(year, month, day)
-        nonprime_rx, nonprime_tx, l, u = history_db.get_non_prime_usage(year, month, day)
-
-        self.today_ax.clear()
-
-        if prime_rx == 0 and nonprime_tx == 0:
-            self.today_ax.set_title('No data for this date')
-            #self.today_fig.tight_layout()
-            self.today_canvas.draw()
-            self.today_last_update = minute
-            self.last_date = date
-            return
-    
-        update_usage_chart(self.today_usage_ax, nonprime_rx, nonprime_tx, prime_rx, prime_tx, '')
-
-        for i in range(1, 4):
-            widgets[f'today_label{i}'].set_text(f'{now.year}-{now.month:02}-{now.day:02}')
-            widgets[f'updated_label{i}'].set_text(f'{now.hour:02}:{now.minute:02}')
-        width = 0.35
-        rx = []
-        tx = []
-        latency = []
-        uptime = []
-        for h in range(24):
-            if day == now.day and h > now.hour:
-                break
-            r, t, a, u = self.db.get_hour_usage(year, month, day, h)
-            rx.append(r)
-            tx.append(t)
-            if a > 0:
-                latency.append(a)
-            uptime.append(u)
-
-        max_hour = h
-        widgets['average_latency_label'].set_text(f'{mean(latency):.0f}ms')
-        widgets['min_latency_label'].set_text(f'{min(latency):.0f}ms')
-        widgets['max_latency_label'].set_text(f'{max(latency):.0f}ms')
-        widgets['uptime_label'].set_text(f'{mean(uptime):.1f}%')
-        x = np.arange(len(rx))
-        rects1 = self.today_ax.bar(x - width/2, rx, width, label='RX')
-        rects2 = self.today_ax.bar(x + width/2, tx, width, label='TX')
-        self.today_ax.legend()
-        m = [max(rx), max(tx)]
-        self.today_ax.yaxis.set_ticks([0, min(m), max(m)], labels=['', naturalsize(min(m)), naturalsize(max(m))])
-        if len(rx) > 7:
-            self.today_ax.xaxis.set_ticks([x for x in range(max_hour + 1) if x % 2 != 0], labels=[f'{x:02}' for x in range(max_hour +1) if x % 2 != 0])
-        else:
-            
-            self.today_ax.xaxis.set_ticks([x for x in range(len(rx))], labels=[f'{x:02}' for x in range(len(rx))])
-        self.today_ax.bar_label(rects1, padding=3, labels=[naturalsize(x) if x > 0 else "" for x in rects1.datavalues], rotation=90, fontsize=5)
-        self.today_ax.bar_label(rects2, padding=3, labels=[naturalsize(x) if x > 0 else "" for x in rects2.datavalues], rotation=90, fontsize=5)
-        self.today_ax.set_xlabel('Hour')
-        #self.today_fig.tight_layout()
-        self.today_canvas.draw()
-        self.today_usage_canvas.draw()
-        self.today_last_update = minute
-        self.last_date = date
-
-updatecharts = UpdateCharts(db=history_db)
+updatecharts = UpdateCharts(db=history_db, widgets=widgets)
 
 def update_usage_chart(chart, nrx, ntx, prx, ptx, title):
     chart.clear()
