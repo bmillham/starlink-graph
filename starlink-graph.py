@@ -135,10 +135,13 @@ class UpdateCharts:
         self.day_ax.legend()
         self.day_fig.autofmt_xdate()
         self.day_ax.set_xlabel('Day')
-        self.day_fig.tight_layout()
+        #self.day_fig.tight_layout()
+        self.day_ax.set_title(f'Updated: {now.hour:02}:{now.minute:02}')
         self.day_canvas.draw()
         self.day_last_update = now.minute
         self.last_date = date
+        widgets['cycle_usage_label'].set_text(f'{labels[0]} - {labels[-1]}')
+
 
     def do_today_chart(self):
         now = datetime.datetime.now()
@@ -165,7 +168,7 @@ class UpdateCharts:
 
         if prime_rx == 0 and nonprime_tx == 0:
             self.today_ax.set_title('No data for this date')
-            self.today_fig.tight_layout()
+            #self.today_fig.tight_layout()
             self.today_canvas.draw()
             self.today_last_update = minute
             self.last_date = date
@@ -210,7 +213,7 @@ class UpdateCharts:
         self.today_ax.bar_label(rects1, padding=3, labels=[naturalsize(x) if x > 0 else "" for x in rects1.datavalues], rotation=90, fontsize=5)
         self.today_ax.bar_label(rects2, padding=3, labels=[naturalsize(x) if x > 0 else "" for x in rects2.datavalues], rotation=90, fontsize=5)
         self.today_ax.set_xlabel('Hour')
-        self.today_fig.tight_layout()
+        #self.today_fig.tight_layout()
         self.today_canvas.draw()
         self.today_usage_canvas.draw()
         self.today_last_update = minute
