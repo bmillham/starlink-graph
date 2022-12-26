@@ -122,6 +122,16 @@ class History(object):
         return (0 if row[0] is None else row[0], 0 if row[1] is None else row[1],
                 0 if row[2] is None else row[2], 0 if row[3] is None else row[3])
 
+    def get_cycle_dates(self, year=None, month=None, day=None):
+        cycle_dates = []
+        day = datetime(year=year, month=month, day=self.billing_date)
+        while True:
+            if day.day == self.billing_date and month != day.month:
+                break
+            cycle_dates.append(day)
+            day += timedelta(days=1)
+        return cycle_dates
+                
     def get_cycle_usage(self, month=None, year=None):
         now = datetime.now()
         #print(now.isoformat())

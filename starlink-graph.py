@@ -77,37 +77,68 @@ class UpdateCharts:
         self.last_date = None
 
         # The today tab
-        self.today_usage_fig = Figure((3,1))
+        self.today_usage_fig = Figure(layout='constrained')
         self.today_usage_ax = self.today_usage_fig.add_subplot()
         self.today_usage_canvas = FigureCanvas(self.today_usage_fig)
         self.today_usage_ax.set_title('Please wait, gathering data...')
-        self.today_fig = Figure()
+        self.today_fig = Figure(layout='constrained')
         self.today_ax = self.today_fig.add_subplot()
         self.today_canvas = FigureCanvas(self.today_fig)
         self.today_ax.set_title('Please wait, gathering data...')
 
         widgets['today_usage_box2'].pack_start(self.today_usage_canvas, True, True, 0)
         widgets['today_usage_box1'].pack_start(self.today_canvas, True, True, 0)
-        #widgets['todaysw1'].add(self.today_usage_canvas)
-        #widgets['todaysw2'].add(self.today_canvas)
 
         # The daily tab
-        self.day_fig = Figure(figsize=(5, 4), dpi=100)
+        self.day_fig = Figure()
         self.day_ax = self.day_fig.add_subplot()
         self.day_canvas = FigureCanvas(self.day_fig)
         widgets['dailybox'].pack_start(self.day_canvas, True, True, 0)
 
-        #self.daily_toolbar = NavigationToolbar(self.day_canvas, window=widgets['window1'])
-        #widgets['dailybox'].pack_start(self.daily_toolbar, False, False, 0)
-
     def do_daily_chart(self):
-        print('updating daily')
+        now = datetime.datetime.now()
+        date = widgets['today_label1'].get_text()
+        if now.minute == self.day_last_update and date == self.last_date:
+            return
 
-        #s, e, r, t, l, u, nr, nt, nl, nu, tl, tu = history.get_cycle_usage()
-        #rx, tx, avg, uptime = history.get_prime_usage(year, month, day)
-        #nrx, ntx, navg, nuptime = history.get_non_prime_usage(year, month, day)
+        sday, eday, prx, ptx, pavg, puptime, nrx, ntx, nave, nuptime, tave, tuptime = history_db.get_cycle_usage()
+        y, m, d = sday.split(' ')[0].split('-')
+        cycle_dates = history_db.get_cycle_dates(int(y), int(m), int(d))
+        labels = []
+        prime_rx = []
+        prime_tx = []
+        prime_total = []
+        nonprime_rx = []
+        nonprime_tx = []
+        nonprime_total = []
+        self.day_ax.clear()
+        for day in cycle_dates:
+            r, t, l, u = history_db.get_prime_usage(day.year, day.month, day.day)
+            labels.append(f'{day.year}-{day.month:02}-{day.day:02}')
+            prime_rx.append(r)
+            prime_tx.append(t)
+            prime_total.append(r+t)
+            r, t, l, u = history_db.get_non_prime_usage(day.year, day.month, day.day)
+            nonprime_rx.append(r)
+            nonprime_tx.append(t)
+            nonprime_total.append(r+t)
+            
+        width=0.35
+        x = np.arange(len(labels))
+        rect1 = self.day_ax.bar(x - width/2, prime_rx, width, label='Prime RX')
+        self.day_ax.bar(x - width/2, prime_tx, width, bottom=prime_rx, label='Prime TX')
+        rect2 = self.day_ax.bar(x + width/2, nonprime_rx, width, label='Non-Prime RX')
+        self.day_ax.bar(x + width/2, nonprime_tx, width, bottom=nonprime_rx, label='Non-Prime TX')
+
+        self.day_ax.yaxis.set_ticks([0, min(prime_total), max(prime_total), max(nonprime_total)], labels=['', naturalsize(min(prime_total)), naturalsize(max(prime_total)), naturalsize(max(nonprime_total))])
+        self.day_ax.xaxis.set_ticks([z for z in x if z % 2 != 0], labels=[labels[z] for z in x if z % 2 != 0])
+        self.day_ax.legend()
+        self.day_fig.autofmt_xdate()
+        self.day_ax.set_xlabel('Day')
+        self.day_fig.tight_layout()
         self.day_canvas.draw()
-        #self.day_last_update = now.minute
+        self.day_last_update = now.minute
+        self.last_date = date
 
     def do_today_chart(self):
         now = datetime.datetime.now()
