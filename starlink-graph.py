@@ -22,7 +22,7 @@ import io
 import time
 from Signals import Signals
 from History import History
-from UpdateCharts import UpdateCharts
+from Charts.UsageCharts import UsageCharts
 import numpy as np
 
 from SimpleHuman import naturalsize
@@ -71,7 +71,7 @@ def set_bar_text(chart, bar, text):
                 ha='left', va='center')
 
 
-updatecharts = UpdateCharts(db=history_db, widgets=widgets)
+usagecharts = UsageCharts(db=history_db, widgets=widgets)
 
 def update_usage_chart(chart, nrx, ntx, prx, ptx, title):
     chart.clear()
@@ -145,11 +145,11 @@ def animate(i, update_today=False):
     sday, eday, prx, ptx, pavg, puptime, nrx, ntx, nave, nuptime, tave, tuptime = history_db.get_cycle_usage()
 
     if widgets['animation_notebook'].get_current_page() == 1 or update_today:
-        updatecharts.do_today_chart()
+        usagecharts.do_today_chart()
         return True
 
     if widgets['animation_notebook'].get_current_page() == 2:
-        updatecharts.do_daily_chart()
+        usagecharts.do_daily_chart()
         return True
 
     update_usage_chart(usagechart, nrx, ntx, prx, ptx, f"Cycle Dates: {sday.split(' ')[0]} - {eday.split(' ')[0]}")

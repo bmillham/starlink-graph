@@ -2,7 +2,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtk3agg import (FigureCanvasGTK3Agg as FigureCanvas)
 
 
-class UpdateCharts(object):
+class UsageCharts(object):
     from .do_daily_chart import do_daily_chart
     from .do_today_chart import do_today_chart
     from .update_usage_chart import update_usage_chart

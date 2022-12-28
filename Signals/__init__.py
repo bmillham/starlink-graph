@@ -55,7 +55,8 @@ class Signals(object):
     def on_date_ok_clicked(self, widget):
         #print(dir(self._widgets['date_calender']))
         date = self._widgets['date_calender'].get_date()
-        self._widgets['today_label'].set_text(f'{date[0]}-{date[1]+1:02}-{date[2]:02}')
+        for i in range(1, 4):
+            self._widgets[f'today_label{i}'].set_text(f'{date[0]}-{date[1]+1:02}-{date[2]:02}')
         self._widgets['calender_dialog'].hide()
 
     def on_date_cancel(self, widget):
