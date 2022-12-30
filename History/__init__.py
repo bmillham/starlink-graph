@@ -36,7 +36,7 @@ END_DATE = "select timestamp from history order by timestamp DESC LIMIT 1"
 ALL_DATES = "SELECT DATE(timestamp, 'localtime') FROM history GROUP BY DATE(timestamp, 'localtime');"
 
 class History(object):
-    def __init__(self, history_db="starlink-history.db", config=None):
+    def __init__(self, history_db="/mnt/Tardis/starlink-data/starlink-history.db", config=None):
         self._db = history_db
         self._config = config
         self.conn = None
