@@ -34,14 +34,18 @@ HOUR_USAGE = """select sum(rx), sum(tx), avg(latency), avg(uptime) from history 
 FIRST_DATE = "select timestamp from history order by timestamp asc limit 1"
 END_DATE = "select timestamp from history order by timestamp DESC LIMIT 1"
 ALL_DATES = "SELECT DATE(timestamp, 'localtime') FROM history GROUP BY DATE(timestamp, 'localtime');"
+INDEX = "CREATE UNIQUE INDEX timestamp_index ON history(timestamp)"
 
 class History(object):
-    def __init__(self, history_db="/mnt/Tardis/starlink-data/starlink-history.db", config=None):
+    #def __init__(self, history_db="/mnt/Tardis/starlink-data/starlink-history.db", config=None):
+    def __init__(self, history_db="starlink-history.db", config=None):
         self._db = history_db
         self._config = config
         self.conn = None
         self._last_commit = 0
         self._commit_interval = 10 # Only commit every X seconds
+        self._saved_history_non_prime = {}
+        self._saved_history_prime = {}
         if config is None:
             self._prime_start = 7
             self._prime_end = 23
@@ -63,6 +67,11 @@ class History(object):
         else:
             self.cursor = self.conn.cursor()
             self._create_table()
+        if self.conn is not None:
+            try:
+                self.cursor.execute(INDEX)
+            except Error as e:
+                print(f'Failed to create index: {e}')
 
     def commit(self):
         now = datetime.now().timestamp()
@@ -175,10 +184,14 @@ class History(object):
         tluse = []
         tuuse = []
         while True:
-            #print(idm1)
             idm1 = idm1 + timedelta(days=1)
-            use = self.get_prime_usage(idm1.year, idm1.month, idm1.day)
-            #print(idm1, use[0])
+            if idm1.year not in self._saved_history_prime:
+                self._saved_history_prime[idm1.year] = {}
+            if idm1.month not in self._saved_history_prime[idm1.year]:
+                self._saved_history_prime[idm1.year][idm1.month] = {}
+            if idm1.day not in self._saved_history_prime[idm1.year][idm1.month] or (y == idm1.year and m == idm1.month and d == idm1.day):
+                self._saved_history_prime[idm1.year][idm1.month][idm1.day] = self.get_prime_usage(idm1.year, idm1.month, idm1.day)
+            use = self._saved_history_prime[idm1.year][idm1.month][idm1.day]
             if use[0] > 0:
                 pruse.append(use[0])
                 ptuse.append(use[1])
@@ -186,7 +199,13 @@ class History(object):
                 puuse.append(use[3])
                 tluse.append(use[2])
                 tuuse.append(use[3])
-            nuse = self.get_non_prime_usage(idm1.year, idm1.month, idm1.day)
+            if idm1.year not in self._saved_history_non_prime:
+                self._saved_history_non_prime[idm1.year] = {}
+            if idm1.month not in self._saved_history_non_prime[idm1.year]:
+                self._saved_history_non_prime[idm1.year][idm1.month] = {}
+            if idm1.day not in self._saved_history_non_prime[idm1.year][idm1.month]:
+                self._saved_history_non_prime[idm1.year][idm1.month][idm1.day] = self.get_non_prime_usage(idm1.year, idm1.month, idm1.day)
+            nuse = self._saved_history_non_prime[idm1.year][idm1.month][idm1.day]
             if nuse[0] > 0:
                 nruse.append(nuse[0])
                 ntuse.append(nuse[1])
@@ -199,7 +218,6 @@ class History(object):
 
         self.cursor.execute(CYCLE_USAGE, (day, day))
         row = self.cursor.fetchone()
-        #print(row)
         return (dates_row[0], dates_row[1], sum(pruse), sum(ptuse), self._average(pluse), self._average(puuse),
                 sum(nruse), sum(ntuse), self._average(nluse), self._average(nuuse), self._average(tluse), self._average(tuuse))
 
@@ -217,7 +235,6 @@ class History(object):
     def get_hour_usage(self, year, month, day, hour):
         self.cursor.execute(HOUR_USAGE, (f'{year}-{month:02}-{day:02}T{hour:02}:%',))
         row = self.cursor.fetchone()
-        #print(row)
         return (0 if row[0] is None else row[0], 0 if row[1] is None else row[1],
                 0 if row[2] is None else row[2], 0 if row[3] is None else row[3])
 

@@ -145,16 +145,14 @@ def animate(i, update_today=False):
     sday, eday, prx, ptx, pavg, puptime, nrx, ntx, nave, nuptime, tave, tuptime = history_db.get_cycle_usage()
 
     if widgets['animation_notebook'].get_current_page() == 1 or update_today:
-    #    usagecharts.do_today_chart()
-        print('skipping page 1 update')
+        usagecharts.do_today_chart()
         return True
 
     if widgets['animation_notebook'].get_current_page() == 2:
-    #    usagecharts.do_daily_chart()
-        print('skipping page 2 update')
+        usagecharts.do_daily_chart()
         return True
 
-    #update_usage_chart(usagechart, nrx, ntx, prx, ptx, f"Cycle Dates: {sday.split(' ')[0]} - {eday.split(' ')[0]}")
+    update_usage_chart(usagechart, nrx, ntx, prx, ptx, f"Cycle Dates: {sday.split(' ')[0]} - {eday.split(' ')[0]}")
 
     availchart.clear()
     availchart.plot(sd._xaxis, sd._avail, linewidth=1, color='green')
@@ -220,6 +218,7 @@ def animate(i, update_today=False):
                                     f'Ave: {latave:.0f}',
                                     f'Max: {max(sd._latency):.0f}'])
     clear_history_images()
+
     return True
 
 
