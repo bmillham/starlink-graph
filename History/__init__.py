@@ -203,7 +203,7 @@ class History(object):
                 self._saved_history_non_prime[idm1.year] = {}
             if idm1.month not in self._saved_history_non_prime[idm1.year]:
                 self._saved_history_non_prime[idm1.year][idm1.month] = {}
-            if idm1.day not in self._saved_history_non_prime[idm1.year][idm1.month]:
+            if idm1.day not in self._saved_history_non_prime[idm1.year][idm1.month] or (y == idm1.year and m == idm1.month and d == idm1.day):
                 self._saved_history_non_prime[idm1.year][idm1.month][idm1.day] = self.get_non_prime_usage(idm1.year, idm1.month, idm1.day)
             nuse = self._saved_history_non_prime[idm1.year][idm1.month][idm1.day]
             if nuse[0] > 0:
