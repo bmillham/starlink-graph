@@ -119,13 +119,13 @@ class History(object):
         print(f'Done populating history. Inserted: {inserted} Dups: {dups}')
 
     def get_prime_usage(self, year, month, day):
-        self.cursor.execute(PRIME, (f'{year}-{month}-{day:02}T{self.prime_start:02}:00:00', f'{year}-{month}-{day:02}T{self.prime_end:02}:00:00'))
+        self.cursor.execute(PRIME, (f'{year}-{month:02}-{day:02}T{self.prime_start:02}:00:00', f'{year}-{month:02}-{day:02}T{self.prime_end:02}:00:00'))
         row = self.cursor.fetchone()
         return (row[0] if row[0] is not None else 0, row[1] if row[1] is not None else 0,
                 0 if row[2] is None else row[2], 0 if row[3] is None else row[3])
 
     def get_non_prime_usage(self, year, month, day):
-        self.cursor.execute(NON_PRIME, (f'{year}-{month}-{day:02}T%', f'{year}-{month}-{day:02}T{self.prime_start:02}:00:00', f'{year}-{month}-{day:02}T{self.prime_end:02}:00:00'))
+        self.cursor.execute(NON_PRIME, (f'{year}-{month:02}-{day:02}T%', f'{year}-{month:02}-{day:02}T{self.prime_start:02}:00:00', f'{year}-{month:02}-{day:02}T{self.prime_end:02}:00:00'))
         #self.cursor.execute(NON_PRIME, (f'{year}-{month}-{day:02}T{self.prime_start:02}:00:00', f'{year}-{month}-{day:02}T{self.prime_end:02}:00:00'))
         row = self.cursor.fetchone()
         return (0 if row[0] is None else row[0], 0 if row[1] is None else row[1],
