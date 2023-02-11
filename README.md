@@ -13,6 +13,7 @@ If you want your history then:</p>
 <li>The original database will be saved</li>
 <li>Once converted start the starlink-graph.py again</li>
 </ul>
+
 # Prerequisites
 You will need starlink-grps-tools from https://github.com/sparky8512/starlink-grpc-tools
 Some distributions (Manjaro) do not have matplotlib installed by default. Install it with pip3 install matplotlib
@@ -26,14 +27,18 @@ must be installed on your system.
 <li>You probably should use a venv!</li>
 <li>pip3 install 'sqlalchemy>=2.0'</li>
 </ul>
+
 # MacOS Notes
 Thank you to reddit user u/virtuallynathan for the following information<br/>
 Use <b>brew</b> to install these packages: cairo, gtk+3, gtksourceview3 gobject-introspection<br/>
 Use <b>pip3</b> to install: pyGObject, pychairo, humanize, matplotlib
+
 # Optional
 The humanize module is used if installed. Install it with pip3 install humanize
+
 # Preperation
 Copy the exemple starlink-graph-default.ini to starlink-graph.ini and edit it to change billing_date to the start day of your billing cycle.
+
 # Running
 Just clone the git and run the script: python starlink-graph.py
 <p>If you have the environment variable PYTHONPATH set to include the location of starlink-grpc-tools then
