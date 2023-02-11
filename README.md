@@ -17,16 +17,15 @@ If you want your history then:
 You will need starlink-grps-tools from https://github.com/sparky8512/starlink-grpc-tools
 Some distributions (Manjaro) do not have matplotlib installed by default. Install it with pip3 install matplotlib
 or apt install python3-matplotlib
-To create the new obstruction animation ffmpeg is required (called directly so no python modules are needed)
-NEW: Added experimental usage tracking. The data is saved in a sqlite3 database, so to use the feature sqlite3
+<p>To create the new obstruction animation ffmpeg is required (called directly so no python modules are needed)
+<p>NEW: Added experimental usage tracking. The data is saved in a sqlite3 database, so to use the feature sqlite3
 must be installed on your system. 
-NEW: Changed to using SQLAlchemy 2.0 for database access to allow usage with MySQL and other database.
+<p>NEW: Changed to using SQLAlchemy 2.0 for database access to allow usage with MySQL and other database.
 <ul>
 <li>Currenly only tested with sqlite3</li>
 <li>You probably should use a venv!</li>
 <li>pip3 install 'sqlalchemy>=2.0'</li>
 </ul>
-
 # MacOS Notes
 Thank you to reddit user u/virtuallynathan for the following information<br/>
 Use <b>brew</b> to install these packages: cairo, gtk+3, gtksourceview3 gobject-introspection<br/>
@@ -37,7 +36,7 @@ The humanize module is used if installed. Install it with pip3 install humanize
 Copy the exemple starlink-graph-default.ini to starlink-graph.ini and edit it to change billing_date to the start day of your billing cycle.
 # Running
 Just clone the git and run the script: python starlink-graph.py
-If you have the environment variable PYTHONPATH set to include the location of starlink-grpc-tools then
+<p>If you have the environment variable PYTHONPATH set to include the location of starlink-grpc-tools then
 the script should run. If you don't have it set you will prompted to select the location of starlink-grpc-tools
 # Release Notes
 <ul>
