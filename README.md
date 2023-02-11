@@ -43,6 +43,7 @@ Copy the exemple starlink-graph-default.ini to starlink-graph.ini and edit it to
 Just clone the git and run the script: python starlink-graph.py
 <p>If you have the environment variable PYTHONPATH set to include the location of starlink-grpc-tools then
 the script should run. If you don't have it set you will prompted to select the location of starlink-grpc-tools
+
 # Release Notes
 <ul>
 <li>V 0.2: Removed command line options in favor of having a GUI setting window.</li>
