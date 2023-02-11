@@ -23,13 +23,12 @@ class History(Base):
     def __repr__(self) -> str:
         return f'History(timestamp={self.timestamp!r}, letency={id.latency!r}'
 
-    def __init__(self, history_db="starlink-history.db", do_echo=False, config=None):
+    def __init__(self, history_db="sqlite+pysqlite:///starlink-history.db", do_echo=False, config=None):
         self._db = history_db
         self._config = config
         self.conn = None
-        self.engine = create_engine("sqlite+pysqlite:///starlink-history3.db",
-                                    echo=do_echo,
-                                    future=True)
+        self.engine = None
+        self._do_echo = do_echo
         self._last_commit = 0
         self._commit_interval = 60 # Only commit every X seconds
         self._saved_history_non_prime = {}
@@ -42,7 +41,7 @@ class History(Base):
             self._prime_start = config.prime_start
             self._prime_end = config.prime_end
             self._cycle_start_day = config.billing_date
-        self._create_database()
+        
 
     def _create_database(self):
         self.metadata.create_all(self.engine)
@@ -58,25 +57,23 @@ class History(Base):
         return stmt
 
     def connect(self):
-        self.conn = self.engine.connect()
-        return
-
-        # Old code
-        if sqlite3 is None:
-            return
         try:
-            self.conn = sqlite3.connect(self._db)
-        except Error as e:
-            print(f'Connect to {self._db} failed: {e}')
-            self.conn = None
-        else:
-            self.cursor = self.conn.cursor()
-            self._create_table()
-        if self.conn is not None:
-            try:
-                self.cursor.execute(INDEX)
-            except Error as e:
-                print(f'Failed to create index: {e}')
+            self.engine = create_engine(self._db,
+                                        echo=self._do_echo,
+                                        future=True)
+        except:
+            print(f'Failed to create engine to {self._db}')
+            exit(0)
+
+        self._create_database() # Create the database. Does nothing if the database exists
+
+        try:
+            self.conn = self.engine.connect()
+        except:
+            print(f'Failed to connect to {self._db}')
+            exit(0)
+
+        return
 
     def commit(self):
         now = datetime.now().timestamp()
@@ -95,7 +92,7 @@ class History(Base):
         try:
             self.conn.execute(stmt)
         except exc.IntegrityError as e:
-            print(f'{e} trying to execute {stmt}')
+            print(f'Duplicate entry for {data._xaxis[cnt]}')
             return False
         self.commit()
         return True
@@ -107,10 +104,14 @@ class History(Base):
         inserted = 0
         stmt = select(History.timestamp).order_by(History.timestamp.desc()).limit(1)
         last = self.conn.execute(stmt).fetchone()
-        print(f'Populating history to the database from {last.timestamp}')
+        if last is not None:
+            print(f'Populating history to the database from {last.timestamp}')
+            lasttime = last.timestamp
+        else:
+            lasttime = datetime.now() + timedelta(days=-1)
         for i in data._xaxis:
             x = i.replace(microsecond=0)
-            if x > last.timestamp.replace(tzinfo=x.tzinfo):
+            if x > lasttime.replace(tzinfo=x.tzinfo):
                 stmt = self._insert(timestamp=x.replace(tzinfo=x.tzinfo),
                                    latency=data._latency[cnt],
                                    uptime=data._avail[cnt],
