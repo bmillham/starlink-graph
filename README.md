@@ -15,9 +15,9 @@ If you want your history then:</p>
 </ul>
 
 # Prerequisites
-You will need starlink-grps-tools from https://github.com/sparky8512/starlink-grpc-tools
-Some distributions (Manjaro) do not have matplotlib installed by default. Install it with pip3 install matplotlib
-or apt install python3-matplotlib
+You will need starlink-grps-tools from https://github.com/sparky8512/starlink-grpc-tools<br>
+Some distributions (Manjaro) do not have matplotlib installed by default. Install it with <b>pip3 install matplotlib</b>
+or <b>apt install python3-matplotlib</b>
 <p>To create the new obstruction animation ffmpeg is required (called directly so no python modules are needed)
 <p>NEW: Added experimental usage tracking. The data is saved in a sqlite3 database, so to use the feature sqlite3
 must be installed on your system. 
@@ -37,7 +37,7 @@ Use <b>pip3</b> to install: pyGObject, pychairo, humanize, matplotlib
 The humanize module is used if installed. Install it with pip3 install humanize
 
 # Preperation
-Copy the exemple starlink-graph-default.ini to starlink-graph.ini and edit it to change billing_date to the start day of your billing cycle.
+Copy the example starlink-graph-default.ini to starlink-graph.ini and edit it to change billing_date to the start day of your billing cycle.
 
 # Running
 Just clone the git and run the script: python starlink-graph.py
