@@ -1,6 +1,6 @@
 import datetime
 import numpy as np
-from SimpleHuman import naturalsize
+from simplehuman import naturalsize
 from statistics import mean, StatisticsError
 
 def do_today_chart(self):
@@ -21,8 +21,8 @@ def do_today_chart(self):
         self.today_last_update = minute
         return
 
-    prime_rx, prime_tx, l, u = self._db.get_prime_usage(year, month, day)
-    nonprime_rx, nonprime_tx, l, u = self._db.get_non_prime_usage(year, month, day)
+    prime_rx, prime_tx, l, u = self._db.get_usage(syear=year, smonth=month, sday=day, prime=True)
+    nonprime_rx, nonprime_tx, l, u = self._db.get_usage(syear=year, smonth=month, sday=day)
 
     self.today_ax.clear()
 

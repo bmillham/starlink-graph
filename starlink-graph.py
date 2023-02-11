@@ -16,16 +16,16 @@ import matplotlib.animation as animation
 import datetime
 from statistics import mean, StatisticsError
 import sys
-from Config import Config
+from config import Config
 import os
 import io
 import time
-from Signals import Signals
-from History import History
-from Charts.UsageCharts import UsageCharts
+from signals import Signals
+from history import History
+from charts.usagecharts import UsageCharts
 import numpy as np
 
-from SimpleHuman import naturalsize
+from simplehuman import naturalsize
 
 configfile = 'starlink-graph.ini'
 defaultconfigfile = 'starlink-graph-default.ini'
@@ -152,7 +152,7 @@ def animate(i, update_today=False):
         usagecharts.do_daily_chart()
         return True
 
-    update_usage_chart(usagechart, nrx, ntx, prx, ptx, f"Cycle Dates: {sday.split(' ')[0]} - {eday.split(' ')[0]}")
+    update_usage_chart(usagechart, nrx, ntx, prx, ptx, f"Cycle Dates: {sday.year}-{sday.month:02}-{sday.day:02} to {eday.year}-{eday.month:02}-{eday.day:02}")
 
     availchart.clear()
     availchart.plot(sd._xaxis, sd._avail, linewidth=1, color='green')

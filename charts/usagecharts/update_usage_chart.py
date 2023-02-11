@@ -1,4 +1,4 @@
-from SimpleHuman import naturalsize
+from simplehuman import naturalsize
 
 def update_usage_chart(self, chart, nrx, ntx, prx, ptx, title):
     chart.clear()
