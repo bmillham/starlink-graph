@@ -3,9 +3,9 @@ Show Starlink stats in a nice graph in an app instead of using a web browser. It
 # Important Information!
 The database has changed in this version!
 <p>
-If you don't care about the history then you can just remove starlink-history.db.
+If you don't care about the history then you can just remove starlink-history.db.</p>
 <p>
-If you want your history then:
+If you want your history then:</p>
 <ul>
 <li>Stop any currently running version</li>
 <li>Run <b>python convert_database.py</b> to convert the database</li>
