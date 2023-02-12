@@ -47,8 +47,8 @@ for row in cursor.fetchall():
 
     try:
         hist_db.conn.execute(stmt)
-    except:
-        print('error')
+    except Error as e:
+        print('Error inserting row:', e)
     cnt += 1
 
 hist_db.conn.commit()
