@@ -34,7 +34,10 @@ cnt = 0
 for row in cursor.fetchall():
     if cnt % 1000 == 0:
         print(f'Convert {cnt}/{count}')
-    ts = datetime.fromisoformat(row[1])
+    try:
+        ts = datetime.fromisoformat(row[1])
+    except ValueError:
+        ts = datetime.fromtimestamp(int(str(row[1])))
     prime = True if ts.hour >= 7 and ts.hour < 23 else False
     stmt = hist_db._insert(timestamp=datetime.fromisoformat(row[1]),
                                         latency=row[2],
