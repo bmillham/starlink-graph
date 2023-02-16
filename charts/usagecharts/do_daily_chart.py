@@ -22,13 +22,13 @@ def do_daily_chart(self):
     while day < eday:
         r, t, l, u = self._db.get_usage(day.year, day.month, day.day, prime=True)
         labels.append(f'{day.year}-{day.month:02}-{day.day:02}')
-        prime_rx.append(r)
-        prime_tx.append(t)
-        prime_total.append(r+t)
+        prime_rx.append(int(r))
+        prime_tx.append(int(t))
+        prime_total.append(int(r+t))
         r, t, l, u = self._db.get_usage(day.year, day.month, day.day)
-        nonprime_rx.append(r)
-        nonprime_tx.append(t)
-        nonprime_total.append(r+t)
+        nonprime_rx.append(int(r))
+        nonprime_tx.append(int(t))
+        nonprime_total.append(int(r+t))
         day += timedelta(days=1)
 
     width=0.35
