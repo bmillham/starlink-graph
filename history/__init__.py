@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, select, MetaData, Boolean
+from sqlalchemy import create_engine, select, MetaData, Boolean, text
 from sqlalchemy import Table, Column, Integer, DateTime, String, Float, insert, func, and_, or_
 from sqlalchemy.orm import Mapped, DeclarativeBase
 from sqlalchemy.orm import mapped_column
@@ -41,10 +41,24 @@ class History(Base):
             self._prime_start = config.prime_start
             self._prime_end = config.prime_end
             self._cycle_start_day = config.billing_date
+            self._db = config.database_url
         
 
     def _create_database(self):
-        self.metadata.create_all(self.engine)
+        try:
+            self.metadata.create_all(self.engine)
+        except exc.OperationalError:
+            db_type = self._db.split(':')[0]; # Find the database type
+            db_name = self._db.split('/')[-1] # Find the database name
+            db_server = self._db.split('/')[-2] # Find the server
+            print('Database error, attempting to create')
+            engine = create_engine(f'{db_type}://{db_server}')
+            conn = engine.connect()
+            conn.execute(text(f'CREATE DATABASE `{db_name}`;'))
+            conn.close()
+            #self.connect()
+            self.metadata.create_all(self.engine)
+
 
     def _insert(self, timestamp, latency, uptime, rx, tx):
         prime = True if timestamp.hour >= self._prime_start and timestamp.hour < self._prime_end else False
@@ -66,13 +80,11 @@ class History(Base):
             exit(0)
 
         self._create_database() # Create the database. Does nothing if the database exists
-
         try:
             self.conn = self.engine.connect()
         except:
             print(f'Failed to connect to {self._db}')
             exit(0)
-
         return
 
     def commit(self):

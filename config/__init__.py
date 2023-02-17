@@ -164,3 +164,7 @@ class Config(object):
     @config_changed.setter
     def config_changed(self, value):
         self._config_changed = value
+
+    @property
+    def database_url(self):
+        return self._opts.get('database_url')
