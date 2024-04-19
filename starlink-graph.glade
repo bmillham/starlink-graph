@@ -793,8 +793,8 @@
     <property name="transient-for">window1</property>
     <property name="attached-to">window1</property>
     <property name="program-name">Starlink-Graph</property>
-    <property name="version">0.6</property>
-    <property name="copyright" translatable="yes">(2022) Brian Millham</property>
+    <property name="version">0.7</property>
+    <property name="copyright" translatable="yes">(2022-2024) Brian Millham</property>
     <property name="comments" translatable="yes">Dishy Version:
 Uptime:</property>
     <property name="website">https://github.com/bmillham/starlink-graph</property>
@@ -2058,50 +2058,10 @@ Select the correct directory in the following dialog.</property>
               </packing>
             </child>
             <child>
-              <!-- n-columns=2 n-rows=3 -->
+              <!-- n-columns=2 n-rows=1 -->
               <object class="GtkGrid">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <child>
-                  <object class="GtkSpinButton" id="primestartspin">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="input-purpose">number</property>
-                    <property name="adjustment">primestartadjustment</property>
-                    <property name="climb-rate">1</property>
-                    <property name="value">7</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">end</property>
-                    <property name="margin-right">10</property>
-                    <property name="label" translatable="yes">Prime Time Start:</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">end</property>
-                    <property name="margin-right">10</property>
-                    <property name="label" translatable="yes">Prime Time End:</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">1</property>
-                  </packing>
-                </child>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
@@ -2113,20 +2073,7 @@ Select the correct directory in the following dialog.</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
-                    <property name="top-attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkSpinButton" id="primeendspin">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="input-purpose">number</property>
-                    <property name="adjustment">primeendadjustment</property>
-                    <property name="numeric">True</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">1</property>
+                    <property name="top-attach">0</property>
                   </packing>
                 </child>
                 <child>
@@ -2140,7 +2087,7 @@ Select the correct directory in the following dialog.</property>
                   </object>
                   <packing>
                     <property name="left-attach">1</property>
-                    <property name="top-attach">2</property>
+                    <property name="top-attach">0</property>
                   </packing>
                 </child>
               </object>
@@ -2152,7 +2099,7 @@ Select the correct directory in the following dialog.</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Usage/Billing</property>
+                <property name="label" translatable="yes">Billing</property>
               </object>
               <packing>
                 <property name="position">3</property>

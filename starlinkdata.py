@@ -14,6 +14,7 @@ class StarlinkData:
         self._download = []
         self._avail = []
         self._outages = []
+        self._state = []
         self._outages_by_cause = {}
         self._last_data = None
         self._last_obstructions = None
@@ -35,26 +36,39 @@ class StarlinkData:
         self._no_data_color_a, self._no_data_color_r, self._no_data_color_g, self._no_data_color_b = self._color_conv(
             config.no_data_color)
 
-    def current_data(self):
-        try:
-           self._last_data, self._last_obstructions, self._last_alerts = starlink_grpc.status_data()
-        except:
-            self._last_data = {'downlink_throughput_bps': 0,
-                               'pop_ping_latency_ms': 0,
-                               'pop_ping_drop_rate': 0,
-                               'uplink_throughput_bps': 0,
-                               'state': 'UNKNOWN'}
-        self._last_data['datetimestamp_utc'] = datetime.datetime.now().astimezone()
+    def current_data(self, db=None):
+        if db is not None:
+            row = db.current_data()
+            self._last_data = {'datetimestamp_utc': row.timestamp,
+                               'downlink_throughput_bps': row.rx,
+                               'pop_ping_latency_ms': row.latency,
+                               'pop_ping_drop_rate': row.uptime,
+                               'uplink_throughput_bps': row.tx,
+                               'state': 'CONNECTED'}
+        else:
+            try:
+               self._last_data, self._last_obstructions, self._last_alerts = starlink_grpc.status_data()
+            except:
+                self._last_data = {'downlink_throughput_bps': 0,
+                                   'pop_ping_latency_ms': 0,
+                                   'pop_ping_drop_rate': 0,
+                                   'uplink_throughput_bps': 0,
+                                   'state': 'UNKNOWN'}
+            self._last_data['datetimestamp_utc'] = datetime.datetime.now().astimezone()
 
         self._xaxis.append(self._last_data['datetimestamp_utc'])
         self._latency.append(self._last_data['pop_ping_latency_ms'])
         self._upload.append(self._last_data['uplink_throughput_bps'])
         self._download.append(self._last_data['downlink_throughput_bps'])
-        self._avail.append(100 - (self._last_data['pop_ping_drop_rate'] * 100))
+        if db:
+            self._avail.append(self._last_data['pop_ping_drop_rate'])
+        else:
+            self._avail.append(100 - (self._last_data['pop_ping_drop_rate'] * 100))
         self.pop_history()
 
     def pop_history(self):
-        while (self._xaxis[-1] - self._xaxis[0]).seconds > self._config.history:
+        last = self._xaxis[-1].replace(microsecond=0).replace(tzinfo=self._xaxis[0].tzinfo)
+        while (last - self._xaxis[0]).seconds > self._config.history:
             self._xaxis.pop(0)
             self._latency.pop(0)
             self._upload.pop(0)
@@ -74,7 +88,19 @@ class StarlinkData:
         return leapseconds.gps_to_utc(datetime.datetime(1980,1,6) +
                                       datetime.timedelta(seconds=(timestamp/1000000000)+tzoff))
 
-    def history(self):
+    def history(self, db=None):
+        if db is not None:
+            self._clear_stats()
+            for row in  db.get_history_bulk_data():
+                ts = row.timestamp.replace(microsecond=0).replace(tzinfo=row.timestamp.tzinfo)
+                self._xaxis.append(ts.replace(tzinfo=ts.tzinfo))
+                self._latency.append(row.latency)
+                self._avail.append(row.uptime)
+                self._download.append(row.rx)
+                self._upload.append(row.tx)
+                self._state.append(row.state)
+            return
+
         z = starlink_grpc.history_bulk_data(self._config.history)[1]
         seconds = self._config.history
         dtstart = datetime.datetime.now().astimezone() - datetime.timedelta(seconds=seconds)

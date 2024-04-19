@@ -21,12 +21,13 @@ def do_today_chart(self):
         self.today_last_update = minute
         return
 
-    prime_rx, prime_tx, l, u = self._db.get_usage(syear=year, smonth=month, sday=day, prime=True)
-    nonprime_rx, nonprime_tx, l, u = self._db.get_usage(syear=year, smonth=month, sday=day)
+    #prime_rx, prime_tx, l, u = self._db.get_usage(syear=year, smonth=month, sday=day, prime=True)
+    #nonprime_rx, nonprime_tx, l, u = self._db.get_usage(syear=year, smonth=month, sday=day)
+    total_rx, total_tx, l, u = self._db.get_usage(syear=year, smonth=month, sday=day)
 
     self.today_ax.clear()
 
-    if prime_rx == 0 and nonprime_tx == 0:
+    if total_rx == 0 and total_tx == 0:
         self.today_ax.set_title('No data for this date')
         #self.today_fig.tight_layout()
         self.today_canvas.draw()
@@ -34,7 +35,7 @@ def do_today_chart(self):
         self.last_date = date
         return
 
-    self.update_usage_chart(self.today_usage_ax, nonprime_rx, nonprime_tx, prime_rx, prime_tx, '')
+    self.update_usage_chart(self.today_usage_ax, total_rx, total_tx, '')
 
     for i in range(1, 4):
         self._widgets[f'today_label{i}'].set_text(f'{now.year}-{now.month:02}-{now.day:02}')

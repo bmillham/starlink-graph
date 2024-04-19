@@ -1,93 +1,67 @@
 from sqlalchemy import create_engine, select, MetaData, Boolean, text
-from sqlalchemy import Table, Column, Integer, DateTime, String, Float, insert, func, and_, or_
+from sqlalchemy import Table, Column, Integer, DateTime, String, Text, Float, insert, func, and_, or_
 from sqlalchemy.orm import Mapped, DeclarativeBase
 from sqlalchemy.orm import mapped_column
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import exc
 from datetime import datetime, timedelta, timezone
 import dateutil.relativedelta
+#class Base(DeclarativeBase):
+#    pass
+Base = declarative_base()
+from .historytable import HistoryTable
+from .outagestable import OutagesTable
 
-class Base(DeclarativeBase):
-    pass
+class History():
 
-class History(Base):
-    __tablename__ = "history"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    timestamp: Mapped[datetime] = mapped_column(DateTime, unique=True)
-    latency: Mapped[float] = mapped_column(Float)
-    uptime: Mapped[float] = mapped_column(Float)
-    rx: Mapped[int] = mapped_column(Integer)
-    tx: Mapped[int] = mapped_column(Integer)
-    prime: Mapped[bool] = mapped_column(Boolean)
-
-    def __repr__(self) -> str:
-        return f'History(timestamp={self.timestamp!r}, letency={id.latency!r}'
 
     def __init__(self, history_db="sqlite+pysqlite:///starlink-history.db", do_echo=False, config=None):
+
         self._db = history_db
         self._config = config
         self.conn = None
         self.engine = None
         self._do_echo = do_echo
         self._last_commit = 0
-        self._commit_interval = 60 # Only commit every X seconds
-        self._saved_history_non_prime = {}
-        self._saved_history_prime = {}
+        self._commit_interval = 1 # Only commit every X seconds
+        self._saved_history = {}
+        #self.history_table = HistoryTable(config)
         if config is None:
-            self._prime_start = 7
-            self._prime_end = 23
             self._cycle_start_day = 27
         else:
-            self._prime_start = config.prime_start
-            self._prime_end = config.prime_end
             self._cycle_start_day = config.billing_date
             self._db = config.database_url
         
 
-    def _create_database(self):
-        try:
-            self.metadata.create_all(self.engine)
-        except exc.OperationalError:
-            db_type = self._db.split(':')[0]; # Find the database type
-            db_name = self._db.split('/')[-1] # Find the database name
-            db_server = self._db.split('/')[-2] # Find the server
-            print('Database error, attempting to create')
-            engine = create_engine(f'{db_type}://{db_server}')
-            conn = engine.connect()
-            conn.execute(text(f'CREATE DATABASE `{db_name}`;'))
-            conn.close()
-            #self.connect()
-            self.metadata.create_all(self.engine)
-
-
-    def _insert(self, timestamp, latency, uptime, rx, tx):
-        prime = True if timestamp.hour >= self._prime_start and timestamp.hour < self._prime_end else False
-        stmt = insert(History).values(timestamp=timestamp.replace(microsecond=0),
-                                      latency=latency,
-                                      uptime=uptime,
-                                      rx=rx,
-                                      tx=tx,
-                                      prime=prime)
-        return stmt
-
     def connect(self):
+        print('Connecting to database')
         try:
             self.engine = create_engine(self._db,
                                         echo=self._do_echo,
                                         future=True)
         except:
             print(f'Failed to create engine to {self._db}')
-            exit(0)
+            self.conn = None
+            return
 
-        self._create_database() # Create the database. Does nothing if the database exists
+        #self._create_database() # Create the database. Does nothing if the database exists
+        #self.history_table.engine = self.engine
+        #self.history_table._create_database()
+        print('Doing connect')
         try:
             self.conn = self.engine.connect()
         except:
             print(f'Failed to connect to {self._db}')
-            exit(0)
+            self.conn = None
+        print('connected')
+        self.history_table = HistoryTable(self._config, engine=self.engine, conn=self.conn)
+        #self.history_table.conn = self.conn
+        self.history_table._create_database()
         return
 
     def commit(self):
+        if self.conn is None:
+            return
         now = datetime.now().timestamp()
         if now > self._last_commit + self._commit_interval:
             self.conn.commit()
@@ -96,26 +70,20 @@ class History(Base):
 
 
     def insert_data(self, data, cnt=-1, commit=True):
-        stmt = self._insert(timestamp=data._xaxis[cnt],
-                            latency=data._latency[cnt],
-                            uptime=data._avail[cnt],
-                            rx=data._download[cnt],
-                            tx=data._upload[cnt])
-        try:
-            self.conn.execute(stmt)
-        except exc.IntegrityError as e:
-            print(f'Duplicate entry for {data._xaxis[cnt]}')
-            return False
-        self.commit()
-        return True
-        
+        if self.conn is None:
+            return
+        self.history_table.insert_data(data, cnt=-1, commit=True)
 
     def populate(self, data):
+        if self.conn is None:
+            print('No database to populate from')
+            return
         cnt = 0
         dups = 0
         inserted = 0
-        stmt = select(History.timestamp).order_by(History.timestamp.desc()).limit(1)
+        stmt = select(HistoryTable.timestamp).order_by(HistoryTable.timestamp.desc()).limit(1)
         last = self.conn.execute(stmt).fetchone()
+
         if last is not None:
             print(f'Populating history to the database from {last.timestamp}')
             lasttime = last.timestamp
@@ -124,13 +92,8 @@ class History(Base):
         for i in data._xaxis:
             x = i.replace(microsecond=0)
             if x > lasttime.replace(tzinfo=x.tzinfo):
-                stmt = self._insert(timestamp=x.replace(tzinfo=x.tzinfo),
-                                   latency=data._latency[cnt],
-                                   uptime=data._avail[cnt],
-                                   rx=data._download[cnt],
-                                   tx=data._upload[cnt])
                 try:
-                    self.conn.execute(stmt)
+                    self.history_table.insert_data(data=data, cnt=cnt)
                 except exc.IntegrityError:
                     dups += 1
                 else:
@@ -140,28 +103,23 @@ class History(Base):
     
         print(f'Done populating history. Inserted: {inserted} Dups: {dups}')
 
-    def get_usage(self, syear=None, smonth=None, sday=None, eyear=None, emonth=None, eday=None, prime=False):
+    def get_usage(self, syear=None, smonth=None, sday=None, eyear=None, emonth=None, eday=None):
+        if self.conn is None:
+            return None
         start_date = datetime(syear, smonth, sday)
         if eyear is None:
             end_date = start_date + timedelta(days=1)
         else:
             end_date = datetime(eyear, emonth, eday)
-        if prime is not None:
-            stmt = select(func.sum(History.rx),
-                          func.sum(History.tx),
-                          func.avg(History.latency),
-                          func.avg(History.uptime)).where(and_(
-                              and_(
-                                  History.timestamp >= start_date,
-                                  History.timestamp < end_date),
-                              History.prime == prime))
-        else:
-            stmt = select(func.sum(History.rx),
-                          func.sum(History.tx),
-                          func.avg(History.latency),
-                          func.avg(History.uptime)).where(and_(
-                              History.timestamp >= start_date,
-                              History.timestamp < end_date))
+        stmt = select(func.sum(HistoryTable.rx),
+                      func.sum(HistoryTable.tx),
+                      func.avg(HistoryTable.latency),
+                      func.avg(HistoryTable.uptime)).where(
+                          and_(
+                              HistoryTable.timestamp >= start_date,
+                              HistoryTable.timestamp < end_date)
+                      )
+                     
 
         row = self.conn.execute(stmt).fetchone()
         return (row[0] if row[0] is not None else 0, row[1] if row[1] is not None else 0,
@@ -169,6 +127,8 @@ class History(Base):
 
 
     def get_cycle_usage(self, month=None, year=None):
+        if self.conn is None:
+            return None
         now = datetime.now()
         if month is not None or year is not None:
             now = datetime(year=year, month=month, day=1)
@@ -177,32 +137,57 @@ class History(Base):
         # First day of the billine cycle
         first_date = last_date + dateutil.relativedelta.relativedelta(months=-1)
 
-        prime = self.get_usage(syear=first_date.year, smonth=first_date.month, sday=first_date.day,
-                               eyear=last_date.year, emonth=last_date.month, eday=last_date.day, prime=True)
-        nonprime = self.get_usage(syear=first_date.year, smonth=first_date.month, sday=first_date.day,
-                                  eyear=last_date.year, emonth=last_date.month, eday=last_date.day, prime=False)
         total = self.get_usage(syear=first_date.year, smonth=first_date.month, sday=first_date.day,
-                               eyear=last_date.year, emonth=last_date.month, eday=last_date.day, prime=None)
-
+                               eyear=last_date.year, emonth=last_date.month, eday=last_date.day)
         return (first_date, last_date,
-                prime[0], prime[1], prime[2], prime[3],
-                nonprime[0], nonprime[1], nonprime[2], nonprime[3],
-                total[2], total[3])
+                total[0], total[1], total[2], total[3])
 
     def get_hour_usage(self, year, month, day, hour):
+        if self.conn is None:
+            return None
         start = datetime(year, month, day, hour)
         end = start + timedelta(hours=1)
-        stmt = select(func.sum(History.rx),
-                      func.sum(History.tx),
-                      func.avg(History.latency),
-                      func.avg(History.uptime)).where(and_(
-                          History.timestamp >= start,
-                          History.timestamp < end))
+        stmt = select(func.sum(HistoryTable.rx),
+                      func.sum(HistoryTable.tx),
+                      func.avg(HistoryTable.latency),
+                      func.avg(HistoryTable.uptime)).where(and_(
+                          HistoryTable.timestamp >= start,
+                          HistoryTable.timestamp < end))
 
         row = self.conn.execute(stmt).fetchone()
         return (0 if row[0] is None else row[0], 0 if row[1] is None else row[1],
                 0 if row[2] is None else row[2], 0 if row[3] is None else row[3])
-        
+
+    def current_data(self):
+        if self.conn is None:
+            return None
+        stmt = select(HistoryTable.timestamp,
+                      HistoryTable.rx,
+                      HistoryTable.tx,
+                      HistoryTable.latency,
+                      HistoryTable.uptime,
+                      HistoryTable.state).order_by(HistoryTable.timestamp.desc()).limit(1)
+        self.commit()
+        row = self.conn.execute(stmt).fetchone()
+        return row
+
+    def get_history_bulk_data(self):
+        if self.conn is None:
+            return None
+        end = datetime.now()
+        start = end - timedelta(seconds=self._config.history)
+        print(f'Reading bulk data from {start} to {end} from the database')
+
+        stmt = select(HistoryTable.timestamp,
+                      HistoryTable.rx,
+                      HistoryTable.tx,
+                      HistoryTable.latency,
+                      HistoryTable.uptime,
+                      HistoryTable.state).where(and_(
+                          HistoryTable.timestamp >= start,
+                          HistoryTable.timestamp <= end))
+        return self.conn.execute(stmt).fetchall()
+
     @property
     def prime_start(self):
         return self._prime_start

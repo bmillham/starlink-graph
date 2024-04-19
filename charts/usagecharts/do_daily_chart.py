@@ -8,7 +8,7 @@ def do_daily_chart(self):
     if now.minute == self.day_last_update and date == self.last_date:
         return
 
-    sday, eday, prx, ptx, pavg, puptime, nrx, ntx, nave, nuptime, tave, tuptime = self._db.get_cycle_usage()
+    sday, eday, rx, tx, latency, uptime  = self._db.get_cycle_usage()
     labels = []
     prime_rx = []
     prime_tx = []
@@ -20,7 +20,7 @@ def do_daily_chart(self):
     day = sday
 
     while day < eday:
-        r, t, l, u = self._db.get_usage(day.year, day.month, day.day, prime=True)
+        r, t, l, u = self._db.get_usage(day.year, day.month, day.day)
         labels.append(f'{day.year}-{day.month:02}-{day.day:02}')
         prime_rx.append(int(r))
         prime_tx.append(int(t))

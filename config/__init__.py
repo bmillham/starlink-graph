@@ -42,8 +42,6 @@ class Config(object):
                                    'video_codec': self._widgets['video_codec_cb'].get_active(),
                                    'video_size': self._widgets['video_size_cb'].get_active(),
                                    'video_duration': str(int(self._widgets['video_duration_spin_button'].get_value())),
-                                   'prime_start': int(self._widgets['primestartspin'].get_value()),
-                                   'prime_end': int(self._widgets['primeendspin'].get_value()),
                                    'billing_date': int(self._widgets['billingdayspin'].get_value()),
                                    'animation_directory': '' if self._widgets[
                                                                     'animation_output_directory'].get_filename() is None else
@@ -147,13 +145,6 @@ class Config(object):
         return self._opts.getint('billing_date')
 
     @property
-    def prime_start(self):
-        return self._opts.getint('prime_start')
-
-    @property
-    def prime_end(self):
-        return self._opts.getint('prime_end')
-    @property
     def animation_directory(self):
         return self._opts.get('animation_directory')
 
@@ -168,3 +159,8 @@ class Config(object):
     @property
     def database_url(self):
         return self._opts.get('database_url')
+
+    @property
+    def access_mode(self):
+        return self._opts.get('access_mode')
+

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # starlink-graph.py
-# (C) 2022: Brian Millham
+# (C) 2022-2023: Brian Millham
 
 import gi
 
@@ -78,28 +78,33 @@ def update_usage_chart(chart, nrx, ntx, prx, ptx, title):
     chart.clear()
     chart.set(title=title)
 
-    nprxbar = chart.barh(['Non\nPrime'], [nrx], label='RX', color=['orange'])
-    nptxbar = chart.barh(['Non\nPrime'], [ntx], label='TX', left=[nrx], color=['purple'])
+    #nprxbar = chart.barh(['Non\nPrime'], [nrx], label='RX', color=['orange'])
+    #nptxbar = chart.barh(['Non\nPrime'], [ntx], label='TX', left=[nrx], color=['purple'])
     rxbar = chart.barh(['Prime'], [prx], label='RX', color=['orange'])
     txbar = chart.barh(['Prime'], [ptx], label='TX', left=[prx], color=['purple'])
     tbar = chart.barh(['Total'], [prx + nrx], label='RX', color=['orange'])
-    set_bar_text(chart, rxbar, f'RX: {naturalsize(prx)} TX: {naturalsize(ptx)} Total: {naturalsize(prx+ptx)}')
-    set_bar_text(chart, nprxbar, f'RX: {naturalsize(nrx)} TX: {naturalsize(ntx)} Total: {naturalsize(nrx+ntx)}')
+    #set_bar_text(chart, rxbar, f'RX: {naturalsize(prx)} TX: {naturalsize(ptx)} Total: {naturalsize(prx+ptx)}')
+    #set_bar_text(chart, nprxbar, f'RX: {naturalsize(nrx)} TX: {naturalsize(ntx)} Total: {naturalsize(nrx+ntx)}')
     set_bar_text(chart, tbar, f'RX: {naturalsize(nrx+prx)} TX: {naturalsize(ntx+ptx)} Total: {naturalsize(prx+ptx+nrx+ntx)}')
-    chart.barh(['Total'], [ptx + ntx], label='TX', left=[prx + nrx], color=['purple'])
+    #chart.barh(['Total'], [ptx + ntx], label='TX', left=[prx + nrx], color=['purple'])
+    chart.barh(['Total'], [ntx], label='TX', left=[prx + nrx], color=['purple'])
     chart.legend(handles=[rxbar, txbar])
     chart.yaxis.set_label_text('Usage')
     chart.yaxis.set_label_position('right')
+    #chart.xaxis.set_ticks([0, prx + ptx + nrx + ntx], labels=['', naturalsize(prx + ptx + nrx + ntx)])
     chart.xaxis.set_ticks([0, prx + ptx + nrx + ntx], labels=['', naturalsize(prx + ptx + nrx + ntx)])   
 
 def animate(i, update_today=False):
     if config.config_changed:
         print('config changed')
-        history_db.prime_start = config.prime_start
-        history_db.prime_end = config.prime_end
         history_db.billing_date = config.billing_date
         config.config_changed = False
-    sd.current_data()
+
+    if config.access_mode == 'client':
+        sd.current_data(db=history_db)
+    else:
+        sd.current_data()
+
     if sd._last_data['state'] != 'CONNECTED':
         print(f'Not connected: {sd._last_data["state"]}@{sd._last_data["datetimestamp_utc"]}')
         sd.outages()
@@ -107,13 +112,15 @@ def animate(i, update_today=False):
         # Things are working normally, so only check outages every 5 seconds
         if sd._xaxis[-1].second % 5 == 0:
             sd.outages(min_duration=config.duration)
+        
 
     hdl = sd._download[-1]
     hul = sd._upload[-1]
     hmdl = max(sd._download)
     hmul = max(sd._upload)
     # Save the data to the database
-    history_db.insert_data(sd)
+    if config.access_mode != 'client':
+        history_db.insert_data(sd)
     # Get averages, excluding an 0 values
     try:
         dlave = mean([z for z in sd._download if z > 0])
@@ -143,7 +150,11 @@ def animate(i, update_today=False):
     upave = naturalsize(upave)
 
 
-    sday, eday, prx, ptx, pavg, puptime, nrx, ntx, nave, nuptime, tave, tuptime = history_db.get_cycle_usage()
+    try:
+        sday, eday, rx, tx, tave, tuptime  = history_db.get_cycle_usage()
+    except TypeError:
+        print('No cycle usage')
+        return True
 
     if widgets['animation_notebook'].get_current_page() == 1 or update_today:
         usagecharts.do_today_chart()
@@ -153,7 +164,9 @@ def animate(i, update_today=False):
         usagecharts.do_daily_chart()
         return True
 
-    update_usage_chart(usagechart, nrx, ntx, prx, ptx, f"Cycle Dates: {sday.year}-{sday.month:02}-{sday.day:02} to {eday.year}-{eday.month:02}-{eday.day:02}")
+    #update_usage_chart(usagechart, nrx, ntx, prx, ptx, f"Cycle Dates: {sday.year}-{sday.month:02}-{sday.day:02} to {eday.year}-{eday.month:02}-{eday.day:02}")
+    #update_usage_chart(usagechart, sum(sd._download), sum(sd._upload), 0, 0, f"Cycle Dates: {sday.year}-{sday.month:02}-{sday.day:02} to {eday.year}-{eday.month:02}-{eday.day:02}")
+    update_usage_chart(usagechart, rx, tx, 0, 0, f"Cycle Dates: {sday.year}-{sday.month:02}-{sday.day:02} to {eday.year}-{eday.month:02}-{eday.day:02}")
 
     availchart.clear()
     availchart.plot(sd._xaxis, sd._avail, linewidth=1, color='green')
@@ -266,10 +279,14 @@ def startup():
     widgets['scrolledwindow1'].add(canvas)
 
     history_db.connect()
-    sd.history()
-    sd.outages()
-    # Populate missing data in the database
-    history_db.populate(sd)
+    if config.access_mode == 'client':
+        sd.history(history_db)
+    else:
+        sd.history()
+        sd.outages()
+        # Populate missing data in the database
+        history_db.populate(sd)
+
     # Force an update right away.
     animate(1)
     now = datetime.datetime.now()
