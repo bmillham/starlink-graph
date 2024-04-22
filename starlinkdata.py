@@ -39,6 +39,10 @@ class StarlinkData:
     def current_data(self, db=None):
         if db is not None:
             row = db.current_data()
+            print(f'{row=}')
+            if row is None:
+                self._last_data = None
+                return
             self._last_data = {'datetimestamp_utc': row.timestamp,
                                'downlink_throughput_bps': row.rx,
                                'pop_ping_latency_ms': row.latency,

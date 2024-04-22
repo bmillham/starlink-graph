@@ -8,37 +8,28 @@ def do_daily_chart(self):
     if now.minute == self.day_last_update and date == self.last_date:
         return
 
-    sday, eday, rx, tx, latency, uptime  = self._db.get_cycle_usage()
+    sday, eday, cycle_rx, cycle_tx, cycle_latency, cycle_uptime  = self._db.get_cycle_usage()
     labels = []
-    prime_rx = []
-    prime_tx = []
-    prime_total = []
-    nonprime_rx = []
-    nonprime_tx = []
-    nonprime_total = []
+    day_rx = []
+    day_tx = []
+    day_total = []
     self.day_ax.clear()
     day = sday
 
     while day < eday:
         r, t, l, u = self._db.get_usage(day.year, day.month, day.day)
         labels.append(f'{day.year}-{day.month:02}-{day.day:02}')
-        prime_rx.append(int(r))
-        prime_tx.append(int(t))
-        prime_total.append(int(r+t))
-        r, t, l, u = self._db.get_usage(day.year, day.month, day.day)
-        nonprime_rx.append(int(r))
-        nonprime_tx.append(int(t))
-        nonprime_total.append(int(r+t))
+        day_rx.append(int(r))
+        day_tx.append(int(t))
+        day_total.append(int(r+t))
         day += timedelta(days=1)
 
     width=0.35
     x = np.arange(len(labels))
-    rect1 = self.day_ax.bar(x - width/2, prime_rx, width, label='Prime RX')
-    self.day_ax.bar(x - width/2, prime_tx, width, bottom=prime_rx, label='Prime TX')
-    rect2 = self.day_ax.bar(x + width/2, nonprime_rx, width, label='Non-Prime RX')
-    self.day_ax.bar(x + width/2, nonprime_tx, width, bottom=nonprime_rx, label='Non-Prime TX')
+    rect1 = self.day_ax.bar(x - width/2, day_rx, width, label='RX')
+    self.day_ax.bar(x - width/2, day_tx, width, bottom=day_rx, label='TX')
 
-    self.day_ax.yaxis.set_ticks([0, min(prime_total), max(prime_total), max(nonprime_total)], labels=['', naturalsize(min(prime_total)), naturalsize(max(prime_total)), naturalsize(max(nonprime_total))])
+    self.day_ax.yaxis.set_ticks([0, min(day_total), max(day_total), ], labels=['', naturalsize(min(day_total)), naturalsize(max(day_total))])
     self.day_ax.xaxis.set_ticks([z for z in x if z % 2 != 0], labels=[labels[z] for z in x if z % 2 != 0])
     self.day_ax.legend()
     self.day_fig.autofmt_xdate()

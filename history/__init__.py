@@ -122,7 +122,7 @@ class History():
                      
 
         row = self.conn.execute(stmt).fetchone()
-        return (row[0] if row[0] is not None else 0, row[1] if row[1] is not None else 0,
+        return (row[0] / 8.0 if row[0] is not None else 0, row[1] / 8.0 if row[1] is not None else 0,
                 0 if row[2] is None else row[2], 0 if row[3] is None else row[3])
 
 

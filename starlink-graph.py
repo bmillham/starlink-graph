@@ -74,25 +74,25 @@ def set_bar_text(chart, bar, text):
 
 usagecharts = UsageCharts(db=history_db, widgets=widgets)
 
-def update_usage_chart(chart, nrx, ntx, prx, ptx, title):
+def update_usage_chart(chart, rx, tx, title):
     chart.clear()
     chart.set(title=title)
 
     #nprxbar = chart.barh(['Non\nPrime'], [nrx], label='RX', color=['orange'])
     #nptxbar = chart.barh(['Non\nPrime'], [ntx], label='TX', left=[nrx], color=['purple'])
-    rxbar = chart.barh(['Prime'], [prx], label='RX', color=['orange'])
-    txbar = chart.barh(['Prime'], [ptx], label='TX', left=[prx], color=['purple'])
-    tbar = chart.barh(['Total'], [prx + nrx], label='RX', color=['orange'])
+    rxbar = chart.barh(['Total'], [rx], label='RX', color=['orange'])
+    txbar = chart.barh(['Total'], [tx], label='TX', left=[rx], color=['purple'])
+    tbar = chart.barh(['Total'], [rx + tx], label='RX', color=['orange'])
     #set_bar_text(chart, rxbar, f'RX: {naturalsize(prx)} TX: {naturalsize(ptx)} Total: {naturalsize(prx+ptx)}')
     #set_bar_text(chart, nprxbar, f'RX: {naturalsize(nrx)} TX: {naturalsize(ntx)} Total: {naturalsize(nrx+ntx)}')
-    set_bar_text(chart, tbar, f'RX: {naturalsize(nrx+prx)} TX: {naturalsize(ntx+ptx)} Total: {naturalsize(prx+ptx+nrx+ntx)}')
+    set_bar_text(chart, tbar, f'RX: {naturalsize(rx)} TX: {naturalsize(tx)} Total: {naturalsize(rx+tx)}')
     #chart.barh(['Total'], [ptx + ntx], label='TX', left=[prx + nrx], color=['purple'])
-    chart.barh(['Total'], [ntx], label='TX', left=[prx + nrx], color=['purple'])
+    chart.barh(['Total'], [tx], label='TX', left=[rx], color=['purple'])
     chart.legend(handles=[rxbar, txbar])
     chart.yaxis.set_label_text('Usage')
     chart.yaxis.set_label_position('right')
     #chart.xaxis.set_ticks([0, prx + ptx + nrx + ntx], labels=['', naturalsize(prx + ptx + nrx + ntx)])
-    chart.xaxis.set_ticks([0, prx + ptx + nrx + ntx], labels=['', naturalsize(prx + ptx + nrx + ntx)])   
+    chart.xaxis.set_ticks([0, rx + tx], labels=['', naturalsize(rx + tx)])   
 
 def animate(i, update_today=False):
     if config.config_changed:
@@ -104,6 +104,10 @@ def animate(i, update_today=False):
         sd.current_data(db=history_db)
     else:
         sd.current_data()
+
+    if sd._last_data is None:
+        print('No data')
+        return True
 
     if sd._last_data['state'] != 'CONNECTED':
         print(f'Not connected: {sd._last_data["state"]}@{sd._last_data["datetimestamp_utc"]}')
@@ -166,7 +170,7 @@ def animate(i, update_today=False):
 
     #update_usage_chart(usagechart, nrx, ntx, prx, ptx, f"Cycle Dates: {sday.year}-{sday.month:02}-{sday.day:02} to {eday.year}-{eday.month:02}-{eday.day:02}")
     #update_usage_chart(usagechart, sum(sd._download), sum(sd._upload), 0, 0, f"Cycle Dates: {sday.year}-{sday.month:02}-{sday.day:02} to {eday.year}-{eday.month:02}-{eday.day:02}")
-    update_usage_chart(usagechart, rx, tx, 0, 0, f"Cycle Dates: {sday.year}-{sday.month:02}-{sday.day:02} to {eday.year}-{eday.month:02}-{eday.day:02}")
+    update_usage_chart(usagechart, rx, tx, f"Cycle Dates: {sday.year}-{sday.month:02}-{sday.day:02} to {eday.year}-{eday.month:02}-{eday.day:02}")
 
     availchart.clear()
     availchart.plot(sd._xaxis, sd._avail, linewidth=1, color='green')
@@ -190,7 +194,10 @@ def animate(i, update_today=False):
     latencychart.xaxis.set_ticks([])
     # Set the tick interval
     tick_count = int(len(sd._xaxis) / (config.ticks - 1))
-    tick_vals = sd._xaxis[::tick_count]
+    try:
+        tick_vals = sd._xaxis[::tick_count]
+    except ValueError:
+        tick_vals = sd._xaxis[::1]
     if len(tick_vals) < config.ticks:
         tick_vals.append(sd._xaxis[-1])
     tick_labels = [f'{v.astimezone().strftime("%I:%M%p")}' for v in tick_vals]
