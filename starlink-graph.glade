@@ -214,7 +214,7 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">This Cycle</property>
+                <property name="label" translatable="yes">Current</property>
               </object>
               <packing>
                 <property name="tab-fill">False</property>

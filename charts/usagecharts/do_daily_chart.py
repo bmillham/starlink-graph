@@ -24,10 +24,11 @@ def do_daily_chart(self):
         day_total.append(int(r+t))
         day += timedelta(days=1)
 
-    width=0.35
+    #width=0.35
+    width=1
     x = np.arange(len(labels))
-    rect1 = self.day_ax.bar(x - width/2, day_rx, width, label='RX')
-    self.day_ax.bar(x - width/2, day_tx, width, bottom=day_rx, label='TX')
+    rect1 = self.day_ax.bar(x - width, day_rx, width, label='RX')
+    self.day_ax.bar(x - width, day_tx, width, bottom=day_rx, label='TX')
 
     self.day_ax.yaxis.set_ticks([0, min(day_total), max(day_total), ], labels=['', naturalsize(min(day_total)), naturalsize(max(day_total))])
     self.day_ax.xaxis.set_ticks([z for z in x if z % 2 != 0], labels=[labels[z] for z in x if z % 2 != 0])
