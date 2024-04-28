@@ -22,3 +22,4 @@ starlink-graph.ini
 /starlink-graph.ini.save
 /*.py#
 /starlink-history.db-journal
+/scan.log

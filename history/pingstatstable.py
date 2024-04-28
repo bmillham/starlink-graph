@@ -25,16 +25,13 @@ CREATE TABLE IF NOT EXISTS "history" ("time" INTEGER NOT NULL, "id" TEXT NOT NUL
 class HistoryTable(Base):
     __tablename__ = "history"
 
-    time: Mapped[int] = mapped_column(primary_key=True)
-    id: Mapped[str] = mapped_column(String(50), primary_key=True)
-    pop_ping_drop_rate: Mapped[float] = mapped_column(Float)
-    pop_ping_latency_ms: Mapped[float] = mapped_column(Float)
-    downlink_throughput_bps: Mapped[float] = mapped_column(Float)
-    uplink_throughput_bps: Mapped[float] = mapped_column(Float)
-    snr: Mapped[float] = mapped_column(Float)
-    scheduled: Mapped[bool] = mapped_column(Boolean)
-    obstructed: Mapped[bool] = mapped_column(Boolean)
-    counter: Mapped[int] = mapped_column()
+    id: Mapped[int] = mapped_column(primary_key=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, unique=True)
+    latency: Mapped[float] = mapped_column(Float)
+    uptime: Mapped[float] = mapped_column(Float)
+    rx: Mapped[int] = mapped_column(Integer)
+    tx: Mapped[int] = mapped_column(Integer)
+    state: Mapped[str] = mapped_column(Text)
 
     def __repr__(self) -> str:
         return f'HistoryTable(timestamp={self.timestamp!r}, latency={id.latency!r}'
@@ -72,8 +69,7 @@ class HistoryTable(Base):
             state = data._last_data['state']
         except TypeError:
             state = 'NO STATE AVAILABLE'
-        stmt = insert(HistoryTable).values(time=ts,
-                                           id='id',
+        stmt = insert(HistoryTable).values(timestamp=ts,
                                            latency=data._latency[cnt],
                                            uptime=data._avail[cnt],
                                            rx=data._download[cnt],
