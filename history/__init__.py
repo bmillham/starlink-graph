@@ -132,9 +132,14 @@ class History():
         now = datetime.now()
         if month is not None or year is not None:
             now = datetime(year=year, month=month, day=1)
+
         # Last day of the billing cycle
         last_date = now.replace(day=self.billing_date)
-        # First day of the billine cycle
+        # Move to next month if after the billing date
+        if now.day >= self.billing_date:
+            last_date += dateutil.relativedelta.relativedelta(months=1)
+
+        # First day of the billing cycle
         first_date = last_date + dateutil.relativedelta.relativedelta(months=-1)
 
         total = self.get_usage(syear=first_date.year, smonth=first_date.month, sday=first_date.day,
