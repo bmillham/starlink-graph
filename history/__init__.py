@@ -188,13 +188,9 @@ class History():
     def current_data(self):
         if self.conn is None:
             return None
-        stmt = select(StatusTable.time,
-                      StatusTable.uplink_throughput_bps,
-                      StatusTable.downlink_throughput_bps,
-                      StatusTable.pop_ping_latency_ms,
-                      StatusTable.pop_ping_drop_rate,
-                      StatusTable.state).order_by(StatusTable.time.desc()).limit(1)
-        self.commit()
+
+        self.conn.commit()
+        stmt = select(StatusTable).order_by(StatusTable.time.desc()).limit(1)
         row = self.conn.execute(stmt).fetchone()
         return row
 

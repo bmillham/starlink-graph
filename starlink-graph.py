@@ -107,6 +107,29 @@ def animate(i, update_today=False):
     #else:
     #    sd.current_data()
 
+
+    def _bool(value):
+        return 'True' if value else 'False'
+
+    row = sd.db.current_data()
+    # Populate alerts
+    acount = 0
+    for a in row._mapping:
+        if a.startswith('alert_'):
+            v = row._mapping[a]
+            if v:
+                acount += 1
+            widgets[a].set_text(_bool(v))
+
+    if acount > 0:
+        widgets['advanced_tab_label'].set_text(f'Advanced ({acount})')
+    else:
+        widgets['advanced_tab_label'].set_text( 'Advanced')
+    # Populate location and aiming
+    for a in ('latitude', 'longitude', 'altitude', 'direction_azimuth', 'direction_elevation'):
+        widgets[a].set_text(str(row._mapping[a]))
+    
+    
     if sd._last_data is None:
         print('No data')
         return True
