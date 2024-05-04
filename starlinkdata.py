@@ -43,12 +43,12 @@ class StarlinkData:
             if row is None:
                 self._last_data = None
                 return
-            self._last_data = {'datetimestamp_utc': row.timestamp,
-                               'downlink_throughput_bps': row.rx,
-                               'pop_ping_latency_ms': row.latency,
-                               'pop_ping_drop_rate': row.uptime,
-                               'uplink_throughput_bps': row.tx,
-                               'state': 'CONNECTED'}
+            self._last_data = {'datetimestamp_utc': datetime.datetime.fromtimestamp(row.time),
+                               'downlink_throughput_bps': row.downlink_throughput_bps,
+                               'pop_ping_latency_ms': row.pop_ping_latency_ms,
+                               'pop_ping_drop_rate': row.pop_ping_drop_rate,
+                               'uplink_throughput_bps': row.uplink_throughput_bps,
+                               'state': row.state}
         else:
             try:
                self._last_data, self._last_obstructions, self._last_alerts = starlink_grpc.status_data()
@@ -96,12 +96,13 @@ class StarlinkData:
         if db is not None:
             self._clear_stats()
             for row in  db.get_history_bulk_data():
-                ts = row.timestamp.replace(microsecond=0).replace(tzinfo=row.timestamp.tzinfo)
-                self._xaxis.append(ts.replace(tzinfo=ts.tzinfo))
-                self._latency.append(row.latency)
-                self._avail.append(row.uptime)
-                self._download.append(row.rx)
-                self._upload.append(row.tx)
+                stamp = datetime.datetime.fromtimestamp(row.time)
+                ts = stamp.replace(microsecond=0).replace(tzinfo=stamp.tzinfo)
+                self._xaxis.append(ts.replace(tzinfo=stamp.tzinfo))
+                self._latency.append(row.pop_ping_latency_ms)
+                self._avail.append(row.pop_ping_drop_rate)
+                self._download.append(row.downlink_throughput_bps)
+                self._upload.append(row.uplink_throughput_bps)
                 self._state.append(row.state)
             return
 
