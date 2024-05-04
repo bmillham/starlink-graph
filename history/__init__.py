@@ -204,6 +204,7 @@ class History():
                       StatusTable.state).order_by(StatusTable.time.desc()).limit(1)
         self.commit()
         row = self.conn.execute(stmt).fetchone()
+        #print(f'{row.ping_drop_rate}')
         return row
 
     def get_history_bulk_data(self):

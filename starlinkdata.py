@@ -65,7 +65,7 @@ class StarlinkData:
         self._upload.append(self._last_data['uplink_throughput_bps'])
         self._download.append(self._last_data['downlink_throughput_bps'])
         if db:
-            self._avail.append(self._last_data['pop_ping_drop_rate'])
+            self._avail.append(100 - (self._last_data['pop_ping_drop_rate'] * 100))
         else:
             self._avail.append(100 - (self._last_data['pop_ping_drop_rate'] * 100))
         self.pop_history()
@@ -100,7 +100,7 @@ class StarlinkData:
                 ts = stamp.replace(microsecond=0).replace(tzinfo=stamp.tzinfo)
                 self._xaxis.append(ts.replace(tzinfo=stamp.tzinfo))
                 self._latency.append(row.pop_ping_latency_ms)
-                self._avail.append(row.pop_ping_drop_rate)
+                self._avail.append(100 - (row.pop_ping_drop_rate * 100))
                 self._download.append(row.downlink_throughput_bps)
                 self._upload.append(row.uplink_throughput_bps)
                 self._state.append(row.state)
