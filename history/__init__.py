@@ -136,7 +136,6 @@ class History():
         row = self.conn.execute(stmt).fetchone()
         return (row[0] / 8.0 if row[0] is not None else 0, row[1] / 8.0 if row[1] is not None else 0,
                 0 if row[2] is None else row[2], 0 if row[3] is None else row[3])
-        #return (0, 0, 0, 0)
 
 
     def get_cycle_usage(self, month=None, year=None):
@@ -176,26 +175,19 @@ class History():
             return None
         start = datetime(year, month, day, hour)
         end = start + timedelta(hours=1)
-        stmt = select(func.sum(HistoryTable.rx),
-                      func.sum(HistoryTable.tx),
-                      func.avg(HistoryTable.latency),
-                      func.avg(HistoryTable.uptime)).where(and_(
-                          HistoryTable.timestamp >= start,
-                          HistoryTable.timestamp < end))
+        stmt = select(func.sum(StatusTable.downlink_throughput_bps),
+                      func.sum(StatusTable.uplink_throughput_bps),
+                      func.avg(StatusTable.pop_ping_latency_ms),
+                      func.avg(StatusTable.pop_ping_drop_rate)).where(and_(
+                          StatusTable.time >= datetime.timestamp(start),
+                          StatusTable.time < datetime.timestamp(end)))
 
         row = self.conn.execute(stmt).fetchone()
-        return (0 if row[0] is None else row[0], 0 if row[1] is None else row[1],
-                0 if row[2] is None else row[2], 0 if row[3] is None else row[3])
+        return row
 
     def current_data(self):
         if self.conn is None:
             return None
-        #stmt = select(HistoryTable.timestamp,
-        #              HistoryTable.rx,
-        #              HistoryTable.tx,
-        #              HistoryTable.latency,
-        #              HistoryTable.uptime,
-        #              HistoryTable.state).order_by(HistoryTable.timestamp.desc()).limit(1)
         stmt = select(StatusTable.time,
                       StatusTable.uplink_throughput_bps,
                       StatusTable.downlink_throughput_bps,
@@ -204,7 +196,6 @@ class History():
                       StatusTable.state).order_by(StatusTable.time.desc()).limit(1)
         self.commit()
         row = self.conn.execute(stmt).fetchone()
-        #print(f'{row.ping_drop_rate}')
         return row
 
     def get_history_bulk_data(self):
@@ -214,14 +205,6 @@ class History():
         start = end - timedelta(seconds=self._config.history)
         print(f'Reading bulk data from {start} to {end} from the database')
 
-        #stmt = select(HistoryTable.time,
-        #              HistoryTable.uplink_throughput_bps,
-        #              HistoryTable.downlink_throughput_bps,
-        #              HistoryTable.pop_ping_latency_ms,
-        #              HistoryTable.obstructed,
-        #              HistoryTable.scheduled).where(and_(
-        #                  HistoryTable.time >= start,
-        #                  HistoryTable.time <= end))
         stmt = select(StatusTable.time,
                       StatusTable.uplink_throughput_bps,
                       StatusTable.downlink_throughput_bps,
