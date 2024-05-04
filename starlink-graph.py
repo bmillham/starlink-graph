@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # starlink-graph.py
-# (C) 2022-2023: Brian Millham
+# (C) 2022-2024: Brian Millham
 
 import gi
 

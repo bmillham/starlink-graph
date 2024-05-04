@@ -1,3 +1,7 @@
+import gi
+
+gi.require_version('Gdk', '4.0')
+
 from gi.repository import Gdk
 import configparser
 
