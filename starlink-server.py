@@ -92,6 +92,11 @@ def parse_args():
 
 def query_counter(opts, gstate, column, table):
     now = time.time()
+
+
+    res = history_db.query_counter(opts, gstate, column, table)
+    return 0, None
+    
     cur = gstate.sql_conn.cursor()
     cur.execute(
         'SELECT "time", "{0}" FROM "{1}" WHERE "time"<? AND "id"=? '
@@ -140,7 +145,7 @@ def loop_body(opts, gstate, shutdown=False):
 
     if opts.history_stats_mode and (not rc or opts.poll_loops > 1):
         if gstate.counter_stats is None and not opts.skip_query and opts.samples < 0:
-            _, gstate.counter_stats = query_counter(opts, gstate, "end_counter", "ping_stats")
+            _, gstate.counter_stats = gstate.db.query_counter(opts, gstate, "end_counter", "ping_stats")
         hist_rc, hist_ts = dish_common.get_history_stats(opts, gstate, cb_add_item, cb_add_sequence,
                                                          shutdown)
         if not rc:
@@ -148,34 +153,32 @@ def loop_body(opts, gstate, shutdown=False):
 
     if not shutdown and opts.bulk_mode and not rc:
         if gstate.counter is None and not opts.skip_query and opts.bulk_samples < 0:
-            gstate.timestamp, gstate.counter = query_counter(opts, gstate, "counter", "history")
+            gstate.timestamp, gstate.counter = gstate.db.query_counter(opts, gstate, "counter", "history")
         rc = dish_common.get_bulk_data(opts, gstate, cb_add_bulk)
 
     rows_written = 0
 
     try:
-        cur = gstate.sql_conn.cursor()
         for category, fields in tables.items():
             if fields:
                 timestamp = status_ts if category == "status" else hist_ts
-                sql = 'INSERT OR REPLACE INTO "{0}" ("time","id",{1}) VALUES ({2})'.format(
-                    category, ",".join('"' + x + '"' for x in fields),
-                    ",".join(repeat("?",
-                                    len(fields) + 2)))
-                values = [timestamp, gstate.dish_id]
-                values.extend(fields.values())
-                cur.execute(sql, values)
+                if category == 'ping_stats':
+                    gstate.db.ping_stats_table.insert_data(timestamp, gstate.dish_id, fields)
+                elif category == 'status':
+                    gstate.db.status_table.insert_data(timestamp, gstate.dish_id, fields)
+                elif category == 'usage':
+                    gstate.db.usage_table.insert_data(timestamp, gstate.dish_id, fields)
+                else:
+                    print(f'Unknown category {category}')
                 rows_written += 1
 
         if hist_rows:
-            sql = 'INSERT OR REPLACE INTO "history" ({0}) VALUES({1})'.format(
-                ",".join('"' + x + '"' for x in hist_cols), ",".join(repeat("?", len(hist_cols))))
-            cur.executemany(sql, hist_rows)
-            rows_written += len(hist_rows)
+            for hrow in hist_rows:
+                gstate.db.history_table.insert_data(hrow, commit=False)
+                rows_written += 1
+        gstate.db.commit()
 
-        cur.close()
-        gstate.sql_conn.commit()
-    except sqlite3.OperationalError as e:
+    except Exception as e:
         # these are not necessarily fatal, but also not much can do about
         logging.error("Unexpected error from database, discarding data: %s", e)
         rc = 1
@@ -301,13 +304,13 @@ def main():
     config = Config(configfile=configfile, defaultconfigfile=defaultconfigfile)
     history_db = History(config=config)
     gstate.sql_conn = history_db.connect()
+    gstate.db = history_db
 
     rc = 0
-    print(f'{opts=}, {gstate=}')
-    '''try:
-        rc = ensure_schema(opts, gstate.sql_conn, gstate.context)
-        if rc:
-            sys.exit(rc)
+    try:
+        #rc = ensure_schema(opts, gstate.sql_conn, gstate.context)
+        #if rc:
+        #    sys.exit(rc)
         next_loop = time.monotonic()
         while True:
             rc = loop_body(opts, gstate)
@@ -317,15 +320,15 @@ def main():
                 time.sleep(next_loop - now)
             else:
                 break
-    except sqlite3.Error as e:
-        logging.error("Database error: %s", e)
+    except Exception as e:
+        logging.error(f"Database error: {e}")
         rc = 1
     except (KeyboardInterrupt, Terminated):
         pass
     finally:
         loop_body(opts, gstate, shutdown=True)
-        gstate.sql_conn.close()
-        gstate.shutdown()'''
+        history_db.close()
+        gstate.shutdown()
 
     sys.exit(rc)
 

@@ -1,16 +1,20 @@
 from sqlalchemy import create_engine, select, MetaData, Boolean, text
-from sqlalchemy import Table, Column, Integer, DateTime, String, Text, Float, insert, func, and_, or_
+from sqlalchemy import Table, Column, Integer, DateTime, String, Text, Float, insert, func, and_, or_, desc
 from sqlalchemy.orm import Mapped, DeclarativeBase
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import exc
 from datetime import datetime, timedelta, timezone
+import time
 import dateutil.relativedelta
 #class Base(DeclarativeBase):
 #    pass
 Base = declarative_base()
 from .historytable import HistoryTable
 from .outagestable import OutagesTable
+from .statustable import StatusTable
+from .pingstatstable import PingStatsTable
+from .usagetable import UsageTable
 
 class History():
 
@@ -33,6 +37,9 @@ class History():
             self._db = config.database_url
         
 
+    def close(self):
+        self.conn.close()
+
     def connect(self):
         print('Connecting to database')
         try:
@@ -47,16 +54,20 @@ class History():
         #self._create_database() # Create the database. Does nothing if the database exists
         #self.history_table.engine = self.engine
         #self.history_table._create_database()
-        print('Doing connect')
         try:
             self.conn = self.engine.connect()
         except:
             print(f'Failed to connect to {self._db}')
             self.conn = None
-        print('connected')
         self.history_table = HistoryTable(self._config, engine=self.engine, conn=self.conn)
         #self.history_table.conn = self.conn
-        self.history_table._create_database()
+        self.history_table._create_table()
+        self.status_table = StatusTable(self._config, engine=self.engine, conn=self.conn)
+        self.status_table._create_table()
+        self.ping_stats_table = PingStatsTable(self._config, engine=self.engine, conn=self.conn)
+        self.ping_stats_table._create_table()
+        self.usage_table = UsageTable(self._config, engine=self.engine, conn=self.conn)
+        self.usage_table._create_table()
         return
 
     def commit(self):
@@ -73,6 +84,7 @@ class History():
         if self.conn is None:
             return
         self.history_table.insert_data(data, cnt=-1, commit=True)
+        #self.ping_stats_table.insert_data(data, cnt=-1, commit=True)
 
     def populate(self, data):
         if self.conn is None:
@@ -147,6 +159,17 @@ class History():
         return (first_date, last_date,
                 total[0], total[1], total[2], total[3])
 
+    def query_counter(self, opts, gstate, column, table):
+        now = time.time()
+        stmt = select(HistoryTable.time, HistoryTable.counter).where(and_(
+            HistoryTable.time < now,
+            HistoryTable.id == gstate.dish_id)).order_by(HistoryTable.time.desc()).limit(1)
+        row = self.conn.execute(stmt).fetchone()
+        if row is None:
+            return 0, None
+        else:
+            return row
+                      
     def get_hour_usage(self, year, month, day, hour):
         if self.conn is None:
             return None

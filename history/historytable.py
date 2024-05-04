@@ -31,9 +31,9 @@ class HistoryTable(Base):
     pop_ping_latency_ms: Mapped[float] = mapped_column(Float)
     downlink_throughput_bps: Mapped[float] = mapped_column(Float)
     uplink_throughput_bps: Mapped[float] = mapped_column(Float)
-    snr: Mapped[float] = mapped_column(Float)
-    scheduled: Mapped[bool] = mapped_column(Boolean)
-    obstructed: Mapped[bool] = mapped_column(Boolean)
+    snr: Mapped[float | None] = mapped_column(Float)
+    scheduled: Mapped[bool | None] = mapped_column(Boolean)
+    obstructed: Mapped[bool | None] = mapped_column(Boolean)
     counter: Mapped[int] = mapped_column()
 
     def __repr__(self) -> str:
@@ -43,65 +43,29 @@ class HistoryTable(Base):
         self._engine = engine
         self._conn = conn
 
-        if config is None:
-            self._cycle_start_day = 27
-        else:
-            self._cycle_start_day = config.billing_date
-
-    def _create_database(self):
+    def _create_table(self):
         try:
             self.metadata.create_all(self._engine)
         except exc.OperationalError:
-            db_type = self._db.split(':')[0]; # Find the database type
-            db_name = self._db.split('/')[-1] # Find the database name
-            db_server = self._db.split('/')[-2] # Find the server
-            print('Database error, attempting to create')
-            engine = create_engine(f'{db_type}://{db_server}')
-            conn = engine.connect()
-            conn.execute(text(f'CREATE DATABASE `{db_name}`;'))
-            conn.close()
-            #self.connect()
-            self.metadata.create_all(self._engine)
+            print('Error creating history table')
 
-    def _remove_ms(self, timestamp) -> datetime:
-        return timestamp.replace(microsecond=0)
-
-    def insert_data(self, data, cnt=-1, commit=True):
-        ts = self._remove_ms(data._xaxis[cnt])
-        try:
-            state = data._last_data['state']
-        except TypeError:
-            state = 'NO STATE AVAILABLE'
-        stmt = insert(HistoryTable).values(time=ts,
-                                           id='id',
-                                           latency=data._latency[cnt],
-                                           uptime=data._avail[cnt],
-                                           rx=data._download[cnt],
-                                           tx=data._upload[cnt],
-                                           state=state)
-
+    def insert_data(self, data, commit=True):
+        stmt = insert(HistoryTable).values(time=data[0],
+                                           id=data[1],
+                                           pop_ping_drop_rate=data[2],
+                                           pop_ping_latency_ms=data[3],
+                                           downlink_throughput_bps=data[4],
+                                           uplink_throughput_bps=data[5],
+                                           snr=data[6],
+                                           scheduled=data[7],
+                                           obstructed=data[8],
+                                           counter=data[9])
         try:
             self._conn.execute(stmt)
         except exc.IntegrityError as e:
-            print(f'Duplicate entry for {data._xaxis[cnt]}')
+            print(f'Duplicate entry for {data}')
             return False
         if commit:
             self._conn.commit()
         return True
 
-
-#    @property
-#    def engine(self):
-#        return self._engine
-
-#    @engine.setter
-#    def engine(self, engine):
-#        self._engine = engine
-
-#    @property
-#    def conn(self):
-#        return self._conn
-
-#    @conn.setter
-#    def conn(self, conn):
-#        self._conn = conn

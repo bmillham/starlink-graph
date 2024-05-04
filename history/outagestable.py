@@ -26,7 +26,6 @@ class OutagesTable(Base):
             print('Unable to create outages table')
 
     def insert_data(self, timestamp=None, cause=None, duration=None):
-        ts = self._remove_ms(data._xaxis[cnt])
         stmt = insert(OutagesTable).values(timestamp=ts,
                                            cause=cause,
                                            duration=duration)
