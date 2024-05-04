@@ -1,5 +1,6 @@
 #rom humanize.time import naturaldelta
-from simplehuman import naturaldelta
+#from simplehuman import naturaldelta
+from datetime import timedelta
 
 
 def on_about_close_button(self, widget):
@@ -9,7 +10,6 @@ def on_about_close_button(self, widget):
 
 def on_about_dialog_click(self, widget):
     # Show current dish info
-    self._sd.current_data()
-    widget.set_comments(
-      f'Dishy: {self._sd._last_data["software_version"]}\nUptime: {naturaldelta(self._sd._last_data["uptime"])}')
+    info = self.sd.dish_info
+    widget.set_comments(f'Dishy ID: {info.id}\nHardware: {info.hardware_version}\nSoftware: {info.software_version}\nUptime: {timedelta(seconds=info.uptime)}')
     widget.show()

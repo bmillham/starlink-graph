@@ -21,6 +21,7 @@ class StarlinkData:
         self._last_alerts = None
         self._config = config
         self.load_colors(config)
+        self._db = None
 
     @staticmethod
     def _color_conv(color):
@@ -36,9 +37,9 @@ class StarlinkData:
         self._no_data_color_a, self._no_data_color_r, self._no_data_color_g, self._no_data_color_b = self._color_conv(
             config.no_data_color)
 
-    def current_data(self, db=None):
-        if db is not None:
-            row = db.current_data()
+    def current_data(self):
+        if self.db is not None:
+            row = self.db.current_data()
             if row is None:
                 self._last_data = None
                 return
@@ -63,7 +64,7 @@ class StarlinkData:
         self._latency.append(self._last_data['pop_ping_latency_ms'])
         self._upload.append(self._last_data['uplink_throughput_bps'])
         self._download.append(self._last_data['downlink_throughput_bps'])
-        if db:
+        if self.db:
             self._avail.append(100 - (self._last_data['pop_ping_drop_rate'] * 100))
         else:
             self._avail.append(100 - (self._last_data['pop_ping_drop_rate'] * 100))
@@ -91,10 +92,10 @@ class StarlinkData:
         return leapseconds.gps_to_utc(datetime.datetime(1980,1,6) +
                                       datetime.timedelta(seconds=(timestamp/1000000000)+tzoff))
 
-    def history(self, db=None):
-        if db is not None:
+    def history(self):
+        if self.db is not None:
             self._clear_stats()
-            for row in  db.get_history_bulk_data():
+            for row in  self.db.get_history_bulk_data():
                 stamp = datetime.datetime.fromtimestamp(row.time)
                 ts = stamp.replace(microsecond=0).replace(tzinfo=stamp.tzinfo)
                 self._xaxis.append(ts.replace(tzinfo=stamp.tzinfo))
@@ -198,3 +199,20 @@ class StarlinkData:
         with os.fdopen(thandle, "wb") as f:
             writer.write(f, (bytes(pixel_bytes(row)) for row in snr_data))
         return tfname
+
+    @property
+    def db(self):
+        return self._db
+
+    @db.setter
+    def db(self, db):
+        self._db = db
+
+    @property
+    def software_version(self):
+        return self.db.software_version
+
+    @property
+    def dish_info(self):
+        return self.db.dish_info
+

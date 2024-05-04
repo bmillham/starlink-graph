@@ -101,9 +101,11 @@ def animate(i, update_today=False):
         config.config_changed = False
 
     if config.access_mode == 'client':
-        sd.current_data(db=history_db)
-    else:
-        sd.current_data()
+        sd.db = history_db
+    sd.current_data()
+    #    sd.current_data(db=history_db)
+    #else:
+    #    sd.current_data()
 
     if sd._last_data is None:
         print('No data')
@@ -287,10 +289,11 @@ def startup():
 
     history_db.connect()
     if config.access_mode == 'client':
-        sd.history(history_db)
-    else:
-        sd.history()
-        sd.outages()
+        sd.db = history_db
+
+    sd.history()
+    sd.outages()
+    if sd.db is None:
         # Populate missing data in the database
         history_db.populate(sd)
 

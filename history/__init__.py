@@ -238,3 +238,18 @@ class History():
     @billing_date.setter
     def billing_date(self, day):
         self._cycle_start_day = day
+
+    @property
+    def software_version(self):
+        stmt = select(StatusTable.software_version).order_by(StatusTable.time.desc()).limit(1)
+        version = self.conn.execute(stmt).fetchone()
+        return version.software_version
+
+    @property
+    def dish_info(self):
+        stmt = select(StatusTable.id,
+                      StatusTable.hardware_version,
+                      StatusTable.software_version,
+                      StatusTable.uptime).order_by(StatusTable.time.desc()).limit(1)
+        info = self.conn.execute(stmt).fetchone()
+        return info
