@@ -114,17 +114,26 @@ def animate(i, update_today=False):
     row = sd.db.current_data()
     # Populate alerts
     acount = 0
+    alerts = ['Active Alerts']
     for a in row._mapping:
         if a.startswith('alert_'):
             v = row._mapping[a]
             if v:
                 acount += 1
             widgets[a].set_text(_bool(v))
+            if a == 'alert_is_heating' and v == 1:
+                alerts.append('Heating On')
+            if a == 'alert_install_pending' and v == 1:
+                alerts.append('Update Available')
+            if a == 'alert_lower_signal_than_predicted' and v == 1:
+                alerts.append('Low Signal Strength')
 
     if acount > 0:
         widgets['alerts_tab_label'].set_text(f'Alerts ({acount})')
     else:
         widgets['alerts_tab_label'].set_text( 'Alerts')
+
+
     # Populate location and aiming
     for a in ('latitude', 'longitude', 'altitude', 'direction_azimuth', 'direction_elevation'):
         widgets[a].set_text(str(row._mapping[a]))
@@ -247,6 +256,14 @@ def animate(i, update_today=False):
         widgets['outage_tab_label'].set_text('Outages')
     else:
         widgets['outage_tab_label'].set_text(f'Outages: ({",".join([str(len(widgets["outagestore"])), str(len(widgets["shortoutagestore"]))])})')
+
+    if len(alerts) > 1:
+        availchart.text(sd._xaxis[0], 10, "\n".join(alerts),
+                        bbox={
+                            'facecolor': 'green', 'alpha': 0.5, 'pad': 1})
+    else:
+        for t in availchart.texts:
+            t.set_visible(False) # Hide the text if no alerts
 
     upmin = min(sd._upload)
     upmax = max(sd._upload)
