@@ -122,9 +122,9 @@ def animate(i, update_today=False):
             widgets[a].set_text(_bool(v))
 
     if acount > 0:
-        widgets['advanced_tab_label'].set_text(f'Advanced ({acount})')
+        widgets['alerts_tab_label'].set_text(f'Alerts ({acount})')
     else:
-        widgets['advanced_tab_label'].set_text( 'Advanced')
+        widgets['alerts_tab_label'].set_text( 'Alerts')
     # Populate location and aiming
     for a in ('latitude', 'longitude', 'altitude', 'direction_azimuth', 'direction_elevation'):
         widgets[a].set_text(str(row._mapping[a]))
