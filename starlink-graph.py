@@ -134,14 +134,21 @@ def animate(i, update_today=False):
         print('No data')
         return True
 
-    if sd._last_data['state'] != 'CONNECTED':
-        print(f'Not connected: {sd._last_data["state"]}@{sd._last_data["datetimestamp_utc"]}')
-        sd.outages()
-    else:
-        # Things are working normally, so only check outages every 5 seconds
-        if sd._xaxis[-1].second % 5 == 0:
-            sd.outages(min_duration=config.duration)
-        
+    #outages = sd.db.outages
+    outages = sd.db.outages_table.get_all_outages()
+    
+    widgets['outagestore'].clear()
+    widgets['shortoutagestore'].clear()
+    for o in outages:
+        if o.duration < 2.0:
+            store = 'shortoutagestore'
+        else:
+            store = 'outagestore'
+        widgets[store].append([o.start_timestamp.strftime("%I:%M%p"),
+                               o.cause,
+                               str(o.duration)])
+    widgets['long_outages_label'].set_text(f'{len(widgets["outagestore"])}')
+    widgets['short_outages_label'].set_text(f'{len(widgets["shortoutagestore"])}')
 
     hdl = sd._download[-1]
     hul = sd._upload[-1]
@@ -193,8 +200,6 @@ def animate(i, update_today=False):
         usagecharts.do_daily_chart()
         return True
 
-    #update_usage_chart(usagechart, nrx, ntx, prx, ptx, f"Cycle Dates: {sday.year}-{sday.month:02}-{sday.day:02} to {eday.year}-{eday.month:02}-{eday.day:02}")
-    #update_usage_chart(usagechart, sum(sd._download), sum(sd._upload), 0, 0, f"Cycle Dates: {sday.year}-{sday.month:02}-{sday.day:02} to {eday.year}-{eday.month:02}-{eday.day:02}")
     update_usage_chart(usagechart, rx, tx, f"Cycle Dates: {sday.year}-{sday.month:02}-{sday.day:02} to {eday.year}-{eday.month:02}-{eday.day:02}")
 
     availchart.clear()
@@ -315,7 +320,7 @@ def startup():
         sd.db = history_db
 
     sd.history()
-    sd.outages()
+
     if sd.db is None:
         # Populate missing data in the database
         history_db.populate(sd)

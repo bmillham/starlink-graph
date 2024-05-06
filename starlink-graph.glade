@@ -43,6 +43,88 @@
     <property name="can-focus">False</property>
     <property name="icon-name">accessories-calculator</property>
   </object>
+  <object class="GtkListStore" id="image_history_store">
+    <columns>
+      <!-- column-name historylabel -->
+      <column type="gchararray"/>
+      <!-- column-name historyvalue -->
+      <column type="gint"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Forever</col>
+        <col id="1">-1</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">12 Hours</col>
+        <col id="1">12</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">24 Hours</col>
+        <col id="1">24</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">36 Hours</col>
+        <col id="1">36</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">48 Hours</col>
+        <col id="1">48</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkAdjustment" id="intervaladjustment">
+    <property name="lower">500</property>
+    <property name="upper">5000</property>
+    <property name="value">1000</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="obstructionadjustment">
+    <property name="lower">1</property>
+    <property name="upper">900</property>
+    <property name="value">10</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="outagedurationadjustment">
+    <property name="upper">5</property>
+    <property name="value">2</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">1</property>
+  </object>
+  <object class="GtkListStore" id="outagestore">
+    <columns>
+      <!-- column-name Time -->
+      <column type="gchararray"/>
+      <!-- column-name Reason -->
+      <column type="gchararray"/>
+      <!-- column-name Duration -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkAdjustment" id="primeendadjustment">
+    <property name="upper">23</property>
+    <property name="value">23</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="primestartadjustment">
+    <property name="upper">23</property>
+    <property name="value">7</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkListStore" id="shortoutagestore">
+    <columns>
+      <!-- column-name Time -->
+      <column type="gchararray"/>
+      <!-- column-name Reason -->
+      <column type="gchararray"/>
+      <!-- column-name Duration -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkApplicationWindow" id="window1">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Starlink</property>
@@ -119,16 +201,6 @@
                   <object class="GtkMenu">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <child>
-                      <object class="GtkMenuItem">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="tooltip-text" translatable="yes">View outages in the last 12 hours</property>
-                        <property name="label" translatable="yes">_Outages</property>
-                        <property name="use-underline">True</property>
-                        <signal name="activate" handler="on_outage_clicked" object="outagewindow" swapped="no"/>
-                      </object>
-                    </child>
                     <child>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
@@ -776,6 +848,287 @@
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="shadow-type">in</property>
+                    <child>
+                      <object class="GtkViewport">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="spacing">2</property>
+                                <property name="homogeneous">True</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="halign">end</property>
+                                    <property name="label" translatable="yes">Outages 2+ Seconds:</property>
+                                    <attributes>
+                                      <attribute name="weight" value="book"/>
+                                      <attribute name="scale" value="2"/>
+                                    </attributes>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="long_outages_label">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="halign">start</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"/>
+                                      <attribute name="scale" value="2"/>
+                                    </attributes>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkTreeView">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="model">outagestore</property>
+                                <property name="enable-search">False</property>
+                                <property name="search-column">0</property>
+                                <property name="show-expanders">False</property>
+                                <property name="level-indentation">1</property>
+                                <child internal-child="selection">
+                                  <object class="GtkTreeSelection"/>
+                                </child>
+                                <child>
+                                  <object class="GtkTreeViewColumn">
+                                    <property name="spacing">2</property>
+                                    <property name="sizing">autosize</property>
+                                    <property name="title" translatable="yes">Time</property>
+                                    <property name="expand">True</property>
+                                    <child>
+                                      <object class="GtkCellRendererText"/>
+                                      <attributes>
+                                        <attribute name="text">0</attribute>
+                                      </attributes>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkTreeViewColumn">
+                                    <property name="spacing">2</property>
+                                    <property name="sizing">autosize</property>
+                                    <property name="title" translatable="yes">Reason</property>
+                                    <property name="expand">True</property>
+                                    <child>
+                                      <object class="GtkCellRendererText"/>
+                                      <attributes>
+                                        <attribute name="text">1</attribute>
+                                      </attributes>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkTreeViewColumn">
+                                    <property name="spacing">2</property>
+                                    <property name="sizing">autosize</property>
+                                    <property name="title" translatable="yes">Duration</property>
+                                    <property name="expand">True</property>
+                                    <child>
+                                      <object class="GtkCellRendererText"/>
+                                      <attributes>
+                                        <attribute name="text">2</attribute>
+                                      </attributes>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child type="tab">
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">2+ Seconds</property>
+                  </object>
+                  <packing>
+                    <property name="tab-fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="spacing">2</property>
+                        <property name="homogeneous">True</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">end</property>
+                            <property name="label" translatable="yes">Outages &lt; 2 seconds:</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                              <attribute name="scale" value="2"/>
+                            </attributes>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="short_outages_label">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                              <attribute name="scale" value="2"/>
+                            </attributes>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkTreeView">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="model">shortoutagestore</property>
+                        <property name="enable-search">False</property>
+                        <property name="show-expanders">False</property>
+                        <property name="level-indentation">1</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection"/>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn">
+                            <property name="title" translatable="yes">Time</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="short_outage_time"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn">
+                            <property name="title" translatable="yes">Reason</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="short_outage_reason"/>
+                              <attributes>
+                                <attribute name="text">1</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn">
+                            <property name="title" translatable="yes">Duration</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="short_outage_duration"/>
+                              <attributes>
+                                <attribute name="text">2</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child type="tab">
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">&lt; 2 Seconds</property>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                    <property name="tab-fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child type="tab">
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Outages</property>
+              </object>
+              <packing>
+                <property name="position">3</property>
+                <property name="tab-fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkNotebook">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <child>
                   <!-- n-columns=2 n-rows=16 -->
                   <object class="GtkGrid">
                     <property name="visible">True</property>
@@ -1326,7 +1679,7 @@
                 </child>
               </object>
               <packing>
-                <property name="position">3</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <child type="tab">
@@ -1336,7 +1689,7 @@
                 <property name="label" translatable="yes">Advanced</property>
               </object>
               <packing>
-                <property name="position">3</property>
+                <property name="position">4</property>
                 <property name="tab-fill">False</property>
               </packing>
             </child>
@@ -1809,66 +2162,6 @@ Select the correct directory in the following dialog.</property>
       </object>
     </child>
   </object>
-  <object class="GtkListStore" id="image_history_store">
-    <columns>
-      <!-- column-name historylabel -->
-      <column type="gchararray"/>
-      <!-- column-name historyvalue -->
-      <column type="gint"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Forever</col>
-        <col id="1">-1</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">12 Hours</col>
-        <col id="1">12</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">24 Hours</col>
-        <col id="1">24</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">36 Hours</col>
-        <col id="1">36</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">48 Hours</col>
-        <col id="1">48</col>
-      </row>
-    </data>
-  </object>
-  <object class="GtkAdjustment" id="intervaladjustment">
-    <property name="lower">500</property>
-    <property name="upper">5000</property>
-    <property name="value">1000</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">10</property>
-  </object>
-  <object class="GtkAdjustment" id="obstructionadjustment">
-    <property name="lower">1</property>
-    <property name="upper">900</property>
-    <property name="value">10</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">10</property>
-  </object>
-  <object class="GtkAdjustment" id="outagedurationadjustment">
-    <property name="upper">5</property>
-    <property name="value">2</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">1</property>
-  </object>
-  <object class="GtkListStore" id="outagestore">
-    <columns>
-      <!-- column-name Time -->
-      <column type="gchararray"/>
-      <!-- column-name Reason -->
-      <column type="gchararray"/>
-      <!-- column-name Duration -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
   <object class="GtkWindow" id="outagewindow">
     <property name="can-focus">False</property>
     <property name="has-focus">True</property>
@@ -1917,80 +2210,10 @@ Select the correct directory in the following dialog.</property>
           </packing>
         </child>
         <child>
-          <object class="GtkTreeView">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="model">outagestore</property>
-            <property name="enable-search">False</property>
-            <property name="search-column">0</property>
-            <property name="show-expanders">False</property>
-            <property name="level-indentation">1</property>
-            <child internal-child="selection">
-              <object class="GtkTreeSelection"/>
-            </child>
-            <child>
-              <object class="GtkTreeViewColumn">
-                <property name="spacing">2</property>
-                <property name="sizing">autosize</property>
-                <property name="title" translatable="yes">Time</property>
-                <property name="expand">True</property>
-                <child>
-                  <object class="GtkCellRendererText"/>
-                  <attributes>
-                    <attribute name="text">0</attribute>
-                  </attributes>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkTreeViewColumn">
-                <property name="spacing">2</property>
-                <property name="sizing">autosize</property>
-                <property name="title" translatable="yes">Reason</property>
-                <property name="expand">True</property>
-                <child>
-                  <object class="GtkCellRendererText"/>
-                  <attributes>
-                    <attribute name="text">1</attribute>
-                  </attributes>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkTreeViewColumn">
-                <property name="spacing">2</property>
-                <property name="sizing">autosize</property>
-                <property name="title" translatable="yes">Duration</property>
-                <property name="expand">True</property>
-                <child>
-                  <object class="GtkCellRendererText"/>
-                  <attributes>
-                    <attribute name="text">2</attribute>
-                  </attributes>
-                </child>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
+          <placeholder/>
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkAdjustment" id="primeendadjustment">
-    <property name="upper">23</property>
-    <property name="value">23</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">10</property>
-  </object>
-  <object class="GtkAdjustment" id="primestartadjustment">
-    <property name="upper">23</property>
-    <property name="value">7</property>
-    <property name="step-increment">1</property>
-    <property name="page-increment">10</property>
   </object>
   <object class="GtkAdjustment" id="ticksadjustment">
     <property name="lower">2</property>

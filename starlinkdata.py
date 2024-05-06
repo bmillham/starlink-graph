@@ -137,11 +137,12 @@ class StarlinkData:
         # Clear old data
         self._outages.clear()
         self._outages_by_cause.clear()
-        try:
-            history = starlink_grpc.get_history()
-        except:
-            print('No history returned')
-            return
+        #try:
+        #    history = starlink_grpc.get_history()
+        #except:
+        #    print('No history returned')
+        #    return
+        
         for o in history.outages:
             fix = self._gps_to_gmt(o.start_timestamp_ns)
             cause = o.Cause.Name(o.cause)

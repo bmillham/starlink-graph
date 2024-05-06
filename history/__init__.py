@@ -5,6 +5,7 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import exc
 from datetime import datetime, timedelta, timezone
+import leapseconds
 import time
 import dateutil.relativedelta
 #class Base(DeclarativeBase):
@@ -68,6 +69,8 @@ class History():
         self.ping_stats_table._create_table()
         self.usage_table = UsageTable(self._config, engine=self.engine, conn=self.conn)
         self.usage_table._create_table()
+        self.outages_table = OutagesTable(self._config, engine=self.engine, conn=self.conn)
+        self.outages_table._create_table()
         return
 
     def commit(self):

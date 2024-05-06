@@ -151,6 +151,9 @@ def loop_body(opts, gstate, shutdown=False):
         if not rc:
             rc = hist_rc
 
+    outage_data = starlink_grpc.get_history().outages
+    gstate.db.outages_table.insert_data(outage_data)
+
     if not shutdown and opts.bulk_mode and not rc:
         if gstate.counter is None and not opts.skip_query and opts.bulk_samples < 0:
             gstate.timestamp, gstate.counter = gstate.db.query_counter(opts, gstate, "counter", "history")
@@ -292,7 +295,6 @@ def main():
     opts = parse_args()
 
     logging.basicConfig(format="%(levelname)s: %(message)s")
-
 
     gstate = dish_common.GlobalState(target=opts.target)
     gstate.points = []
