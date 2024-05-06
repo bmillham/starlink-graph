@@ -134,7 +134,6 @@ def animate(i, update_today=False):
         print('No data')
         return True
 
-    #outages = sd.db.outages
     outages = sd.db.outages_table.get_all_outages()
     
     widgets['outagestore'].clear()
@@ -244,14 +243,11 @@ def animate(i, update_today=False):
     availchart.xaxis.set_ticks([])
     availchart.set_yticks([100, availave[0], 0], labels=[f'{"" if availave[0] > 85.0 else "100%"}',
                                                          f'Ave:\n{availave[0] / 100:.2%}', '0%'])
-    if len(sd._outages_by_cause) == 0:
-        availchart.text(sd._xaxis[0], 10, "No outages in the last 12 hours",
-                        bbox={'facecolor': 'green',
-                              'alpha': 0.5,
-                              'pad': 1})
+    if len(widgets['outagestore']) + len(widgets['shortoutagestore']) == 0:
+        widgets['outage_tab_label'].set_text('Outages')
     else:
-        availchart.text(sd._xaxis[0], 10, "\n".join([f'{k}: {v:.0f}s' for k, v in sd._outages_by_cause.items()]), bbox={
-            'facecolor': 'green', 'alpha': 0.5, 'pad': 1})
+        widgets['outage_tab_label'].set_text(f'Outages: ({",".join([str(len(widgets["outagestore"])), str(len(widgets["shortoutagestore"]))])})')
+
     upmin = min(sd._upload)
     upmax = max(sd._upload)
     dmin = min(sd._download)

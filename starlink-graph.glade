@@ -911,11 +911,14 @@
                               <object class="GtkTreeView">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
+                                <property name="hexpand">True</property>
                                 <property name="model">outagestore</property>
+                                <property name="headers-clickable">False</property>
                                 <property name="enable-search">False</property>
                                 <property name="search-column">0</property>
                                 <property name="show-expanders">False</property>
                                 <property name="level-indentation">1</property>
+                                <property name="enable-grid-lines">both</property>
                                 <child internal-child="selection">
                                   <object class="GtkTreeSelection"/>
                                 </child>
@@ -1039,15 +1042,19 @@
                       <object class="GtkTreeView">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
+                        <property name="hexpand">True</property>
                         <property name="model">shortoutagestore</property>
+                        <property name="headers-clickable">False</property>
                         <property name="enable-search">False</property>
                         <property name="show-expanders">False</property>
                         <property name="level-indentation">1</property>
+                        <property name="enable-grid-lines">both</property>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection"/>
                         </child>
                         <child>
                           <object class="GtkTreeViewColumn">
+                            <property name="sizing">autosize</property>
                             <property name="title" translatable="yes">Time</property>
                             <child>
                               <object class="GtkCellRendererText" id="short_outage_time"/>
@@ -1059,6 +1066,7 @@
                         </child>
                         <child>
                           <object class="GtkTreeViewColumn">
+                            <property name="sizing">autosize</property>
                             <property name="title" translatable="yes">Reason</property>
                             <child>
                               <object class="GtkCellRendererText" id="short_outage_reason"/>
@@ -1070,6 +1078,7 @@
                         </child>
                         <child>
                           <object class="GtkTreeViewColumn">
+                            <property name="sizing">autosize</property>
                             <property name="title" translatable="yes">Duration</property>
                             <child>
                               <object class="GtkCellRendererText" id="short_outage_duration"/>
@@ -1089,6 +1098,7 @@
                   </object>
                   <packing>
                     <property name="position">1</property>
+                    <property name="tab-fill">False</property>
                   </packing>
                 </child>
                 <child type="tab">
@@ -1114,7 +1124,7 @@
               </packing>
             </child>
             <child type="tab">
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="outage_tab_label">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="label" translatable="yes">Outages</property>

@@ -1,6 +1,5 @@
 from gi.repository import Gdk
 import starlink_grpc
-import leapseconds
 import datetime
 import png
 import tempfile
@@ -86,12 +85,6 @@ class StarlinkData:
         self._avail.clear()
         self._download.clear()
 
-    def _gps_to_gmt(self, timestamp):
-         # Convert GPS time to GMT.
-        tzoff = datetime.datetime.now().astimezone().utcoffset().total_seconds()
-        return leapseconds.gps_to_utc(datetime.datetime(1980,1,6) +
-                                      datetime.timedelta(seconds=(timestamp/1000000000)+tzoff))
-
     def history(self):
         if self.db is not None:
             self._clear_stats()
@@ -130,33 +123,6 @@ class StarlinkData:
                 self._upload.append(0)
                 self._avail.append(0)
             dtstart += datetime.timedelta(seconds=1)
-
-    def outages(self, min_duration=None):
-        if min_duration is None:
-            min_duration = self._config.duration
-        # Clear old data
-        self._outages.clear()
-        self._outages_by_cause.clear()
-        #try:
-        #    history = starlink_grpc.get_history()
-        #except:
-        #    print('No history returned')
-        #    return
-        
-        for o in history.outages:
-            fix = self._gps_to_gmt(o.start_timestamp_ns)
-            cause = o.Cause.Name(o.cause)
-            duration =  o.duration_ns/1000000000
-            # The starlink page ignores outages less than 2 seconds. So do the same.
-            if duration < min_duration:
-                continue
-            self._outages.append({'time': fix,
-                                  'cause': cause,
-                                  'duration': duration})
-            if cause not in self._outages_by_cause:
-                self._outages_by_cause[cause] = duration
-            else:
-                self._outages_by_cause[cause] += duration
 
     def obstruction_map(self, config=None):
         try:
