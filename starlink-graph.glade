@@ -2306,59 +2306,6 @@ Select the correct directory in the following dialog.</property>
       </object>
     </child>
   </object>
-  <object class="GtkWindow" id="outagewindow">
-    <property name="can-focus">False</property>
-    <property name="has-focus">True</property>
-    <property name="receives-default">True</property>
-    <property name="title" translatable="yes">Starlnk Outages</property>
-    <property name="window-position">center-on-parent</property>
-    <property name="destroy-with-parent">True</property>
-    <property name="type-hint">dialog</property>
-    <property name="gravity">center</property>
-    <property name="transient-for">window1</property>
-    <signal name="delete-event" handler="outage_close" swapped="no"/>
-    <child>
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="margin-left">2</property>
-        <property name="margin-right">2</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkLabel" id="outagelabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="margin-left">2</property>
-            <property name="margin-right">2</property>
-            <property name="label" translatable="yes">Outages in the last 12 hours</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkCheckButton" id="outagecheckbox">
-            <property name="label" translatable="yes">Show all outages</property>
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">False</property>
-            <property name="draw-indicator">True</property>
-            <signal name="toggled" handler="outage_toggled" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-    </child>
-  </object>
   <object class="GtkAdjustment" id="ticksadjustment">
     <property name="lower">2</property>
     <property name="upper">4</property>

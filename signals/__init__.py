@@ -8,7 +8,6 @@ class Signals(object):
     from .about_dialog import on_about_close_button, on_about_dialog_click
     from .config_dialog import on_settings_clicked, no_grpc_hide, on_configcancelbutton_clicked, on_configsavebutton_clicked, enable_map_cb, clear_history_button_clicked, save_map_when_window_closed_cb_toggled
     from .obstruction_window import delete_obstruction_images, on_obstructions_clicked, auto_obstruction_toggle, on_obstructionwindow_delete_event
-    from .outage_window import outage_close, outage_toggled, on_outage_clicked, show_outages
     from .delete_dialog import on_delete_confirmation_window_delete_event, on_delete_confirmation_yes_clicked
     from .animation_window import on_ani_window_delete, create_animation, on_create_animation_clicked
     from .usage_window import on_usage_clicked
