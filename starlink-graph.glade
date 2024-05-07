@@ -1433,6 +1433,7 @@
                       <object class="GtkTreeView">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
+                        <property name="halign">center</property>
                         <property name="hexpand">True</property>
                         <property name="model">shortoutagestore</property>
                         <property name="headers-clickable">False</property>
@@ -1445,6 +1446,7 @@
                         </child>
                         <child>
                           <object class="GtkTreeViewColumn">
+                            <property name="spacing">2</property>
                             <property name="sizing">autosize</property>
                             <property name="title" translatable="yes">Time</property>
                             <child>
@@ -1457,6 +1459,7 @@
                         </child>
                         <child>
                           <object class="GtkTreeViewColumn">
+                            <property name="spacing">2</property>
                             <property name="sizing">autosize</property>
                             <property name="title" translatable="yes">Reason</property>
                             <child>
@@ -1469,6 +1472,7 @@
                         </child>
                         <child>
                           <object class="GtkTreeViewColumn">
+                            <property name="spacing">2</property>
                             <property name="sizing">autosize</property>
                             <property name="title" translatable="yes">Duration</property>
                             <child>

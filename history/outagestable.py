@@ -55,6 +55,6 @@ class OutagesTable(Base):
 
     def get_all_outages(self):
         start_time = datetime.now() + timedelta(hours=-12)
-        stmt = select(OutagesTable).where(start_time >= start_time)
+        stmt = select(OutagesTable).where(OutagesTable.start_timestamp >= start_time)
         res = self._conn.execute(stmt)
         return res.fetchall() 
