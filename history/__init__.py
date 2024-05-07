@@ -249,6 +249,7 @@ class History():
         stmt = select(StatusTable.id,
                       StatusTable.hardware_version,
                       StatusTable.software_version,
-                      StatusTable.uptime).order_by(StatusTable.time.desc()).limit(1)
+                      StatusTable.uptime,
+                      StatusTable.state).order_by(StatusTable.time.desc()).limit(1)
         info = self.conn.execute(stmt).fetchone()
         return info

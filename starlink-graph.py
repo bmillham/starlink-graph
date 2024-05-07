@@ -256,6 +256,12 @@ def animate(i, update_today=False):
         widgets['outage_tab_label'].set_text('Outages')
     else:
         widgets['outage_tab_label'].set_text(f'Outages: ({",".join([str(len(widgets["outagestore"])), str(len(widgets["shortoutagestore"]))])})')
+    info = sd.dish_info
+    widgets['dishy_id_label'].set_text(info.id)
+    widgets['hardware_version_label'].set_text(info.hardware_version)
+    widgets['software_version_label'].set_text(info.software_version)
+    widgets['dish_uptime_label'].set_text(str(datetime.timedelta(seconds=info.uptime)))
+    widgets['state_label'].set_text(info.state)
 
     if len(alerts) > 1:
         availchart.text(sd._xaxis[0], 10, "\n".join(alerts),
