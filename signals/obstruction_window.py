@@ -7,12 +7,11 @@ def delete_obstruction_images(self, widget):
     widget.show()
 
 
-def on_obstructions_clicked(self, widget):
-    self.auto_obstruction_toggle()
-
-    self.show_obstruction_map()
-    widget.show()
-
+def on_obstructions_clicked(self, notebook, content, page):
+    #self.auto_obstruction_toggle()
+    if page == 5:
+        self.show_obstruction_map()
+        content.show()
 
 def auto_obstruction_toggle(self, widget=None):
     if self._widgets['obstruction_update_check'].get_active() or self._widgets['save_map_when_window_closed_cb'].get_active():
