@@ -1,8 +1,16 @@
 import gi
 
-gi.require_version('Gdk', '3.0')
+try:
+    gi.require_version('Gdk', '3.0')
+except ValueError:
+    print('Gdk not found')
+    no_gdk = True
+else:
+    no_gdk = False
 
-from gi.repository import Gdk
+if not no_gdk:
+    from gi.repository import Gdk
+
 import configparser
 
 
@@ -18,9 +26,14 @@ class Config(object):
             self._config = None
         finally:
             self._opts = self._config['options']
-        self._ob_rgba_color = Gdk.RGBA()
-        self._un_rgba_color = Gdk.RGBA()
-        self._no_rgba_color = Gdk.RGBA()
+        if no_gdk:
+            self._ob_rgba_color = Gdk.RGBA()
+            self._un_rgba_color = Gdk.RGBA()
+            self._no_rgba_color = Gdk.RGBA()
+        else:
+            self._ob_rgba_color = None
+            self._un_rgba_color = None
+            self._no_rgba_color = None
         self._widgets = dict()
         self._exe_file = exe_file
         self._config_changed = False
