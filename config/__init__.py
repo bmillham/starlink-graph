@@ -27,13 +27,13 @@ class Config(object):
         finally:
             self._opts = self._config['options']
         if no_gdk:
-            self._ob_rgba_color = Gdk.RGBA()
-            self._un_rgba_color = Gdk.RGBA()
-            self._no_rgba_color = Gdk.RGBA()
-        else:
             self._ob_rgba_color = None
             self._un_rgba_color = None
             self._no_rgba_color = None
+        else:
+            self._ob_rgba_color = Gdk.RGBA()
+            self._un_rgba_color = Gdk.RGBA()
+            self._no_rgba_color = Gdk.RGBA()
         self._widgets = dict()
         self._exe_file = exe_file
         self._config_changed = False
