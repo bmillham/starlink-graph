@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.90.2 -->
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkImage" id="image4">
+    <property name="icon-name">accessories-calculator</property>
+  </object>
+  <object class="GtkImage" id="image3">
+    <property name="icon-name">accessories-calculator</property>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="icon-name">accessories-calculator</property>
+  </object>
+  <object class="GtkImage" id="image1">
+    <property name="icon-name">accessories-calculator</property>
+  </object>
+  <object class="GtkTextBuffer" id="ani_out_buffer"/>
+</interface>

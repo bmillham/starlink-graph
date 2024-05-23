@@ -1,0 +1,2296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkTextBuffer" id="ani_out_buffer"/>
+  <object class="GtkAdjustment" id="billlingstartdayadjustment">
+    <property name="lower">1</property>
+    <property name="upper">31</property>
+    <property name="value">1</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="duration_adjustment">
+    <property name="lower">30</property>
+    <property name="upper">600</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="historyadjustment">
+    <property name="lower">60</property>
+    <property name="upper">900</property>
+    <property name="value">900</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">1</property>
+  </object>
+  <object class="GtkImage" id="image1">
+    <property name="icon-name">accessories-calculator</property>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="icon-name">accessories-calculator</property>
+  </object>
+  <object class="GtkImage" id="image3">
+    <property name="icon-name">accessories-calculator</property>
+  </object>
+  <object class="GtkImage" id="image4">
+    <property name="icon-name">accessories-calculator</property>
+  </object>
+  <object class="GtkListStore" id="image_history_store">
+    <columns>
+      <column type="gchararray"/>
+      <column type="gint"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Forever</col>
+        <col id="1">-1</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">12 Hours</col>
+        <col id="1">12</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">24 Hours</col>
+        <col id="1">24</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">36 Hours</col>
+        <col id="1">36</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">48 Hours</col>
+        <col id="1">48</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkAdjustment" id="intervaladjustment">
+    <property name="lower">500</property>
+    <property name="upper">5000</property>
+    <property name="value">1000</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="obstructionadjustment">
+    <property name="lower">1</property>
+    <property name="upper">900</property>
+    <property name="value">10</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="outagedurationadjustment">
+    <property name="upper">5</property>
+    <property name="value">2</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">1</property>
+  </object>
+  <object class="GtkListStore" id="outagestore">
+    <columns>
+      <column type="gchararray"/>
+      <column type="gchararray"/>
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkAdjustment" id="primeendadjustment">
+    <property name="upper">23</property>
+    <property name="value">23</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="primestartadjustment">
+    <property name="upper">23</property>
+    <property name="value">7</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkListStore" id="shortoutagestore">
+    <columns>
+      <column type="gchararray"/>
+      <column type="gchararray"/>
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkApplicationWindow" id="window1">
+    <property name="title" translatable="1">Starlink</property>
+    <property name="default-width">800</property>
+    <property name="default-height">600</property>
+    <property name="icon">starlink.png</property>
+    <signal name="destroy" handler="on_window1_destroy" swapped="no"/>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="baseline-position">bottom</property>
+        <child>
+          <object class="GtkMenuBar">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkMenuItem">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="1">_File</property>
+                <property name="use-underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="tooltip-text" translatable="1">Change application settings (not yet implimented)</property>
+                        <property name="label" translatable="1">_Settings</property>
+                        <property name="use-underline">True</property>
+                        <signal name="activate" handler="no_grpc_hide" object="nogrpcwindow" swapped="no"/>
+                        <signal name="activate" handler="on_settings_clicked" object="configwindow" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="1">Delete Obstruction Images</property>
+                        <property name="use-underline">True</property>
+                        <signal name="activate" handler="delete_obstruction_images" object="delete_confirmation_window" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSeparatorMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="1">_Quit</property>
+                        <property name="use-underline">True</property>
+                        <signal name="activate" handler="on_window1_destroy" swapped="no"/>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="1">Animation</property>
+                <property name="use-underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="1">Create</property>
+                        <property name="use-underline">True</property>
+                        <signal name="activate" handler="on_create_animation_clicked" swapped="no"/>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="1">_Help</property>
+                <property name="use-underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="1">_About</property>
+                        <property name="use-underline">True</property>
+                        <signal name="activate" handler="on_about_dialog_click" object="aboutdialog" swapped="no"/>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkNotebook" id="animation_notebook">
+            <property name="focusable">1</property>
+            <signal name="switch-page" handler="on_obstructions_clicked" swapped="no"/>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="child">
+                  <object class="GtkScrolledWindow" id="scrolledwindow1">
+                    <property name="focusable">1</property>
+                    <property name="vexpand">1</property>
+                    <property name="shadow-type">in</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel">
+                    <property name="label" translatable="1">Current</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="position">1</property>
+                <property name="child">
+                  <object class="GtkNotebook">
+                    <property name="focusable">1</property>
+                    <property name="enable-popup">1</property>
+                    <child>
+                      <object class="GtkNotebookPage">
+                        <property name="child">
+                          <object class="GtkBox" id="today_usage_box2">
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="halign">center</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="halign">end</property>
+                                    <property name="label" translatable="1">Hourly Usage For:</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"></attribute>
+                                    </attributes>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="today_label1">
+                                    <property name="halign">start</property>
+                                    <property name="xpad">5</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"></attribute>
+                                    </attributes>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkButton">
+                                    <property name="focusable">1</property>
+                                    <property name="receives-default">1</property>
+                                    <property name="image">image2</property>
+                                    <property name="always-show-image">True</property>
+                                    <signal name="clicked" handler="on_date_button_clicked" swapped="no"/>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="halign">end</property>
+                                    <property name="label" translatable="1">Updated:</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"></attribute>
+                                    </attributes>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="updated_label1">
+                                    <property name="halign">start</property>
+                                    <property name="xpad">5</property>
+                                    <property name="label" translatable="1">Never</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"></attribute>
+                                    </attributes>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                        <property name="tab">
+                          <object class="GtkLabel">
+                            <property name="label" translatable="1">Total</property>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkNotebookPage">
+                        <property name="position">1</property>
+                        <property name="child">
+                          <object class="GtkBox" id="today_usage_box1">
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="halign">center</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="halign">end</property>
+                                    <property name="label" translatable="1">Hourly Usage For:</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"></attribute>
+                                    </attributes>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="today_label2">
+                                    <property name="halign">start</property>
+                                    <property name="xpad">5</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"></attribute>
+                                    </attributes>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkButton">
+                                    <property name="focusable">1</property>
+                                    <property name="receives-default">1</property>
+                                    <property name="image">image3</property>
+                                    <property name="always-show-image">True</property>
+                                    <signal name="clicked" handler="on_date_button_clicked" swapped="no"/>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="halign">end</property>
+                                    <property name="label" translatable="1">Updated:</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"></attribute>
+                                    </attributes>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="updated_label2">
+                                    <property name="halign">start</property>
+                                    <property name="xpad">5</property>
+                                    <property name="label" translatable="1">Never</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"></attribute>
+                                    </attributes>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                        <property name="tab">
+                          <object class="GtkLabel">
+                            <property name="label" translatable="1">Hourly</property>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkNotebookPage">
+                        <property name="position">2</property>
+                        <property name="child">
+                          <object class="GtkBox">
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="halign">center</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="halign">end</property>
+                                    <property name="label" translatable="1">Hourly Usage For:</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"></attribute>
+                                    </attributes>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="today_label3">
+                                    <property name="halign">start</property>
+                                    <property name="xpad">5</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"></attribute>
+                                    </attributes>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkButton">
+                                    <property name="focusable">1</property>
+                                    <property name="receives-default">1</property>
+                                    <property name="image">image1</property>
+                                    <property name="always-show-image">True</property>
+                                    <signal name="clicked" handler="on_date_button_clicked" swapped="no"/>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="halign">end</property>
+                                    <property name="label" translatable="1">Updated:</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"></attribute>
+                                    </attributes>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="updated_label3">
+                                    <property name="halign">start</property>
+                                    <property name="xpad">5</property>
+                                    <property name="label" translatable="1">Never</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"></attribute>
+                                    </attributes>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkGrid">
+                                <property name="halign">center</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="xpad">5</property>
+                                    <property name="label" translatable="1">Latency</property>
+                                    <layout>
+                                      <property name="column">0</property>
+                                      <property name="row">0</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label" translatable="1">Uptime:</property>
+                                    <layout>
+                                      <property name="column">0</property>
+                                      <property name="row">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkGrid">
+                                    <child>
+                                      <object class="GtkLabel" id="average_latency_label">
+                                        <property name="xpad">5</property>
+                                        <layout>
+                                          <property name="column">2</property>
+                                          <property name="row">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="label" translatable="1">Min</property>
+                                        <layout>
+                                          <property name="column">0</property>
+                                          <property name="row">0</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="label" translatable="1">Max</property>
+                                        <layout>
+                                          <property name="column">1</property>
+                                          <property name="row">0</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="label" translatable="1">Ave</property>
+                                        <layout>
+                                          <property name="column">2</property>
+                                          <property name="row">0</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="min_latency_label">
+                                        <property name="xpad">5</property>
+                                        <layout>
+                                          <property name="column">0</property>
+                                          <property name="row">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="max_latency_label">
+                                        <property name="xpad">5</property>
+                                        <layout>
+                                          <property name="column">1</property>
+                                          <property name="row">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <layout>
+                                      <property name="column">1</property>
+                                      <property name="row">0</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="uptime_label">
+                                    <layout>
+                                      <property name="column">1</property>
+                                      <property name="row">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                        <property name="tab">
+                          <object class="GtkLabel">
+                            <property name="label" translatable="1">Latency/Uptime</property>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel">
+                    <property name="label" translatable="1">Hourly</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="position">2</property>
+                <property name="child">
+                  <object class="GtkBox" id="dailybox">
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="halign">center</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="xpad">5</property>
+                            <property name="label" translatable="1">Cycle Usage For:</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="cycle_usage_label">
+                            <property name="xpad">5</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton">
+                            <property name="focusable">1</property>
+                            <property name="receives-default">1</property>
+                            <property name="image">image4</property>
+                            <property name="always-show-image">True</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel">
+                    <property name="label" translatable="1">Daily</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="position">3</property>
+                <property name="child">
+                  <object class="GtkGrid">
+                    <property name="column-spacing">2</property>
+                    <property name="column-homogeneous">1</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Motors Stuck:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_motors_stuck">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Thermal Throttle:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Thermal Shutdown:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">2</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Mast Not Near Vertical:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">3</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Unexpected Location:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">4</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Slow Ethernet Speeds:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">5</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Roaming:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">6</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Install Pending:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">7</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Is Heating:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">8</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Power Supply Thermal Throttle:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">9</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Is Power Save Idle:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">10</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Moving While Not Mobile:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">11</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Moving Too Fast For Policy:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">12</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">DBF Telem Stale:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">13</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Low Motor Current:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">14</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Lower Signal Than Predicted:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">15</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_thermal_throttle">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_thermal_shutdown">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">2</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_mast_not_near_vertical">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">3</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_unexpected_location">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">4</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_slow_ethernet_speeds">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">5</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_roaming">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">6</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_install_pending">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">7</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_is_heating">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">8</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_power_supply_thermal_throttle">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">9</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_is_power_save_idle">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">10</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_moving_while_not_mobile">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">11</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_moving_too_fast_for_policy">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">12</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_dbf_telem_stale">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">13</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_low_motor_current">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">14</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="alert_lower_signal_than_predicted">
+                        <property name="halign">start</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">15</property>
+                        </layout>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel" id="alerts_tab_label">
+                    <property name="label" translatable="1">Alerts</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="position">4</property>
+                <property name="child">
+                  <object class="GtkNotebook">
+                    <property name="focusable">1</property>
+                    <child>
+                      <object class="GtkNotebookPage">
+                        <property name="child">
+                          <object class="GtkScrolledWindow">
+                            <property name="focusable">1</property>
+                            <property name="shadow-type">in</property>
+                            <property name="child">
+                              <object class="GtkViewport">
+                                <property name="child">
+                                  <object class="GtkBox">
+                                    <property name="orientation">vertical</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="spacing">2</property>
+                                        <property name="homogeneous">1</property>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="halign">end</property>
+                                            <property name="label" translatable="1">Outages 2+ Seconds:</property>
+                                            <attributes>
+                                              <attribute name="weight" value="book"></attribute>
+                                              <attribute name="scale" value="2"></attribute>
+                                            </attributes>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel" id="long_outages_label">
+                                            <property name="halign">start</property>
+                                            <attributes>
+                                              <attribute name="weight" value="bold"></attribute>
+                                              <attribute name="scale" value="2"></attribute>
+                                            </attributes>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkTreeView">
+                                        <property name="focusable">1</property>
+                                        <property name="hexpand">1</property>
+                                        <property name="model">outagestore</property>
+                                        <property name="headers-clickable">0</property>
+                                        <property name="enable-search">0</property>
+                                        <property name="search-column">0</property>
+                                        <property name="show-expanders">0</property>
+                                        <property name="level-indentation">1</property>
+                                        <property name="enable-grid-lines">both</property>
+                                        <child internal-child="selection">
+                                          <object class="GtkTreeSelection"/>
+                                        </child>
+                                        <child>
+                                          <object class="GtkTreeViewColumn">
+                                            <property name="spacing">2</property>
+                                            <property name="sizing">autosize</property>
+                                            <property name="title" translatable="1">Time</property>
+                                            <property name="expand">1</property>
+                                            <child>
+                                              <object class="GtkCellRendererText"/>
+                                              <attributes>
+                                                <attribute name="text">0</attribute>
+                                              </attributes>
+                                            </child>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkTreeViewColumn">
+                                            <property name="spacing">2</property>
+                                            <property name="sizing">autosize</property>
+                                            <property name="title" translatable="1">Reason</property>
+                                            <property name="expand">1</property>
+                                            <child>
+                                              <object class="GtkCellRendererText"/>
+                                              <attributes>
+                                                <attribute name="text">1</attribute>
+                                              </attributes>
+                                            </child>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkTreeViewColumn">
+                                            <property name="spacing">2</property>
+                                            <property name="sizing">autosize</property>
+                                            <property name="title" translatable="1">Duration</property>
+                                            <property name="expand">1</property>
+                                            <child>
+                                              <object class="GtkCellRendererText"/>
+                                              <attributes>
+                                                <attribute name="text">2</attribute>
+                                              </attributes>
+                                            </child>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </property>
+                              </object>
+                            </property>
+                          </object>
+                        </property>
+                        <property name="tab">
+                          <object class="GtkLabel">
+                            <property name="label" translatable="1">2+ Seconds</property>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkNotebookPage">
+                        <property name="position">1</property>
+                        <property name="tab-fill">False</property>
+                        <property name="child">
+                          <object class="GtkScrolledWindow">
+                            <property name="focusable">1</property>
+                            <property name="shadow-type">in</property>
+                            <property name="child">
+                              <object class="GtkViewport">
+                                <property name="child">
+                                  <object class="GtkBox">
+                                    <property name="orientation">vertical</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="spacing">2</property>
+                                        <property name="homogeneous">1</property>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="halign">end</property>
+                                            <property name="label" translatable="1">Outages &lt; 2 seconds:</property>
+                                            <attributes>
+                                              <attribute name="weight" value="bold"></attribute>
+                                              <attribute name="scale" value="2"></attribute>
+                                            </attributes>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel" id="short_outages_label">
+                                            <property name="halign">start</property>
+                                            <attributes>
+                                              <attribute name="weight" value="bold"></attribute>
+                                              <attribute name="scale" value="2"></attribute>
+                                            </attributes>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkTreeView">
+                                        <property name="focusable">1</property>
+                                        <property name="hexpand">1</property>
+                                        <property name="model">shortoutagestore</property>
+                                        <property name="headers-clickable">0</property>
+                                        <property name="enable-search">0</property>
+                                        <property name="show-expanders">0</property>
+                                        <property name="level-indentation">1</property>
+                                        <property name="enable-grid-lines">both</property>
+                                        <child>
+                                          <object class="GtkTreeViewColumn">
+                                            <property name="spacing">2</property>
+                                            <property name="sizing">autosize</property>
+                                            <property name="title" translatable="1">Time</property>
+                                            <child>
+                                              <object class="GtkCellRendererText" id="short_outage_time"/>
+                                              <attributes>
+                                                <attribute name="text">0</attribute>
+                                              </attributes>
+                                            </child>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkTreeViewColumn">
+                                            <property name="spacing">2</property>
+                                            <property name="sizing">autosize</property>
+                                            <property name="title" translatable="1">Reason</property>
+                                            <child>
+                                              <object class="GtkCellRendererText" id="short_outage_reason"/>
+                                              <attributes>
+                                                <attribute name="text">1</attribute>
+                                              </attributes>
+                                            </child>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkTreeViewColumn">
+                                            <property name="spacing">2</property>
+                                            <property name="sizing">autosize</property>
+                                            <property name="title" translatable="1">Duration</property>
+                                            <child>
+                                              <object class="GtkCellRendererText" id="short_outage_duration"/>
+                                              <attributes>
+                                                <attribute name="text">2</attribute>
+                                              </attributes>
+                                            </child>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </property>
+                              </object>
+                            </property>
+                          </object>
+                        </property>
+                        <property name="tab">
+                          <object class="GtkLabel">
+                            <property name="label" translatable="1">&lt; 2 Seconds</property>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel" id="outage_tab_label">
+                    <property name="label" translatable="1">Outages</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="position">5</property>
+                <property name="child">
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkCheckButton" id="obstruction_update_check">
+                        <property name="label" translatable="1">Automatically update map</property>
+                        <property name="focusable">1</property>
+                        <property name="halign">center</property>
+                        <signal name="toggled" handler="auto_obstruction_toggle" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImage" id="obstructionimage">
+                        <property name="icon-name">emblem-unreadable</property>
+                        <property name="icon_size">6</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="obstruction_timer_label">
+                        <property name="label" translatable="1">label</property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel">
+                    <property name="label" translatable="1">Obstructions</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="position">6</property>
+                <property name="child">
+                  <object class="GtkNotebook">
+                    <property name="focusable">1</property>
+                    <child>
+                      <object class="GtkNotebookPage">
+                        <property name="child">
+                          <object class="GtkGrid">
+                            <property name="column-spacing">2</property>
+                            <property name="column-homogeneous">1</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="halign">end</property>
+                                <property name="label" translatable="1">Latitude:</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="halign">end</property>
+                                <property name="label" translatable="1">Longitude:</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">1</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="halign">end</property>
+                                <property name="valign">end</property>
+                                <property name="label" translatable="1">Altitude:</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">2</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="latitude">
+                                <property name="halign">start</property>
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="longitude">
+                                <property name="halign">start</property>
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="row">1</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="altitude">
+                                <property name="halign">start</property>
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="row">2</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                        <property name="tab">
+                          <object class="GtkLabel">
+                            <property name="label" translatable="1">Location</property>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkNotebookPage">
+                        <property name="position">1</property>
+                        <property name="child">
+                          <object class="GtkGrid">
+                            <property name="column-spacing">2</property>
+                            <property name="column-homogeneous">1</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="halign">end</property>
+                                <property name="label" translatable="1">Direction Azimuth:</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="halign">end</property>
+                                <property name="label" translatable="1">Direction Elevation:</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">1</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="direction_elevation">
+                                <property name="halign">start</property>
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="row">1</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="direction_azimuth">
+                                <property name="halign">start</property>
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                        <property name="tab">
+                          <object class="GtkLabel">
+                            <property name="label" translatable="1">Aiming</property>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkNotebookPage">
+                        <property name="position">2</property>
+                        <property name="child">
+                          <object class="GtkGrid">
+                            <property name="column-spacing">2</property>
+                            <property name="column-homogeneous">1</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="halign">end</property>
+                                <property name="label" translatable="1">Dishy ID:</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="halign">end</property>
+                                <property name="label" translatable="1">Software Version:</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">1</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="halign">end</property>
+                                <property name="label" translatable="1">Hardware Version:</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">2</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="dishy_id_label">
+                                <property name="halign">start</property>
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="software_version_label">
+                                <property name="halign">start</property>
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="row">1</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="hardware_version_label">
+                                <property name="halign">start</property>
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="row">2</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="halign">end</property>
+                                <property name="label" translatable="1">Uptime:</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">3</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="dish_uptime_label">
+                                <property name="halign">start</property>
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="row">3</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="halign">end</property>
+                                <property name="label" translatable="1">State:</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">4</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="state_label">
+                                <property name="halign">start</property>
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="row">4</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                        <property name="tab">
+                          <object class="GtkLabel">
+                            <property name="label" translatable="1">Dishy Information</property>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel">
+                    <property name="label" translatable="1">Advanced</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkAboutDialog" id="aboutdialog">
+    <property name="type">popup</property>
+    <property name="resizable">0</property>
+    <property name="window-position">center-on-parent</property>
+    <property name="destroy-with-parent">1</property>
+    <property name="type-hint">dialog</property>
+    <property name="deletable">0</property>
+    <property name="gravity">south</property>
+    <property name="transient-for">window1</property>
+    <property name="attached-to">window1</property>
+    <property name="program-name">Starlink-Graph</property>
+    <property name="version">0.7</property>
+    <property name="copyright" translatable="1">(2022-2024) Brian Millham</property>
+    <property name="website">https://github.com/bmillham/starlink-graph</property>
+    <property name="website-label" translatable="1">Github</property>
+    <property name="authors">Brian Millham &lt;bmillham@gmail.com&gt;
+sparky8512 &lt;sparky8512@github&gt;: starlink-grpc module
+Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
+    <property name="artists">Starlink logo found on reddit. Author unknown.</property>
+    <property name="logo">starlink.png</property>
+    <property name="license-type">gpl-2-0</property>
+    <signal name="close" handler="on_about_close_button" swapped="no"/>
+    <signal name="delete-event" handler="on_about_close_button" swapped="no"/>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="visible">0</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="valign">center</property>
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="label" translatable="1">Close</property>
+                <property name="focusable">1</property>
+                <property name="receives-default">1</property>
+                <signal name="clicked" handler="on_about_close_button" object="aboutdialog" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="ani_window">
+    <property name="title" translatable="1">Creating Anination</property>
+    <property name="window-position">center-on-parent</property>
+    <property name="gravity">center</property>
+    <property name="transient-for">window1</property>
+    <property name="attached-to">window1</property>
+    <signal name="delete-event" handler="on_ani_window_delete" swapped="no"/>
+    <property name="child">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkGrid">
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="1">Output Directory:</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">0</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="1">Animation File:</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">1</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="animation_directory_label">
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">0</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="animation_file_label">
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">1</property>
+                </layout>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="ani_progress">
+            <property name="show-text">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="ani_button">
+            <property name="label" translatable="1">Cancel</property>
+            <property name="focusable">1</property>
+            <property name="receives-default">1</property>
+            <signal name="clicked" handler="on_ani_window_delete" object="ani_window" swapped="no"/>
+          </object>
+        </child>
+      </object>
+    </property>
+  </object>
+  <object class="GtkDialog" id="calender_dialog">
+    <property name="resizable">0</property>
+    <property name="type-hint">dialog</property>
+    <property name="deletable">0</property>
+    <property name="attached-to">window1</property>
+    <signal name="close" handler="on_date_cancel" swapped="no"/>
+    <child internal-child="content_area">
+      <object class="GtkBox">
+        <property name="visible">0</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <object class="GtkCalendar" id="date_calender">
+            <property name="focusable">1</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child internal-child="action_area">
+      <object class="GtkButtonBox">
+        <property name="valign">center</property>
+        <property name="can-focus">False</property>
+        <property name="layout-style">end</property>
+        <child>
+          <object class="GtkButton">
+            <property name="label">gtk-ok</property>
+            <property name="focusable">1</property>
+            <property name="receives-default">1</property>
+            <property name="use-stock">True</property>
+            <property name="always-show-image">True</property>
+            <signal name="clicked" handler="on_date_ok_clicked" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="label">gtk-cancel</property>
+            <property name="focusable">1</property>
+            <property name="receives-default">1</property>
+            <property name="use-stock">True</property>
+            <property name="always-show-image">True</property>
+            <signal name="clicked" handler="on_date_cancel" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="delete_confirmation_window">
+    <property name="title" translatable="1">Delete Obstruction Map Images</property>
+    <property name="window-position">center-on-parent</property>
+    <property name="type-hint">dialog</property>
+    <property name="gravity">center</property>
+    <property name="transient-for">window1</property>
+    <property name="attached-to">window1</property>
+    <signal name="delete-event" handler="on_delete_confirmation_window_delete_event" swapped="no"/>
+    <property name="child">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel" id="really_delete_label">
+            <property name="label" translatable="1">Really delete?</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="halign">end</property>
+            <child>
+              <object class="GtkButton">
+                <property name="label" translatable="1">Yes</property>
+                <property name="focusable">1</property>
+                <property name="receives-default">1</property>
+                <signal name="clicked" handler="on_delete_confirmation_yes_clicked" object="delete_confirmation_window" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="label" translatable="1">No</property>
+                <property name="focusable">1</property>
+                <property name="receives-default">1</property>
+                <signal name="clicked" handler="on_delete_confirmation_window_delete_event" object="delete_confirmation_window" swapped="no"/>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+  </object>
+  <object class="GtkWindow" id="nogrpcwindow">
+    <property name="has-focus">1</property>
+    <property name="receives-default">1</property>
+    <property name="window-position">center-on-parent</property>
+    <property name="destroy-with-parent">1</property>
+    <property name="type-hint">dialog</property>
+    <property name="gravity">center</property>
+    <property name="transient-for">window1</property>
+    <signal name="delete-event" handler="on_window1_destroy" swapped="no"/>
+    <property name="child">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="homogeneous">1</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="label" translatable="1">ERROR</property>
+            <attributes>
+              <attribute name="weight" value="bold"></attribute>
+              <attribute name="scale" value="2"></attribute>
+            </attributes>
+          </object>
+        </child>
+        <child>
+          <object class="GtkImage">
+            <property name="icon-name">dialog-error</property>
+            <property name="icon_size">6</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="label" translatable="1">Unable to import starlink-grpc.
+Select the correct directory in the following dialog.</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <child>
+              <object class="GtkButton" id="nogrpc_ok_button">
+                <property name="halign">center</property>
+                <property name="label" translatable="1">Open the settings dialog</property>
+                <property name="focusable">1</property>
+                <property name="receives-default">1</property>
+                <signal name="clicked" handler="on_settings_clicked" object="configwindow" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="label" translatable="1">Quit</property>
+                <property name="focusable">1</property>
+                <property name="receives-default">1</property>
+                <signal name="clicked" handler="on_window1_destroy" swapped="no"/>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+  </object>
+  <object class="GtkAdjustment" id="ticksadjustment">
+    <property name="lower">2</property>
+    <property name="upper">4</property>
+    <property name="value">3</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">1</property>
+  </object>
+  <object class="GtkListStore" id="video_codec_store">
+    <columns>
+      <column type="gchararray"/>
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">X264</col>
+        <col id="1" translatable="yes">libx264</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">X265</col>
+        <col id="1" translatable="yes">libx265</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="video_format_store">
+    <columns>
+      <column type="gchararray"/>
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Matroska</col>
+        <col id="1" translatable="yes">mkv</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">MP4</col>
+        <col id="1" translatable="yes">mp4</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="video_size_store">
+    <columns>
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">100x100</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">200x200</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">400x400</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">600x600</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">800x800</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkWindow" id="configwindow">
+    <property name="title" translatable="1">Starlink-graph Configuration</property>
+    <property name="window-position">center-on-parent</property>
+    <property name="gravity">center</property>
+    <property name="transient-for">window1</property>
+    <property name="attached-to">window1</property>
+    <signal name="delete-event" handler="on_configcancelbutton_clicked" swapped="no"/>
+    <property name="child">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkNotebook">
+            <property name="focusable">1</property>
+            <property name="scrollable">1</property>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="child">
+                  <object class="GtkGrid" id="basicgrid">
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Tools Location:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFileChooserButton" id="toolslocation">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="tooltip-text" translatable="1">Starlink-graph will automatically restart if this value is changed.</property>
+                        <property name="action">select-folder</property>
+                        <property name="title" translatable="1">Location of the starlink-grpc-tools directory</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Update Interval (ms):</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="updateentry">
+                        <property name="focusable">1</property>
+                        <property name="tooltip-text" translatable="1">Starlink-graph will automatically restart if this value is changed.</property>
+                        <property name="text" translatable="1">1000</property>
+                        <property name="input-purpose">number</property>
+                        <property name="adjustment">intervaladjustment</property>
+                        <property name="value">1000</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Minimum Outage Duration:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">2</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="durationentry">
+                        <property name="focusable">1</property>
+                        <property name="text" translatable="1">2.00</property>
+                        <property name="input-purpose">number</property>
+                        <property name="adjustment">outagedurationadjustment</property>
+                        <property name="digits">2</property>
+                        <property name="value">2</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">2</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Seconds of history to keep:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">3</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="historyentry">
+                        <property name="focusable">1</property>
+                        <property name="text" translatable="1">900</property>
+                        <property name="input-purpose">number</property>
+                        <property name="adjustment">historyadjustment</property>
+                        <property name="value">900</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">3</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="label" translatable="1">Number of graph time labels:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">4</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="ticksentry">
+                        <property name="focusable">1</property>
+                        <property name="text" translatable="1">3</property>
+                        <property name="input-purpose">number</property>
+                        <property name="adjustment">ticksadjustment</property>
+                        <property name="value">3</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">4</property>
+                        </layout>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel">
+                    <property name="label" translatable="1">Basic</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="position">1</property>
+                <property name="child">
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkGrid" id="obstructionsgid">
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label" translatable="1">Obstruction Map Update Interval:</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="halign">end</property>
+                            <property name="label" translatable="1">Obstructed Color:</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="halign">end</property>
+                            <property name="label" translatable="1">Unobstructed Color:</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">2</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="halign">end</property>
+                            <property name="label" translatable="1">No Data Color:</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">3</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="halign">end</property>
+                            <property name="label" translatable="1">Obstruction History Location:</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">4</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <child>
+                              <object class="GtkFileChooserButton" id="obstructionhistorylocation">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="action">select-folder</property>
+                                <property name="title" translatable="1">Location of the obstruction history png files</property>
+                                <signal name="file-set" handler="enable_map_cb" swapped="no"/>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="clear_history_button">
+                                <property name="label" translatable="1">Clear</property>
+                                <property name="focusable">1</property>
+                                <property name="receives-default">1</property>
+                                <signal name="clicked" handler="clear_history_button_clicked" swapped="no"/>
+                              </object>
+                            </child>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">4</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkSpinButton" id="obstruction_map_interval_entry">
+                            <property name="focusable">1</property>
+                            <property name="text" translatable="1">10</property>
+                            <property name="input-purpose">number</property>
+                            <property name="adjustment">obstructionadjustment</property>
+                            <property name="value">10</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkColorButton" id="obstructed_color_button">
+                            <property name="focusable">1</property>
+                            <property name="receives-default">1</property>
+                            <property name="title" translatable="1">Pick Obstructed Color</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkColorButton" id="unobstructed_color_button">
+                            <property name="focusable">1</property>
+                            <property name="receives-default">1</property>
+                            <property name="title" translatable="1">Pick Unobstructed Color</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">2</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkColorButton" id="no_data_color_button">
+                            <property name="focusable">1</property>
+                            <property name="receives-default">1</property>
+                            <property name="title" translatable="1">Pick No Data Color</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">3</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="halign">end</property>
+                            <property name="margin-end">3</property>
+                            <property name="label" translatable="1">Keep History Images For:</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">5</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkComboBox" id="keep_history_images">
+                            <property name="model">image_history_store</property>
+                            <property name="active">0</property>
+                            <child>
+                              <object class="GtkCellRendererText"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">5</property>
+                            </layout>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="save_map_when_window_closed_cb">
+                        <property name="label" translatable="1">Save obstruction map images when Obstruction Window is closed.</property>
+                        <property name="focusable">1</property>
+                        <signal name="toggled" handler="save_map_when_window_closed_cb_toggled" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel">
+                    <property name="label" translatable="1">Obstructions</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="position">2</property>
+                <property name="child">
+                  <object class="GtkGrid">
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="margin-end">3</property>
+                        <property name="label" translatable="1">Video Format:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="margin-end">3</property>
+                        <property name="label" translatable="1">Video Codec:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="margin-end">3</property>
+                        <property name="label" translatable="1">Video Size:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">2</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="margin-end">3</property>
+                        <property name="label" translatable="1">Duration:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">3</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="video_format_cb">
+                        <property name="model">video_format_store</property>
+                        <property name="active">0</property>
+                        <property name="id-column">0</property>
+                        <child>
+                          <object class="GtkCellRendererText"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="video_codec_cb">
+                        <property name="model">video_codec_store</property>
+                        <property name="active">0</property>
+                        <property name="id-column">0</property>
+                        <child>
+                          <object class="GtkCellRendererText"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="video_size_cb">
+                        <property name="model">video_size_store</property>
+                        <property name="active">0</property>
+                        <property name="id-column">0</property>
+                        <child>
+                          <object class="GtkCellRendererText"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">2</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="video_duration_spin_button">
+                        <property name="focusable">1</property>
+                        <property name="input-purpose">digits</property>
+                        <property name="adjustment">duration_adjustment</property>
+                        <property name="value">30</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">3</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="margin-end">3</property>
+                        <property name="label" translatable="1">Animation Output Directory:</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">4</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFileChooserButton" id="animation_output_directory">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="action">select-folder</property>
+                        <property name="title" translatable="1">Location of animation files</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">4</property>
+                        </layout>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel">
+                    <property name="label" translatable="1">Animation	</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="position">3</property>
+                <property name="child">
+                  <object class="GtkGrid">
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">end</property>
+                        <property name="margin-end">10</property>
+                        <property name="label" translatable="1">Billing Day:</property>
+                        <property name="justify">center</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="billingdayspin">
+                        <property name="focusable">1</property>
+                        <property name="input-purpose">number</property>
+                        <property name="adjustment">billlingstartdayadjustment</property>
+                        <property name="numeric">1</property>
+                        <property name="value">1</property>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel">
+                    <property name="label" translatable="1">Billing</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="halign">end</property>
+            <child>
+              <object class="GtkButton" id="configcancelbutton">
+                <property name="label">gtk-cancel</property>
+                <property name="focusable">1</property>
+                <property name="receives-default">1</property>
+                <property name="use-stock">True</property>
+                <property name="image-position">right</property>
+                <signal name="clicked" handler="on_configcancelbutton_clicked" object="configwindow" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="configsavebutton">
+                <property name="label">gtk-save</property>
+                <property name="focusable">1</property>
+                <property name="receives-default">1</property>
+                <property name="use-stock">True</property>
+                <property name="image-position">right</property>
+                <signal name="clicked" handler="on_configsavebutton_clicked" object="configwindow" swapped="no"/>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+  </object>
+</interface>

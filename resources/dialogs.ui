@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.90.2 -->
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkWindow" id="delete_confirmation_window">
+    <property name="child">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel" id="really_delete_label">
+            <property name="label" translatable="yes">Really delete?</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="halign">end</property>
+            <child>
+              <object class="GtkButton">
+                <property name="focusable">1</property>
+                <property name="label" translatable="yes">Yes</property>
+                <property name="receives-default">1</property>
+                <signal name="clicked" handler="on_delete_confirmation_yes_clicked" object="delete_confirmation_window"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="focusable">1</property>
+                <property name="label" translatable="yes">No</property>
+                <property name="receives-default">1</property>
+                <signal name="clicked" handler="on_delete_confirmation_window_delete_event" object="delete_confirmation_window"/>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+    <property name="title" translatable="yes">Delete Obstruction Map Images</property>
+  </object>
+  <object class="GtkDialog" id="calender_dialog">
+    <property name="deletable">0</property>
+    <property name="resizable">0</property>
+    <signal name="close" handler="on_date_cancel"/>
+    <child internal-child="content_area">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <property name="visible">0</property>
+        <child>
+          <object class="GtkCalendar" id="date_calender">
+            <property name="focusable">1</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
