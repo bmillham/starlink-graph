@@ -1,5 +1,5 @@
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_gtk3agg import (FigureCanvasGTK3Agg as FigureCanvas)
+from matplotlib.backends.backend_gtk4agg import (FigureCanvasGTK4Agg as FigureCanvas)
 
 
 class UsageCharts(object):

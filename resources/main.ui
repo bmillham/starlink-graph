@@ -2,11 +2,11 @@
 <!-- Created with Cambalache 0.90.2 -->
 <interface>
   <requires lib="gtk" version="4.0"/>
-  <template class="window1" parent="GtkApplicationWindow">
+  <object class="GtkApplicationWindow" id="window1">
     <property name="default-height">600</property>
     <property name="default-width">800</property>
     <property name="title" translatable="yes">Starlink</property>
-    <signal name="destroy" handler="on_window1_destroy"/>
+    <!-- <signal name="destroy" handler="on_window1_destroy"/> -->
     <child>
       <object class="GtkBox">
         <property name="baseline-position">bottom</property>
@@ -15,7 +15,7 @@
           <object class="GtkNotebook" id="animation_notebook">
             <property name="focusable">1</property>
             <property name="page">1</property>
-            <signal name="switch-page" handler="on_obstructions_clicked"/>
+            <!-- <signal name="switch-page" handler="on_obstructions_clicked"/> -->
             <child>
               <object class="GtkNotebookPage">
                 <property name="child">
@@ -66,7 +66,6 @@
                                   <object class="GtkButton">
                                     <property name="focusable">1</property>
                                     <property name="receives-default">1</property>
-                                    <signal name="clicked" handler="on_date_button_clicked"/>
                                   </object>
                                 </child>
                                 <child>
@@ -127,7 +126,6 @@
                                   <object class="GtkButton">
                                     <property name="focusable">1</property>
                                     <property name="receives-default">1</property>
-                                    <signal name="clicked" handler="on_date_button_clicked"/>
                                   </object>
                                 </child>
                                 <child>
@@ -189,7 +187,6 @@
                                   <object class="GtkButton">
                                     <property name="focusable">1</property>
                                     <property name="receives-default">1</property>
-                                    <signal name="clicked" handler="on_date_button_clicked"/>
                                   </object>
                                 </child>
                                 <child>
@@ -912,7 +909,6 @@
                         <property name="focusable">1</property>
                         <property name="halign">center</property>
                         <property name="label" translatable="yes">Automatically update map</property>
-                        <signal name="toggled" handler="auto_obstruction_toggle"/>
                       </object>
                     </child>
                     <child>
@@ -1193,5 +1189,5 @@
         </child>
       </object>
     </child>
-  </template>
+  </object>
 </interface>

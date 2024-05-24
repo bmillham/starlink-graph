@@ -1,7 +1,7 @@
 import gi
 
 try:
-    gi.require_version('Gdk', '3.0')
+    gi.require_version('Gdk', '4.0')
 except ValueError:
     print('Gdk not found')
     no_gdk = True

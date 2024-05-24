@@ -19,7 +19,7 @@
                 <property name="focusable">1</property>
                 <property name="label" translatable="yes">Yes</property>
                 <property name="receives-default">1</property>
-                <signal name="clicked" handler="on_delete_confirmation_yes_clicked" object="delete_confirmation_window"/>
+                <!-- <signal name="clicked" handler="on_delete_confirmation_yes_clicked" object="delete_confirmation_window"/> -->
               </object>
             </child>
             <child>
@@ -27,7 +27,7 @@
                 <property name="focusable">1</property>
                 <property name="label" translatable="yes">No</property>
                 <property name="receives-default">1</property>
-                <signal name="clicked" handler="on_delete_confirmation_window_delete_event" object="delete_confirmation_window"/>
+                <!-- <signal name="clicked" handler="on_delete_confirmation_window_delete_event" object="delete_confirmation_window"/> -->
               </object>
             </child>
           </object>
@@ -39,7 +39,7 @@
   <object class="GtkDialog" id="calender_dialog">
     <property name="deletable">0</property>
     <property name="resizable">0</property>
-    <signal name="close" handler="on_date_cancel"/>
+    <!-- <signal name="close" handler="on_date_cancel"/> -->
     <child internal-child="content_area">
       <object class="GtkBox">
         <property name="orientation">vertical</property>

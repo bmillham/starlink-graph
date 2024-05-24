@@ -2,7 +2,7 @@
 <!-- Created with Cambalache 0.90.2 -->
 <interface>
   <requires lib="gtk" version="4.0"/>
-  <template class="nogrpcwindow" parent="GtkWindow">
+  <object class="GtkWindow" id="nogrpcwindow">
     <property name="child">
       <object class="GtkBox">
         <property name="homogeneous">1</property>
@@ -36,7 +36,7 @@ Select the correct directory in the following dialog.</property>
                 <property name="halign">center</property>
                 <property name="label" translatable="yes">Open the settings dialog</property>
                 <property name="receives-default">1</property>
-                <signal name="clicked" handler="on_settings_clicked"/>
+                <!-- <signal name="clicked" handler="on_settings_clicked"/> -->
               </object>
             </child>
             <child>
@@ -44,7 +44,7 @@ Select the correct directory in the following dialog.</property>
                 <property name="focusable">1</property>
                 <property name="label" translatable="yes">Quit</property>
                 <property name="receives-default">1</property>
-                <signal name="clicked" handler="on_window1_destroy"/>
+                <!-- <signal name="clicked" handler="on_window1_destroy"/> -->
               </object>
             </child>
           </object>
@@ -53,5 +53,5 @@ Select the correct directory in the following dialog.</property>
     </property>
     <property name="destroy-with-parent">1</property>
     <property name="receives-default">1</property>
-  </template>
+  </object>
 </interface>

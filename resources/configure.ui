@@ -182,7 +182,7 @@
                                 <property name="focusable">1</property>
                                 <property name="label" translatable="yes">Clear</property>
                                 <property name="receives-default">1</property>
-                                <signal name="clicked" handler="clear_history_button_clicked"/>
+                                <!-- <signal name="clicked" handler="clear_history_button_clicked"/> -->
                               </object>
                             </child>
                             <layout>
@@ -268,7 +268,7 @@
                       <object class="GtkCheckButton" id="save_map_when_window_closed_cb">
                         <property name="focusable">1</property>
                         <property name="label" translatable="yes">Save obstruction map images when Obstruction Window is closed.</property>
-                        <signal name="toggled" handler="save_map_when_window_closed_cb_toggled"/>
+                        <!-- <signal name="toggled" handler="save_map_when_window_closed_cb_toggled"/> -->
                       </object>
                     </child>
                   </object>
@@ -459,7 +459,7 @@
                 <property name="icon-name">window-close</property>
                 <property name="label">gtk-cancel</property>
                 <property name="receives-default">1</property>
-                <signal name="clicked" handler="on_configcancelbutton_clicked" object="configwindow"/>
+                <!-- <signal name="clicked" handler="on_configcancelbutton_clicked" object="configwindow"/> -->
               </object>
             </child>
             <child>
@@ -468,7 +468,7 @@
                 <property name="icon-name">document-save</property>
                 <property name="label">gtk-save</property>
                 <property name="receives-default">1</property>
-                <signal name="clicked" handler="on_configsavebutton_clicked" object="configwindow"/>
+                <!-- <signal name="clicked" handler="on_configsavebutton_clicked" object="configwindow"/> -->
               </object>
             </child>
           </object>

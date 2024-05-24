@@ -54,7 +54,7 @@
             <property name="focusable">1</property>
             <property name="label" translatable="yes">Cancel</property>
             <property name="receives-default">1</property>
-            <signal name="clicked" handler="on_ani_window_delete" object="ani_window"/>
+            <!-- <signal name="clicked" handler="on_ani_window_delete" object="ani_window"/> -->
           </object>
         </child>
       </object>
