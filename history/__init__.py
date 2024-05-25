@@ -126,17 +126,28 @@ class History():
             end_date = start_date + timedelta(days=1)
         else:
             end_date = datetime(eyear, emonth, eday)
-        stmt = select(func.sum(StatusTable.downlink_throughput_bps),
-                      func.sum(StatusTable.uplink_throughput_bps),
-                      func.avg(StatusTable.pop_ping_latency_ms),
-                      func.avg(StatusTable.pop_ping_drop_rate)).where(
+        query_start=time.time()
+        print(f'running usage query: {query_start}')
+        #stmt = select(func.sum(StatusTable.downlink_throughput_bps),
+        #              func.sum(StatusTable.uplink_throughput_bps),
+        #              func.avg(StatusTable.pop_ping_latency_ms),
+        #              func.avg(StatusTable.pop_ping_drop_rate)).where(
+        #                  and_(
+        #                      StatusTable.time >= datetime.timestamp(start_date),
+        #                      StatusTable.time < datetime.timestamp(end_date))
+        #              )
+        stmt = select(func.sum(HistoryTable.downlink_throughput_bps),
+                      func.sum(HistoryTable.uplink_throughput_bps),
+                      func.avg(HistoryTable.pop_ping_latency_ms),
+                      func.avg(HistoryTable.pop_ping_drop_rate)).where(
                           and_(
-                              StatusTable.time >= datetime.timestamp(start_date),
-                              StatusTable.time < datetime.timestamp(end_date))
-                      )
-                     
+                              HistoryTable.time >= datetime.timestamp(start_date),
+                              HistoryTable.time < datetime.timestamp(end_date)))
+        #print(f'Statement: {stmt}')
 
         row = self.conn.execute(stmt).fetchone()
+        query_end = time.time()
+        print(f'done with usage query: {query_end-query_start}')
         return (row[0] / 8.0 if row[0] is not None else 0, row[1] / 8.0 if row[1] is not None else 0,
                 0 if row[2] is None else row[2], 0 if row[3] is None else row[3])
 
@@ -178,12 +189,18 @@ class History():
             return None
         start = datetime(year, month, day, hour)
         end = start + timedelta(hours=1)
-        stmt = select(func.sum(StatusTable.downlink_throughput_bps),
-                      func.sum(StatusTable.uplink_throughput_bps),
-                      func.avg(StatusTable.pop_ping_latency_ms),
-                      func.avg(StatusTable.pop_ping_drop_rate)).where(and_(
-                          StatusTable.time >= datetime.timestamp(start),
-                          StatusTable.time < datetime.timestamp(end)))
+        #stmt = select(func.sum(StatusTable.downlink_throughput_bps),
+        #             func.sum(StatusTable.uplink_throughput_bps),
+        #            func.avg(StatusTable.pop_ping_latency_ms),
+        #           func.avg(StatusTable.pop_ping_drop_rate)).where(and_(
+        #                  StatusTable.time >= datetime.timestamp(start),
+        #                 StatusTable.time < datetime.timestamp(end)))
+        stmt = select(func.sum(HistoryTable.downlink_throughput_bps),
+                      func.sum(HistoryTable.uplink_throughput_bps),
+                      func.avg(HistoryTable.pop_ping_latency_ms),
+                      func.avg(HistoryTable.pop_ping_drop_rate)).where(and_(
+                          HistoryTable.time >= datetime.timestamp(start),
+                          HistoryTable.time < datetime.timestamp(end)))
 
         row = self.conn.execute(stmt).fetchone()
         return row
@@ -194,6 +211,7 @@ class History():
 
         self.conn.commit()
         stmt = select(StatusTable).order_by(StatusTable.time.desc()).limit(1)
+        #stmt = select(HistoryTable).order_by(HistoryTable.time.desc()).limit(1)
         row = self.conn.execute(stmt).fetchone()
         return row
 

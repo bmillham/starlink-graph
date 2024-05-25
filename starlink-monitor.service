@@ -1,0 +1,23 @@
+# To install as a user service
+# Copy this to /etc/systemd/user (use sudo)
+# load the service: systemctl --user daemon-reload
+# start the service: systemctl --user start starlink-server
+# To run automatically: systemctl --user enable starlink-server
+
+[Unit]
+Description=Starlink History Monitor
+
+[Service]
+Type=simple
+WorkingDirectory=/home/brian/Develop/starlink-graph
+#User=brian
+#Group=
+ExecStart=/usr/bin/python3 /home/brian/Develop/starlink-graph/starlink-monitor.py -t1  x ping_drop ping_run_length ping_latency ping_loaded_latency status obstruction_detail alert_detail location usage bulk_history
+Restart=on-failure
+RestartSec=10 # Wait 10 seconds before restarting after a failure
+SuccessExitStatus=10
+StandardOutput=file:%h/log_file
+
+[Install]
+WantedBy=default.target
+

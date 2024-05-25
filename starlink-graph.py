@@ -102,7 +102,9 @@ def animate(i, update_today=False):
 
     if config.access_mode == 'client':
         sd.db = history_db
+
     sd.current_data()
+
     #    sd.current_data(db=history_db)
     #else:
     #    sd.current_data()
@@ -112,6 +114,7 @@ def animate(i, update_today=False):
         return 'True' if value else 'False'
 
     row = sd.db.current_data()
+
     # Populate alerts
     acount = 0
     alerts = ['Active Alerts']
@@ -132,7 +135,6 @@ def animate(i, update_today=False):
         widgets['alerts_tab_label'].set_text(f'Alerts ({acount})')
     else:
         widgets['alerts_tab_label'].set_text( 'Alerts')
-
 
     # Populate location and aiming
     for a in ('latitude', 'longitude', 'altitude', 'direction_azimuth', 'direction_elevation'):
@@ -192,7 +194,6 @@ def animate(i, update_today=False):
     hmul = naturalsize(max(sd._upload))
     dlave = naturalsize(dlave)
     upave = naturalsize(upave)
-
 
     try:
         sday, eday, rx, tx, tave, tuptime  = history_db.get_cycle_usage()
