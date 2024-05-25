@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.90.2 -->
+<interface>
+  <!-- interface-name about.ui -->
+  <requires lib="gtk+" version="3.20"/>
+  <object class="GtkAboutDialog" id="aboutdialog">
+    <property name="artists">Starlink logo found on reddit. Author unknown.</property>
+    <property name="authors">Brian Millham &lt;bmillham@gmail.com&gt;
+sparky8512 &lt;sparky8512@github&gt;: starlink-grpc module
+Zed &lt;isidore.john.r@gmail.com&gt; leapseconds module</property>
+    <property name="can-focus">False</property>
+    <property name="copyright" translatable="yes">(2022-2024) Brian Millham</property>
+    <property name="deletable">False</property>
+    <property name="destroy-with-parent">True</property>
+    <property name="gravity">south</property>
+    <property name="license-type">gpl-2-0</property>
+    <property name="logo">starlink.png</property>
+    <property name="program-name">Starlink-Graph</property>
+    <property name="resizable">False</property>
+    <property name="type">popup</property>
+    <property name="type-hint">dialog</property>
+    <property name="version">0.7</property>
+    <property name="website">https://github.com/bmillham/starlink-graph</property>
+    <property name="website-label" translatable="yes">Github</property>
+    <property name="window-position">center-on-parent</property>
+    <signal name="close" handler="on_about_close_button"/>
+    <signal name="delete-event" handler="on_about_close_button"/>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
+            <child>
+              <object class="GtkButton">
+                <property name="can-focus">True</property>
+                <property name="label" translatable="yes">Close</property>
+                <property name="receives-default">True</property>
+                <property name="visible">True</property>
+                <signal name="clicked" handler="on_about_close_button" object="aboutdialog"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

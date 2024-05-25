@@ -1,511 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Created with Cambalache 0.90.2 -->
-<!-- Generated with glade 3.40.0 -->
 <interface>
-  <!-- interface-name starlink-graph.glade -->
-  <requires lib="gtk+" version="3.10"/>
-  <object class="GtkTextBuffer" id="ani_out_buffer"/>
-  <object class="GtkAdjustment" id="billlingstartdayadjustment">
-    <property name="lower">1</property>
-    <property name="page-increment">10</property>
-    <property name="step-increment">1</property>
-    <property name="upper">31</property>
-    <property name="value">1</property>
-  </object>
-  <object class="GtkAdjustment" id="duration_adjustment">
-    <property name="lower">30</property>
-    <property name="page-increment">10</property>
-    <property name="step-increment">1</property>
-    <property name="upper">600</property>
-  </object>
-  <object class="GtkAdjustment" id="historyadjustment">
-    <property name="lower">60</property>
-    <property name="page-increment">1</property>
-    <property name="step-increment">1</property>
-    <property name="upper">900</property>
-    <property name="value">900</property>
-  </object>
-  <object class="GtkImage" id="image1">
-    <property name="can-focus">False</property>
-    <property name="icon-name">accessories-calculator</property>
-    <property name="visible">True</property>
-  </object>
-  <object class="GtkImage" id="image2">
-    <property name="can-focus">False</property>
-    <property name="icon-name">accessories-calculator</property>
-    <property name="visible">True</property>
-  </object>
-  <object class="GtkImage" id="image3">
-    <property name="can-focus">False</property>
-    <property name="icon-name">accessories-calculator</property>
-    <property name="visible">True</property>
-  </object>
-  <object class="GtkImage" id="image4">
-    <property name="can-focus">False</property>
-    <property name="icon-name">accessories-calculator</property>
-    <property name="visible">True</property>
-  </object>
-  <object class="GtkListStore" id="image_history_store">
-    <columns>
-      <!-- column-name historylabel -->
-      <column type="gchararray"/>
-      <!-- column-name historyvalue -->
-      <column type="gint"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0">Forever</col>
-        <col id="1">-1</col>
-      </row>
-      <row>
-        <col id="0">12 Hours</col>
-        <col id="1">12</col>
-      </row>
-      <row>
-        <col id="0">24 Hours</col>
-        <col id="1">24</col>
-      </row>
-      <row>
-        <col id="0">36 Hours</col>
-        <col id="1">36</col>
-      </row>
-      <row>
-        <col id="0">48 Hours</col>
-        <col id="1">48</col>
-      </row>
-    </data>
-  </object>
-  <object class="GtkAdjustment" id="intervaladjustment">
-    <property name="lower">500</property>
-    <property name="page-increment">10</property>
-    <property name="step-increment">1</property>
-    <property name="upper">5000</property>
-    <property name="value">1000</property>
-  </object>
-  <object class="GtkAdjustment" id="obstructionadjustment">
-    <property name="lower">1</property>
-    <property name="page-increment">10</property>
-    <property name="step-increment">1</property>
-    <property name="upper">900</property>
-    <property name="value">10</property>
-  </object>
-  <object class="GtkAdjustment" id="outagedurationadjustment">
-    <property name="page-increment">1</property>
-    <property name="step-increment">1</property>
-    <property name="upper">5</property>
-    <property name="value">2</property>
-  </object>
-  <object class="GtkListStore" id="outagestore">
-    <columns>
-      <!-- column-name Time -->
-      <column type="gchararray"/>
-      <!-- column-name Reason -->
-      <column type="gchararray"/>
-      <!-- column-name Duration -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkAdjustment" id="primeendadjustment">
-    <property name="page-increment">10</property>
-    <property name="step-increment">1</property>
-    <property name="upper">23</property>
-    <property name="value">23</property>
-  </object>
-  <object class="GtkAdjustment" id="primestartadjustment">
-    <property name="page-increment">10</property>
-    <property name="step-increment">1</property>
-    <property name="upper">23</property>
-    <property name="value">7</property>
-  </object>
-  <object class="GtkListStore" id="shortoutagestore">
-    <columns>
-      <!-- column-name Time -->
-      <column type="gchararray"/>
-      <!-- column-name Reason -->
-      <column type="gchararray"/>
-      <!-- column-name Duration -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkWindow" id="ani_window">
-    <property name="can-focus">False</property>
-    <property name="gravity">center</property>
-    <property name="title" translatable="yes">Creating Anination</property>
-    <property name="window-position">center-on-parent</property>
-    <signal name="delete-event" handler="on_ani_window_delete"/>
-    <child>
-      <object class="GtkBox">
-        <property name="can-focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="visible">True</property>
-        <child>
-          <!-- n-columns=2 n-rows=2 -->
-          <object class="GtkGrid">
-            <property name="can-focus">False</property>
-            <property name="visible">True</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Output Directory:</property>
-                <property name="visible">True</property>
-              </object>
-              <packing>
-                <property name="left-attach">0</property>
-                <property name="top-attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Animation File:</property>
-                <property name="visible">True</property>
-              </object>
-              <packing>
-                <property name="left-attach">0</property>
-                <property name="top-attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="animation_directory_label">
-                <property name="can-focus">False</property>
-                <property name="visible">True</property>
-              </object>
-              <packing>
-                <property name="left-attach">1</property>
-                <property name="top-attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="animation_file_label">
-                <property name="can-focus">False</property>
-                <property name="visible">True</property>
-              </object>
-              <packing>
-                <property name="left-attach">1</property>
-                <property name="top-attach">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkProgressBar" id="ani_progress">
-            <property name="can-focus">False</property>
-            <property name="show-text">True</property>
-            <property name="visible">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="ani_button">
-            <property name="can-focus">True</property>
-            <property name="label" translatable="yes">Cancel</property>
-            <property name="receives-default">True</property>
-            <property name="visible">True</property>
-            <signal name="clicked" handler="on_ani_window_delete" object="ani_window"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkDialog" id="calender_dialog">
-    <property name="can-focus">False</property>
-    <property name="deletable">False</property>
-    <property name="resizable">False</property>
-    <property name="type-hint">dialog</property>
-    <signal name="close" handler="on_date_cancel"/>
-    <child internal-child="vbox">
-      <object class="GtkBox">
-        <property name="can-focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can-focus">False</property>
-            <property name="layout-style">end</property>
-            <child>
-              <object class="GtkButton">
-                <property name="always-show-image">True</property>
-                <property name="can-focus">True</property>
-                <property name="label">gtk-ok</property>
-                <property name="receives-default">True</property>
-                <property name="use-stock">True</property>
-                <property name="visible">True</property>
-                <signal name="clicked" handler="on_date_ok_clicked"/>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton">
-                <property name="always-show-image">True</property>
-                <property name="can-focus">True</property>
-                <property name="label">gtk-cancel</property>
-                <property name="receives-default">True</property>
-                <property name="use-stock">True</property>
-                <property name="visible">True</property>
-                <signal name="clicked" handler="on_date_cancel"/>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkCalendar" id="date_calender">
-            <property name="can-focus">True</property>
-            <property name="visible">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="delete_confirmation_window">
-    <property name="can-focus">False</property>
-    <property name="gravity">center</property>
-    <property name="title" translatable="yes">Delete Obstruction Map Images</property>
-    <property name="type-hint">dialog</property>
-    <property name="window-position">center-on-parent</property>
-    <signal name="delete-event" handler="on_delete_confirmation_window_delete_event"/>
-    <child>
-      <object class="GtkBox">
-        <property name="can-focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="visible">True</property>
-        <child>
-          <object class="GtkLabel" id="really_delete_label">
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Really delete?</property>
-            <property name="visible">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="can-focus">False</property>
-            <property name="halign">end</property>
-            <property name="visible">True</property>
-            <child>
-              <object class="GtkButton">
-                <property name="can-focus">True</property>
-                <property name="label" translatable="yes">Yes</property>
-                <property name="receives-default">True</property>
-                <property name="visible">True</property>
-                <signal name="clicked" handler="on_delete_confirmation_yes_clicked" object="delete_confirmation_window"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton">
-                <property name="can-focus">True</property>
-                <property name="label" translatable="yes">No</property>
-                <property name="receives-default">True</property>
-                <property name="visible">True</property>
-                <signal name="clicked" handler="on_delete_confirmation_window_delete_event" object="delete_confirmation_window"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="nogrpcwindow">
-    <property name="can-focus">False</property>
-    <property name="destroy-with-parent">True</property>
-    <property name="gravity">center</property>
-    <property name="has-focus">True</property>
-    <property name="receives-default">True</property>
-    <property name="type-hint">dialog</property>
-    <property name="window-position">center-on-parent</property>
-    <signal name="delete-event" handler="on_window1_destroy"/>
-    <child>
-      <object class="GtkBox">
-        <property name="can-focus">False</property>
-        <property name="homogeneous">True</property>
-        <property name="orientation">vertical</property>
-        <property name="visible">True</property>
-        <child>
-          <object class="GtkLabel">
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">ERROR</property>
-            <property name="visible">True</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-              <attribute name="scale" value="2"/>
-            </attributes>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkImage">
-            <property name="can-focus">False</property>
-            <property name="icon-name">dialog-error</property>
-            <property name="icon-size">6</property>
-            <property name="visible">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel">
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Unable to import starlink-grpc.
-Select the correct directory in the following dialog.</property>
-            <property name="visible">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="can-focus">False</property>
-            <property name="visible">True</property>
-            <child>
-              <object class="GtkButton" id="nogrpc_ok_button">
-                <property name="can-focus">True</property>
-                <property name="label" translatable="yes">Open the settings dialog</property>
-                <property name="receives-default">True</property>
-                <property name="visible">True</property>
-                <signal name="clicked" handler="on_settings_clicked"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton">
-                <property name="can-focus">True</property>
-                <property name="label" translatable="yes">Quit</property>
-                <property name="receives-default">True</property>
-                <property name="visible">True</property>
-                <signal name="clicked" handler="on_window1_destroy"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="pack-type">end</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="pack-type">end</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkAdjustment" id="ticksadjustment">
-    <property name="lower">2</property>
-    <property name="page-increment">1</property>
-    <property name="step-increment">1</property>
-    <property name="upper">4</property>
-    <property name="value">3</property>
-  </object>
-  <object class="GtkListStore" id="video_codec_store">
-    <columns>
-      <!-- column-name gchararray1 -->
-      <column type="gchararray"/>
-      <!-- column-name gchararray2 -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0">X264</col>
-        <col id="1">libx264</col>
-      </row>
-      <row>
-        <col id="0">X265</col>
-        <col id="1">libx265</col>
-      </row>
-    </data>
-  </object>
-  <object class="GtkListStore" id="video_format_store">
-    <columns>
-      <!-- column-name gchararray1 -->
-      <column type="gchararray"/>
-      <!-- column-name gchararray2 -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0">Matroska</col>
-        <col id="1">mkv</col>
-      </row>
-      <row>
-        <col id="0">MP4</col>
-        <col id="1">mp4</col>
-      </row>
-    </data>
-  </object>
-  <object class="GtkListStore" id="video_size_store">
-    <columns>
-      <!-- column-name gchararray1 -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0">100x100</col>
-      </row>
-      <row>
-        <col id="0">200x200</col>
-      </row>
-      <row>
-        <col id="0">400x400</col>
-      </row>
-      <row>
-        <col id="0">600x600</col>
-      </row>
-      <row>
-        <col id="0">800x800</col>
-      </row>
-    </data>
-  </object>
+  <!-- interface-name config.ui -->
+  <requires lib="gtk+" version="3.20"/>
   <object class="GtkWindow" id="configwindow">
     <property name="can-focus">False</property>
     <property name="gravity">center</property>
@@ -846,7 +343,6 @@ Select the correct directory in the following dialog.</property>
                       <object class="GtkComboBox" id="keep_history_images">
                         <property name="active">0</property>
                         <property name="can-focus">False</property>
-                        <property name="model">image_history_store</property>
                         <property name="visible">True</property>
                         <child>
                           <object class="GtkCellRendererText"/>
@@ -1155,5 +651,124 @@ Select the correct directory in the following dialog.</property>
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkAdjustment" id="historyadjustment">
+    <property name="lower">60</property>
+    <property name="page-increment">1</property>
+    <property name="step-increment">1</property>
+    <property name="upper">900</property>
+    <property name="value">900</property>
+  </object>
+  <object class="GtkAdjustment" id="duration_adjustment">
+    <property name="lower">30</property>
+    <property name="page-increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="upper">600</property>
+  </object>
+  <object class="GtkAdjustment" id="billlingstartdayadjustment">
+    <property name="lower">1</property>
+    <property name="page-increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="upper">31</property>
+    <property name="value">1</property>
+  </object>
+  <object class="GtkTextBuffer" id="ani_out_buffer"/>
+  <object class="GtkAdjustment" id="primestartadjustment">
+    <property name="page-increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="upper">23</property>
+    <property name="value">7</property>
+  </object>
+  <object class="GtkAdjustment" id="outagedurationadjustment">
+    <property name="page-increment">1</property>
+    <property name="step-increment">1</property>
+    <property name="upper">5</property>
+    <property name="value">2</property>
+  </object>
+  <object class="GtkAdjustment" id="primeendadjustment">
+    <property name="page-increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="upper">23</property>
+    <property name="value">23</property>
+  </object>
+  <object class="GtkAdjustment" id="obstructionadjustment">
+    <property name="lower">1</property>
+    <property name="page-increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="upper">900</property>
+    <property name="value">10</property>
+  </object>
+  <object class="GtkAdjustment" id="intervaladjustment">
+    <property name="lower">500</property>
+    <property name="page-increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="upper">5000</property>
+    <property name="value">1000</property>
+  </object>
+  <object class="GtkAdjustment" id="ticksadjustment">
+    <property name="lower">2</property>
+    <property name="page-increment">1</property>
+    <property name="step-increment">1</property>
+    <property name="upper">4</property>
+    <property name="value">3</property>
+  </object>
+  <object class="GtkListStore" id="video_size_store">
+    <columns>
+      <!-- column-name gchararray1 -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">100x100</col>
+      </row>
+      <row>
+        <col id="0">200x200</col>
+      </row>
+      <row>
+        <col id="0">400x400</col>
+      </row>
+      <row>
+        <col id="0">600x600</col>
+      </row>
+      <row>
+        <col id="0">800x800</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="video_format_store">
+    <columns>
+      <!-- column-name gchararray1 -->
+      <column type="gchararray"/>
+      <!-- column-name gchararray2 -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">Matroska</col>
+        <col id="1">mkv</col>
+      </row>
+      <row>
+        <col id="0">MP4</col>
+        <col id="1">mp4</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="video_codec_store">
+    <columns>
+      <!-- column-name gchararray1 -->
+      <column type="gchararray"/>
+      <!-- column-name gchararray2 -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">X264</col>
+        <col id="1">libx264</col>
+      </row>
+      <row>
+        <col id="0">X265</col>
+        <col id="1">libx265</col>
+      </row>
+    </data>
   </object>
 </interface>

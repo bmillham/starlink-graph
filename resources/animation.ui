@@ -1,0 +1,97 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.90.2 -->
+<interface>
+  <!-- interface-name animation.ui -->
+  <requires lib="gtk+" version="3.20"/>
+  <object class="GtkWindow" id="ani_window">
+    <property name="can-focus">False</property>
+    <property name="gravity">center</property>
+    <property name="title" translatable="yes">Creating Anination</property>
+    <property name="window-position">center-on-parent</property>
+    <signal name="delete-event" handler="on_ani_window_delete"/>
+    <child>
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="visible">True</property>
+        <child>
+          <!-- n-columns=2 n-rows=2 -->
+          <object class="GtkGrid">
+            <property name="can-focus">False</property>
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Output Directory:</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Animation File:</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="animation_directory_label">
+                <property name="can-focus">False</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="animation_file_label">
+                <property name="can-focus">False</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="ani_progress">
+            <property name="can-focus">False</property>
+            <property name="show-text">True</property>
+            <property name="visible">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="ani_button">
+            <property name="can-focus">True</property>
+            <property name="label" translatable="yes">Cancel</property>
+            <property name="receives-default">True</property>
+            <property name="visible">True</property>
+            <signal name="clicked" handler="on_ani_window_delete" object="ani_window"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.90.2 -->
+<interface>
+  <!-- interface-name delete.ui -->
+  <requires lib="gtk+" version="3.20"/>
+  <object class="GtkWindow" id="delete_confirmation_window">
+    <property name="can-focus">False</property>
+    <property name="gravity">center</property>
+    <property name="title" translatable="yes">Delete Obstruction Map Images</property>
+    <property name="type-hint">dialog</property>
+    <property name="window-position">center-on-parent</property>
+    <signal name="delete-event" handler="on_delete_confirmation_window_delete_event"/>
+    <child>
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="visible">True</property>
+        <child>
+          <object class="GtkLabel" id="really_delete_label">
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Really delete?</property>
+            <property name="visible">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="can-focus">False</property>
+            <property name="halign">end</property>
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkButton">
+                <property name="can-focus">True</property>
+                <property name="label" translatable="yes">Yes</property>
+                <property name="receives-default">True</property>
+                <property name="visible">True</property>
+                <signal name="clicked" handler="on_delete_confirmation_yes_clicked" object="delete_confirmation_window"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="can-focus">True</property>
+                <property name="label" translatable="yes">No</property>
+                <property name="receives-default">True</property>
+                <property name="visible">True</property>
+                <signal name="clicked" handler="on_delete_confirmation_window_delete_event" object="delete_confirmation_window"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
